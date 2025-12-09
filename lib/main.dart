@@ -1,26 +1,38 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'models/property.dart';
 import 'screens/home_screen.dart';
 import 'screens/property_detail_screen.dart';
+import 'screens/share_screen.dart';
+import 'models/property.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-final _router = GoRouter(
-  routes: [
+final GoRouter _router = GoRouter(
+  routes: <RouteBase>[
     GoRoute(
       path: '/',
-      builder: (context, state) => const HomeScreen(),
-    ),
-    GoRoute(
-      path: '/property',
-      builder: (context, state) {
-        final property = state.extra as Property;
-        return PropertyDetailScreen(property: property);
+      builder: (BuildContext context, GoRouterState state) {
+        return const HomeScreen();
       },
+      routes: <RouteBase>[
+        GoRoute(
+          path: 'property',
+          builder: (BuildContext context, GoRouterState state) {
+            final Property property = state.extra! as Property;
+            return PropertyDetailScreen(property: property);
+          },
+        ),
+        GoRoute(
+          path: 'share',
+          builder: (BuildContext context, GoRouterState state) {
+            final Property property = state.extra! as Property;
+            return ShareScreen(property: property);
+          },
+        ),
+      ],
     ),
   ],
 );
@@ -31,11 +43,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Property Data App',
+      routerConfig: _router,
+      title: 'Property Data',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      routerConfig: _router,
     );
   }
 }
