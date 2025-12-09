@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../models/property.dart';
 
 class CreateReportScreen extends StatefulWidget {
@@ -78,7 +78,7 @@ class _CreateReportScreenState extends State<CreateReportScreen> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Handle send action
+                  context.push('/report_sent');
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),

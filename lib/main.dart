@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'screens/home_screen.dart';
 import 'screens/property_detail_screen.dart';
 import 'screens/create_report_screen.dart';
+import 'screens/report_sent_screen.dart';
 import 'screens/share_screen.dart';
 import 'models/property.dart';
 
@@ -38,6 +39,12 @@ final GoRouter _router = GoRouter(
             } else {
               return const HomeScreen();
             }
+          },
+        ),
+        GoRoute(
+          path: 'report_sent',
+          builder: (BuildContext context, GoRouterState state) {
+            return const ReportSentScreen();
           },
         ),
         GoRoute(
