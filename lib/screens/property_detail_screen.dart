@@ -3,14 +3,40 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/property.dart';
 
-class PropertyDetailScreen extends StatelessWidget {
+class PropertyDetailScreen extends StatefulWidget {
   final Property property;
 
   const PropertyDetailScreen({super.key, required this.property});
 
+  @override
+  State<PropertyDetailScreen> createState() => _PropertyDetailScreenState();
+}
+
+class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
+  int _selectedScenarioIndex = 0;
+  final List<String> _houseScenarios = [
+    'Full Refurbishment',
+    'Extensions (Rear / Side / Front)',
+    'Loft Conversion',
+    'Garage Conversion',
+  ];
+
+  void _nextScenario() {
+    setState(() {
+      _selectedScenarioIndex = (_selectedScenarioIndex + 1) % _houseScenarios.length;
+    });
+  }
+
+  void _previousScenario() {
+    setState(() {
+      _selectedScenarioIndex =
+          (_selectedScenarioIndex - 1 + _houseScenarios.length) %
+              _houseScenarios.length;
+    });
+  }
+
   Widget _buildScenarios(BuildContext context) {
-    // Making the check case-insensitive to be more robust
-    final bool isFlat = property.type.toLowerCase() == 'flat';
+    final bool isFlat = widget.property.type.toLowerCase() == 'flat';
 
     if (isFlat) {
       return const ListTile(
@@ -19,20 +45,32 @@ class PropertyDetailScreen extends StatelessWidget {
         subtitle: Text('Scenario'),
       );
     } else {
-      // Assuming any other type is a house with multiple scenarios
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Development Scenarios',
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8.0),
-          const Text('• Full Refurbishment'),
-          const SizedBox(height: 4.0),
-          const Text('• Extensions (Rear / Side / Front)'),
-          const SizedBox(height: 4.0),
-          const Text('• Loft Conversion'),
-          const SizedBox(height: 4.0),
-          const Text('• Garage Conversion'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_left),
+                onPressed: _previousScenario,
+              ),
+              Expanded(
+                child: Text(
+                  _houseScenarios[_selectedScenarioIndex],
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.arrow_right),
+                onPressed: _nextScenario,
+              ),
+            ],
+          ),
         ],
       );
     }
@@ -47,7 +85,7 @@ class PropertyDetailScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () {
-              context.push('/share', extra: property);
+              context.push('/share', extra: widget.property);
             },
           ),
         ],
@@ -57,21 +95,24 @@ class PropertyDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Price: £${property.price}',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text('Price: £${widget.property.price}',
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            Text('Type: ${property.type}'),
-            Text('Bedrooms: ${property.bedrooms}'),
-            Text('Distance: ${property.distance} miles'),
-            Text('Location: (${property.lat}, ${property.lng})'),
-            Text('Portal: ${property.portal}'),
-            Text('SSTC: ${property.sstc == 1 ? 'Yes' : 'No'}'),
-            if (property.gdv_sold != null) Text('GDV Sold: £${property.gdv_sold}'),
-            if (property.gdv_onmarket != null)
-              Text('GDV On Market: £${property.gdv_onmarket}'),
-            if (property.gdv_area != null) Text('GDV Area: £${property.gdv_area}'),
-            if (property.gdv_final != null)
-              Text('GDV Final: £${property.gdv_final}'),
+            Text('Type: ${widget.property.type}'),
+            Text('Bedrooms: ${widget.property.bedrooms}'),
+            Text('Distance: ${widget.property.distance} miles'),
+            Text('Location: (${widget.property.lat}, ${widget.property.lng})'),
+            Text('Portal: ${widget.property.portal}'),
+            Text('SSTC: ${widget.property.sstc == 1 ? 'Yes' : 'No'}'),
+            if (widget.property.gdv_sold != null)
+              Text('GDV Sold: £${widget.property.gdv_sold}'),
+            if (widget.property.gdv_onmarket != null)
+              Text('GDV On Market: £${widget.property.gdv_onmarket}'),
+            if (widget.property.gdv_area != null)
+              Text('GDV Area: £${widget.property.gdv_area}'),
+            if (widget.property.gdv_final != null)
+              Text('GDV Final: £${widget.property.gdv_final}'),
             const Divider(height: 32),
             _buildScenarios(context),
           ],

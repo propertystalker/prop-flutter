@@ -21,15 +21,23 @@ final GoRouter _router = GoRouter(
         GoRoute(
           path: 'property',
           builder: (BuildContext context, GoRouterState state) {
-            final Property property = state.extra! as Property;
-            return PropertyDetailScreen(property: property);
+            if (state.extra is Property) {
+              final Property property = state.extra! as Property;
+              return PropertyDetailScreen(property: property);
+            } else {
+              return const HomeScreen();
+            }
           },
         ),
         GoRoute(
           path: 'share',
           builder: (BuildContext context, GoRouterState state) {
-            final Property property = state.extra! as Property;
-            return ShareScreen(property: property);
+            if (state.extra is Property) {
+              final Property property = state.extra! as Property;
+              return ShareScreen(property: property);
+            } else {
+              return const HomeScreen();
+            }
           },
         ),
       ],
