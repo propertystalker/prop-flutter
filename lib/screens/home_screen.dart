@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../models/property.dart';
 import '../services/api_service.dart';
 
@@ -23,9 +24,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _fetchProperties() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
 
       try {
         final properties = await _apiService.getProperties(
@@ -33,23 +36,30 @@ class _HomeScreenState extends State<HomeScreen> {
           postcode: _postcodeController.text,
           bedrooms: int.parse(_bedroomsController.text),
         );
-        setState(() {
-          _properties = properties;
-        });
+        if (mounted) {
+          setState(() {
+            _properties = properties;
+          });
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString())),
+          );
+        }
       } finally {
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Property Data'),
@@ -113,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       itemBuilder: (context, index) {
                         final property = _properties[index];
                         return ListTile(
-                          title: Text('£${property.price}'),
+                          title: Text(currencyFormat.format(property.price)),
                           subtitle: Text(property.type),
                           onTap: () {
                             context.go('/property', extra: property);

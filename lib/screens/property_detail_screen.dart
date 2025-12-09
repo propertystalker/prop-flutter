@@ -113,7 +113,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(locale: 'en_GB', symbol: '£');
+    final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
 
     return Scaffold(
       appBar: AppBar(
