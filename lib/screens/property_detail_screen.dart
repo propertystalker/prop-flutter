@@ -1,6 +1,10 @@
 
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../models/property.dart';
 
@@ -16,6 +20,7 @@ class PropertyDetailScreen extends StatefulWidget {
 class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   int _selectedScenarioIndex = 0;
   int _selectedIndex = 0;
+  final List<XFile> _images = [];
   final List<String> _houseScenarios = [
     'Full Refurbishment',
     'Extensions (Rear / Side / Front)',
@@ -112,6 +117,17 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     }
   }
 
+    Future<void> _pickImages() async {
+    final picker = ImagePicker();
+    final pickedFiles = await picker.pickMultiImage();
+
+    if (pickedFiles.isNotEmpty) {
+      setState(() {
+        _images.addAll(pickedFiles);
+      });
+    }
+  }
+
     void _onItemTapped(int index) {
         setState(() {
         _selectedIndex = index;
@@ -122,7 +138,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
             // Stay on this screen
             break;
         case 1:
-            // ignore for now
+            _pickImages();
             break;
         case 2:
             // ignore for now
@@ -170,7 +186,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
           const Padding(
             padding: EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
-              backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=12'), // Placeholder for user avatar
+              backgroundImage: NetworkImage('https://picsum.photos/seed/picsum/200/300'), // Placeholder for user avatar
             ),
           ),
         ],
@@ -180,6 +196,31 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_images.isNotEmpty)
+              SizedBox(
+                height: 200,
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 4.0,
+                    mainAxisSpacing: 4.0,
+                  ),
+                  itemCount: _images.length,
+                  itemBuilder: (context, index) {
+                    final image = _images[index];
+                    return kIsWeb
+                        ? Image.network(
+                            image.path,
+                            fit: BoxFit.cover,
+                          )
+                        : Image.file(
+                            File(image.path),
+                            fit: BoxFit.cover,
+                          );
+                  },
+                ),
+              ),
+            const SizedBox(height: 16),
             Text('Price: ${currencyFormat.format(widget.property.price)}',
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
