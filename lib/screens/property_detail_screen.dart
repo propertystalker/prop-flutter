@@ -142,13 +142,36 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Property Details'),
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: const Icon(Icons.business), // Placeholder for company logo
+          ),
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const Text('98375', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(width: 16),
+            const Text('British Land', style: TextStyle(fontSize: 18)),
+          ],
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.share),
+            icon: const Icon(Icons.settings),
             onPressed: () {
-              context.push('/share', extra: widget.property);
+              // Handle settings tap
             },
+          ),
+          const Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: CircleAvatar(
+              backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=12'), // Placeholder for user avatar
+            ),
           ),
         ],
       ),
