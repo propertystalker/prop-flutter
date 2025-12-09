@@ -15,6 +15,7 @@ class PropertyDetailScreen extends StatefulWidget {
 
 class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   int _selectedScenarioIndex = 0;
+  int _selectedIndex = 0;
   final List<String> _houseScenarios = [
     'Full Refurbishment',
     'Extensions (Rear / Side / Front)',
@@ -111,6 +112,30 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     }
   }
 
+    void _onItemTapped(int index) {
+        setState(() {
+        _selectedIndex = index;
+        });
+
+        switch (index) {
+        case 0:
+            // Stay on this screen
+            break;
+        case 1:
+            // ignore for now
+            break;
+        case 2:
+            // ignore for now
+            break;
+        case 3:
+            context.push('/share', extra: widget.property);
+            break;
+        case 4:
+            // ignore for now
+            break;
+        }
+  }
+
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
@@ -127,7 +152,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,6 +188,37 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Text('£', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list_alt),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.share),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.message),
+            label: '',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }
