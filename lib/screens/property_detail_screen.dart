@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../models/property.dart';
 
 class PropertyDetailScreen extends StatefulWidget {
@@ -21,9 +22,42 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     'Garage Conversion',
   ];
 
+  // Financial variables
+  double _gdv = 0;
+  double _totalCost = 0;
+  double _uplift = 0;
+  double _roi = 0;
+
+  // Define costs for each scenario
+  final Map<String, double> _developmentCosts = {
+    'Full Refurbishment': 50000,
+    'Extensions (Rear / Side / Front)': 100000,
+    'Loft Conversion': 75000,
+    'Garage Conversion': 25000,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _calculateFinancials();
+  }
+
+  void _calculateFinancials() {
+    final selectedScenario = _houseScenarios[_selectedScenarioIndex];
+    final developmentCost = _developmentCosts[selectedScenario] ?? 0;
+
+    setState(() {
+      _gdv = widget.property.gdv_final ?? 0;
+      _totalCost = widget.property.price + developmentCost;
+      _uplift = _gdv - _totalCost;
+      _roi = (_totalCost > 0) ? (_uplift / _totalCost) * 100 : 0;
+    });
+  }
+
   void _nextScenario() {
     setState(() {
       _selectedScenarioIndex = (_selectedScenarioIndex + 1) % _houseScenarios.length;
+      _calculateFinancials(); // Recalculate on change
     });
   }
 
@@ -32,6 +66,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
       _selectedScenarioIndex =
           (_selectedScenarioIndex - 1 + _houseScenarios.length) %
               _houseScenarios.length;
+      _calculateFinancials(); // Recalculate on change
     });
   }
 
@@ -78,6 +113,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat.currency(locale: 'en_GB', symbol: '£');
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Property Details'),
@@ -95,9 +132,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Price: £${widget.property.price}',
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text('Price: ${currencyFormat.format(widget.property.price)}',
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             Text('Type: ${widget.property.type}'),
             Text('Bedrooms: ${widget.property.bedrooms}'),
@@ -106,15 +142,25 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
             Text('Portal: ${widget.property.portal}'),
             Text('SSTC: ${widget.property.sstc == 1 ? 'Yes' : 'No'}'),
             if (widget.property.gdv_sold != null)
-              Text('GDV Sold: £${widget.property.gdv_sold}'),
+              Text('GDV Sold: ${currencyFormat.format(widget.property.gdv_sold)}'),
             if (widget.property.gdv_onmarket != null)
-              Text('GDV On Market: £${widget.property.gdv_onmarket}'),
+              Text(
+                  'GDV On Market: ${currencyFormat.format(widget.property.gdv_onmarket)}'),
             if (widget.property.gdv_area != null)
-              Text('GDV Area: £${widget.property.gdv_area}'),
+              Text('GDV Area: ${currencyFormat.format(widget.property.gdv_area)}'),
             if (widget.property.gdv_final != null)
-              Text('GDV Final: £${widget.property.gdv_final}'),
+              Text('GDV Final: ${currencyFormat.format(widget.property.gdv_final)}'),
             const Divider(height: 32),
             _buildScenarios(context),
+            const Divider(height: 32),
+            Text('GDV: ${currencyFormat.format(_gdv)}', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text('Total Cost: ${currencyFormat.format(_totalCost)}', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text('Uplift: ${currencyFormat.format(_uplift)}', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text('ROI: ${_roi.toStringAsFixed(2)}%', style: Theme.of(context).textTheme.titleMedium),
+
           ],
         ),
       ),
