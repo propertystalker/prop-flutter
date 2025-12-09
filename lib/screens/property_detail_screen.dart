@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -141,7 +140,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
             _pickImages();
             break;
         case 2:
-            // ignore for now
+            context.push('/create_report', extra: widget.property);
             break;
         case 3:
             context.push('/share', extra: widget.property);
