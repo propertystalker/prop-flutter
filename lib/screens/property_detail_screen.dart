@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../models/property.dart';
+import '../services/api_service.dart';
 import 'dart:io';
 
 class PropertyDetailScreen extends StatefulWidget {
@@ -33,6 +34,9 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   double _totalCost = 0;
   double _uplift = 0;
   double _roi = 0;
+  int? _historicalPrice;
+  bool _isLoadingHistoricalPrice = false;
+  String? _historicalPriceError;
 
   // Define costs for each scenario
   final Map<String, double> _developmentCosts = {
@@ -46,6 +50,36 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   void initState() {
     super.initState();
     _calculateFinancials();
+    _fetchHistoricalPrice();
+  }
+
+  void _fetchHistoricalPrice() async {
+    setState(() {
+      _isLoadingHistoricalPrice = true;
+      _historicalPriceError = null;
+    });
+
+    try {
+      final apiService = ApiService();
+      final historicalPrice = await apiService.getHistoricalValuation(
+        apiKey: 'ZVUJN5EMPV',
+        postcode: widget.property.postcode,
+        currentPrice: widget.property.price,
+        year: 2000,
+        month: 'January',
+      );
+      setState(() {
+        _historicalPrice = historicalPrice;
+      });
+    } catch (e) {
+      setState(() {
+        _historicalPriceError = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoadingHistoricalPrice = false;
+      });
+    }
   }
 
   void _calculateFinancials() {
@@ -220,6 +254,24 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 const SizedBox(width: 16),
                 Column(
                   children: [
+                    if (_isLoadingHistoricalPrice)
+                      const CircularProgressIndicator()
+                    else if (_historicalPrice != null)
+                      Text(
+                        currencyFormat.format(_historicalPrice),
+                        style: const TextStyle(color: Color(0xFF94529C)),
+                      )
+                    else if (_historicalPriceError != null)
+                      Text(
+                        'Error',
+                        style: const TextStyle(color: Colors.red),
+                      )
+                    else
+                      const Text(
+                        'Previous Price',
+                        style: TextStyle(color: Color(0xFF94529C)),
+                      ),
+                    const SizedBox(height: 8),
                     Container(
                       width: 24,
                       height: 24,
@@ -337,6 +389,14 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 ),
               ],
             ),
+            if (_historicalPriceError != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  _historicalPriceError!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
             const SizedBox(height: 16),
             Center(
               child: Text(currencyFormat.format(widget.property.price),

@@ -8,6 +8,7 @@ class Property {
   final String distance;
   final int sstc;
   final String portal;
+  final String postcode;
   final double? gdv_sold;
   final double? gdv_onmarket;
   final double? gdv_area;
@@ -22,13 +23,14 @@ class Property {
     required this.distance,
     required this.sstc,
     required this.portal,
+    required this.postcode,
     this.gdv_sold,
     this.gdv_onmarket,
     this.gdv_area,
     this.gdv_final,
   });
 
-  factory Property.fromJson(Map<String, dynamic> json) {
+  factory Property.fromJson(Map<String, dynamic> json, {String? postcode}) {
     return Property(
       price: json['price'],
       lat: json['lat'],
@@ -38,6 +40,7 @@ class Property {
       distance: json['distance'],
       sstc: json['sstc'],
       portal: json['portal'],
+      postcode: postcode ?? '',
       gdv_sold: json['gdv_sold']?.toDouble(),
       gdv_onmarket: json['gdv_onmarket']?.toDouble(),
       gdv_area: json['gdv_area']?.toDouble(),
