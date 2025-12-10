@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../models/property.dart';
+import 'dart:io';
 
 class PropertyDetailScreen extends StatefulWidget {
   final Property property;
@@ -19,6 +18,8 @@ class PropertyDetailScreen extends StatefulWidget {
 class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   int _selectedScenarioIndex = 0;
   int _selectedIndex = 0;
+  int _currentImageIndex = 0;
+  final PageController _pageController = PageController();
   final List<XFile> _images = [];
   final List<String> _houseScenarios = [
     'Full Refurbishment',
@@ -52,7 +53,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     final developmentCost = _developmentCosts[selectedScenario] ?? 0;
 
     setState(() {
-      _gdv = widget.property.gdv_final ?? 0;
+      _gdv = widget.property.gdvFinal ?? 0;
       _totalCost = widget.property.price + developmentCost;
       _uplift = _gdv - _totalCost;
       _roi = (_totalCost > 0) ? (_uplift / _totalCost) * 100 : 0;
@@ -127,6 +128,15 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     }
   }
 
+  void _removeImage(int index) {
+    setState(() {
+      _images.removeAt(index);
+      if (_currentImageIndex >= _images.length && _images.isNotEmpty) {
+        _currentImageIndex = _images.length - 1;
+      }
+    });
+  }
+
     void _onItemTapped(int index) {
         setState(() {
         _selectedIndex = index;
@@ -195,30 +205,138 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (_images.isNotEmpty)
-              SizedBox(
-                height: 200,
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 4.0,
-                    mainAxisSpacing: 4.0,
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.purple, width: 2),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: const Center(child: Text('Comparables')),
                   ),
-                  itemCount: _images.length,
-                  itemBuilder: (context, index) {
-                    final image = _images[index];
-                    return kIsWeb
-                        ? Image.network(
-                            image.path,
-                            fit: BoxFit.cover,
-                          )
-                        : Image.file(
-                            File(image.path),
-                            fit: BoxFit.cover,
-                          );
-                  },
                 ),
-              ),
+                const SizedBox(width: 16),
+                Column(
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        color: Colors.orange,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blue, width: 2),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: _images.isNotEmpty
+                        ? Stack(
+                            children: [
+                              PageView.builder(
+                                controller: _pageController,
+                                itemCount: _images.length,
+                                onPageChanged: (index) {
+                                  setState(() {
+                                    _currentImageIndex = index;
+                                  });
+                                },
+                                itemBuilder: (context, index) {
+                                  final image = _images[index];
+                                  return kIsWeb
+                                      ? Image.network(
+                                          image.path,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Image.file(
+                                          File(image.path),
+                                          fit: BoxFit.cover,
+                                        );
+                                },
+                              ),
+                              Positioned(
+                                top: 8,
+                                left: 8,
+                                child: IconButton(
+                                  icon: const Icon(Icons.remove_circle, color: Colors.white),
+                                  onPressed: () => _removeImage(_currentImageIndex),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 8,
+                                left: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0, vertical: 4.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: Text(
+                                    '${_currentImageIndex + 1}/${_images.length}',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 8,
+                                right: 8,
+                                child: Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                                      onPressed: () {
+                                        _pageController.previousPage(
+                                          duration: const Duration(milliseconds: 300),
+                                          curve: Curves.easeInOut,
+                                        );
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+                                      onPressed: () {
+                                        _pageController.nextPage(
+                                          duration: const Duration(milliseconds: 300),
+                                          curve: Curves.easeInOut,
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
+                        : const Center(child: Text('Photos')),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
             Text('Price: ${currencyFormat.format(widget.property.price)}',
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
@@ -229,15 +347,15 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
             Text('Location: (${widget.property.lat}, ${widget.property.lng})'),
             Text('Portal: ${widget.property.portal}'),
             Text('SSTC: ${widget.property.sstc == 1 ? 'Yes' : 'No'}'),
-            if (widget.property.gdv_sold != null)
-              Text('GDV Sold: ${currencyFormat.format(widget.property.gdv_sold)}'),
-            if (widget.property.gdv_onmarket != null)
+            if (widget.property.gdvSold != null)
+              Text('GDV Sold: ${currencyFormat.format(widget.property.gdvSold)}'),
+            if (widget.property.gdvOnmarket != null)
               Text(
-                  'GDV On Market: ${currencyFormat.format(widget.property.gdv_onmarket)}'),
-            if (widget.property.gdv_area != null)
-              Text('GDV Area: ${currencyFormat.format(widget.property.gdv_area)}'),
-            if (widget.property.gdv_final != null)
-              Text('GDV Final: ${currencyFormat.format(widget.property.gdv_final)}'),
+                  'GDV On Market: ${currencyFormat.format(widget.property.gdvOnmarket)}'),
+            if (widget.property.gdvArea != null)
+              Text('GDV Area: ${currencyFormat.format(widget.property.gdvArea)}'),
+            if (widget.property.gdvFinal != null)
+              Text('GDV Final: ${currencyFormat.format(widget.property.gdvFinal)}'),
             const Divider(height: 32),
             _buildScenarios(context),
             const Divider(height: 32),

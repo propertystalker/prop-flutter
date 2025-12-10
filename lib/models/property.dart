@@ -44,4 +44,12 @@ class Property {
       gdv_final: json['gdv_final']?.toDouble(),
     );
   }
+
+  get gdvSold => null;
+
+  get gdvOnmarket => null;
+
+  get gdvArea => null;
+
+  get gdvFinal => null;
 }
