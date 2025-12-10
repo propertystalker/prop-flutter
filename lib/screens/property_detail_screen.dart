@@ -338,8 +338,10 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            Text('Price: ${currencyFormat.format(widget.property.price)}',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Center(
+              child: Text(currencyFormat.format(widget.property.price),
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF317CD3))),
+            ),
             const SizedBox(height: 16),
             Text('Type: ${widget.property.type}'),
             Text('Bedrooms: ${widget.property.bedrooms}'),
