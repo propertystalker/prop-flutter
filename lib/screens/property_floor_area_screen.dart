@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../models/property_floor_area.dart';
 import '../services/api_service.dart';
+import 'property_floor_area_filter_screen.dart';
 
 class PropertyFloorAreaScreen extends StatefulWidget {
   final String postcode;
@@ -59,9 +60,18 @@ class _PropertyFloorAreaScreenState extends State<PropertyFloorAreaScreen> {
                       children: [
                         Text('Square Feet: ${area.squareFeet}'),
                         Text('Habitable Rooms: ${area.habitableRooms}'),
-                        Text('Inspection Date: ${area.inspectionDate}'),
                       ],
                     ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PropertyFloorAreaFilterScreen(
+                            area: area,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
