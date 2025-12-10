@@ -32,23 +32,14 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildDetailRow(
                   context,
-                  icon: Icons.square_foot,
-                  label: 'Square Feet',
+                  label: 'Size',
                   value: area.squareFeet.toString(),
                 ),
                 const SizedBox(height: 12),
                 _buildDetailRow(
                   context,
-                  icon: Icons.king_bed_outlined,
-                  label: 'Habitable Rooms',
+                  label: 'Bedroom',
                   value: area.habitableRooms.toString(),
-                ),
-                const SizedBox(height: 12),
-                _buildDetailRow(
-                  context,
-                  icon: Icons.date_range,
-                  label: 'Inspection Date',
-                  value: area.inspectionDate,
                 ),
               ],
             ),
@@ -58,18 +49,12 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(BuildContext context, {required IconData icon, required String label, required String value}) {
-    return Row(
+  Widget _buildDetailRow(BuildContext context, {required String label, required String value}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 28, color: Theme.of(context).colorScheme.primary),
-        const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: Theme.of(context).textTheme.bodySmall),
-            Text(value, style: Theme.of(context).textTheme.titleMedium),
-          ],
-        ),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+        Text(value, style: Theme.of(context).textTheme.titleMedium),
       ],
     );
   }
