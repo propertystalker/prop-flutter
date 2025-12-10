@@ -2,9 +2,24 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/property.dart';
+import '../models/property_floor_area.dart';
 
 class ApiService {
   static const String _baseUrl = 'https://api.propertydata.co.uk';
+
+  Future<PropertyFloorAreaResponse> getPropertyFloorAreas({
+    required String apiKey,
+    required String postcode,
+  }) async {
+    final url = '$_baseUrl/floor-areas?key=$apiKey&postcode=$postcode';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return PropertyFloorAreaResponse.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load floor areas');
+    }
+  }
 
   Future<List<Property>> getProperties({
     required String apiKey,
