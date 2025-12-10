@@ -73,7 +73,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
       });
     } catch (e) {
       setState(() {
-        _historicalPriceError = e.toString();
+        _historicalPriceError = 'N/a';
       });
     } finally {
       setState(() {
@@ -263,8 +263,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                       )
                     else if (_historicalPriceError != null)
                       Text(
-                        'Error',
-                        style: const TextStyle(color: Colors.red),
+                        _historicalPriceError!,
+                        style: const TextStyle(color: Color(0xFF94529C)),
                       )
                     else
                       const Text(
@@ -389,14 +389,6 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 ),
               ],
             ),
-            if (_historicalPriceError != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  _historicalPriceError!,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              ),
             const SizedBox(height: 16),
             Center(
               child: Text(currencyFormat.format(widget.property.price),
