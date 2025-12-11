@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'screens/home_screen.dart';
-import 'screens/property_detail_screen.dart';
-import 'screens/create_report_screen.dart';
-import 'screens/report_sent_screen.dart';
-import 'screens/share_screen.dart';
-import 'models/property.dart';
+import 'package:myapp/screens/opening_screen.dart';
+import 'package:myapp/screens/property_floor_area_screen.dart' show PropertyFloorAreaScreen;
+import 'package:myapp/utils/constants.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,46 +13,14 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/',
       builder: (BuildContext context, GoRouterState state) {
-        return const HomeScreen();
+        return const OpeningScreen();
       },
       routes: <RouteBase>[
         GoRoute(
-          path: 'property',
+          path: 'property_floor_area',
           builder: (BuildContext context, GoRouterState state) {
-            if (state.extra is Property) {
-              final Property property = state.extra! as Property;
-              return PropertyDetailScreen(property: property);
-            } else {
-              return const HomeScreen();
-            }
-          },
-        ),
-        GoRoute(
-          path: 'create_report',
-          builder: (BuildContext context, GoRouterState state) {
-            if (state.extra is Property) {
-              final Property property = state.extra! as Property;
-              return CreateReportScreen(property: property);
-            } else {
-              return const HomeScreen();
-            }
-          },
-        ),
-        GoRoute(
-          path: 'report_sent',
-          builder: (BuildContext context, GoRouterState state) {
-            return const ReportSentScreen();
-          },
-        ),
-        GoRoute(
-          path: 'share',
-          builder: (BuildContext context, GoRouterState state) {
-            if (state.extra is Property) {
-              final Property property = state.extra! as Property;
-              return ShareScreen(property: property);
-            } else {
-              return const HomeScreen();
-            }
+            final String postcode = state.uri.queryParameters['postcode']!;
+            return PropertyFloorAreaScreen(postcode: postcode, apiKey: apiKey);
           },
         ),
       ],

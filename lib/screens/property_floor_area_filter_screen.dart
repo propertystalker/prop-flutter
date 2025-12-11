@@ -473,13 +473,13 @@ class PropertyFloorAreaFilterScreenState
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Size', style: Theme.of(context).textTheme.titleMedium),
+                                Text('Size: ', style: Theme.of(context).textTheme.titleMedium),
                                 Text(widget.area.squareFeet.toString(), style: Theme.of(context).textTheme.titleMedium),
                               ],
                             ),
@@ -488,9 +488,8 @@ class PropertyFloorAreaFilterScreenState
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Bedroom', style: Theme.of(context).textTheme.titleMedium),
+                                Text('Bedroom: ', style: Theme.of(context).textTheme.titleMedium),
                                 Text(widget.area.habitableRooms.toString(), style: Theme.of(context).textTheme.titleMedium),
                               ],
                             ),
