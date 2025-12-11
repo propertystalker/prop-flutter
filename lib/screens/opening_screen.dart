@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../utils/constants.dart';
 
-
 class OpeningScreen extends StatefulWidget {
   const OpeningScreen({super.key});
 
@@ -202,6 +201,15 @@ class _OpeningScreenState extends State<OpeningScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text('£266k', style: TextStyle(color: accentColor, fontSize: 24)),
+                      Text('£270k', style: TextStyle(color: accentColor, fontSize: 36, fontWeight: FontWeight.bold)),
+                      Text('£307k', style: TextStyle(color: accentColor, fontSize: 24)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   Container(
                     color: accentColor,
                     padding: const EdgeInsets.symmetric(vertical: 8),
