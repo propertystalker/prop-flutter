@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../utils/constants.dart';
 
+
 class OpeningScreen extends StatefulWidget {
   const OpeningScreen({super.key});
 
@@ -201,6 +202,20 @@ class _OpeningScreenState extends State<OpeningScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Container(
+                    color: accentColor,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: const Center(
+                      child: Text(
+                        'AUTOMATED VALUATION',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   _buildGreyedOutField('Type:'),
                   _buildGreyedOutField('Bedrooms:'),
