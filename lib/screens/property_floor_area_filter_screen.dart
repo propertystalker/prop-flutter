@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../models/property_floor_area.dart';
 import '../services/report_generator.dart';
 import '../utils/constants.dart';
+import 'property_floor_area_screen.dart';
 
 class PropertyFloorAreaFilterScreen extends StatefulWidget {
   final KnownFloorArea area;
@@ -52,6 +53,7 @@ class PropertyFloorAreaFilterScreenState
   bool _isEditingPrice = false;
   late TextEditingController _priceController;
   final FocusNode _priceFocusNode = FocusNode();
+  late TextEditingController _addressController;
 
   final Map<String, double> _developmentCosts = {
     'Full Refurbishment': 50000,
@@ -65,8 +67,27 @@ class PropertyFloorAreaFilterScreenState
   void initState() {
     super.initState();
     _priceController = TextEditingController();
+    _addressController = TextEditingController(text: widget.area.address);
     _fetchCurrentPrice();
     _fetchHistoricalPrice();
+  }
+
+  void _searchByPostcode(String postcode) {
+    if (postcode.isNotEmpty) {
+      // Pop the filter screen
+      Navigator.of(context).pop();
+      // Pop the previous screen
+      Navigator.of(context).pop();
+      // Push a new property floor area screen with the new postcode
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => PropertyFloorAreaScreen(
+            postcode: postcode,
+            apiKey: apiKey, // Assuming apiKey is accessible here
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _fetchCurrentPrice() async {
@@ -109,6 +130,7 @@ class PropertyFloorAreaFilterScreenState
   @override
   void dispose() {
     _priceController.dispose();
+    _addressController.dispose();
     _priceFocusNode.dispose();
     super.dispose();
   }
@@ -417,10 +439,23 @@ class PropertyFloorAreaFilterScreenState
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Column(
                 children: [
-                  Text(
-                    widget.area.address,
-                    style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: TextFormField(
+                      controller: _addressController,
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.search, color: Colors.white),
+                          onPressed: () =>
+                              _searchByPostcode(_addressController.text),
+                        ),
+                      ),
+                      onFieldSubmitted: _searchByPostcode,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   _buildEditablePrice(),
