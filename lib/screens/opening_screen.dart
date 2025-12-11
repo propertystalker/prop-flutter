@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myapp/utils/constants.dart';
+import '../utils/constants.dart';
 
 class OpeningScreen extends StatefulWidget {
   const OpeningScreen({super.key});
@@ -108,8 +108,9 @@ class _OpeningScreenState extends State<OpeningScreen> {
                       Container(
                           width: 24,
                           height: 24,
-                          decoration: const BoxDecoration(
-                              color: trafficRed, shape: BoxShape.circle)),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: trafficRed, width: 2))),
                       const SizedBox(height: 8),
                       Container(
                           width: 24,
@@ -120,8 +121,9 @@ class _OpeningScreenState extends State<OpeningScreen> {
                       Container(
                           width: 24,
                           height: 24,
-                          decoration: const BoxDecoration(
-                              color: trafficGreen, shape: BoxShape.circle)),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: trafficGreen, width: 2))),
                     ],
                   ),
                   const SizedBox(width: 16),
@@ -129,10 +131,34 @@ class _OpeningScreenState extends State<OpeningScreen> {
                     child: Container(
                       height: 200,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blue, width: 2),
+                        color: primaryColor,
                         borderRadius: BorderRadius.circular(8.0),
                       ),
-                      child: const Center(child: Text('Photos')),
+                      child: const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Spot Potential',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Discover opportunities available here & investment required to uplift the property including new value!',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
