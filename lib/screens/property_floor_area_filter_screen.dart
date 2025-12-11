@@ -1,15 +1,20 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../models/property_floor_area.dart';
 import '../services/report_generator.dart';
+import '../utils/constants.dart';
 
 class PropertyFloorAreaFilterScreen extends StatefulWidget {
   final KnownFloorArea area;
+  final String postcode;
 
-  const PropertyFloorAreaFilterScreen({super.key, required this.area});
+  const PropertyFloorAreaFilterScreen(
+      {super.key, required this.area, required this.postcode});
 
   @override
   PropertyFloorAreaFilterScreenState createState() =>
@@ -24,6 +29,8 @@ class PropertyFloorAreaFilterScreenState
   int? _historicalPrice;
   bool _isLoadingHistoricalPrice = false;
   String? _historicalPriceError;
+  bool _isLoadingPrice = true;
+  String? _currentPriceError;
 
   // --- Replicated from PropertyDetailScreen ---
   int _selectedScenarioIndex = 0;
@@ -34,12 +41,12 @@ class PropertyFloorAreaFilterScreenState
     'Garage Conversion',
   ];
 
-  // --- Financial variables ---
+  // Financial variables
   double _gdv = 0;
   double _totalCost = 0;
   double _uplift = 0;
   double _roi = 0;
-  double _currentPrice = 575000;
+  double _currentPrice = 0;
 
   // --- Editing State ---
   bool _isEditingPrice = false;
@@ -51,15 +58,52 @@ class PropertyFloorAreaFilterScreenState
     'Extensions (Rear / Side / Front)': 100000,
     'Loft Conversion': 75000,
     'Garage Conversion': 25000,
-    'Flat Refurbishment Only (1–3 bed)': 40000,
+    'Flat Refurbishment Only (1–3 bed)': 40000, // Added for flats
   };
 
   @override
   void initState() {
     super.initState();
-    _priceController = TextEditingController(text: _currentPrice.toStringAsFixed(0));
+    _priceController = TextEditingController();
+    _fetchCurrentPrice();
     _fetchHistoricalPrice();
-    _calculateFinancials();
+  }
+
+  Future<void> _fetchCurrentPrice() async {
+    setState(() {
+      _isLoadingPrice = true;
+      _currentPriceError = null;
+    });
+
+    final bedrooms = widget.area.habitableRooms;
+    final url = Uri.parse(
+        'https://api.propertydata.co.uk/prices?key=$apiKey&postcode=${widget.postcode}&bedrooms=$bedrooms');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          setState(() {
+            _currentPrice = (data['data']['average'] as int).toDouble();
+            _priceController.text = _currentPrice.toStringAsFixed(0);
+            _calculateFinancials();
+          });
+        } else {
+          throw Exception('Failed to load price data: ${data['error']}');
+        }
+      } else {
+        throw Exception('Failed to load price data');
+      }
+    } catch (e) {
+      setState(() {
+        _currentPriceError = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoadingPrice = false;
+      });
+    }
   }
 
   @override
@@ -90,6 +134,7 @@ class PropertyFloorAreaFilterScreenState
 
     setState(() {
       _totalCost = _currentPrice + developmentCost;
+      // Estimated GDV: for demo purposes, let's assume GDV is total cost + 25% uplift
       _gdv = _totalCost * 1.25;
       _uplift = _gdv - _totalCost;
       _roi = (_totalCost > 0) ? (_uplift / _totalCost) * 100 : 0;
@@ -201,9 +246,20 @@ class PropertyFloorAreaFilterScreenState
   Widget _buildEditablePrice() {
     final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
 
+    if (_isLoadingPrice) {
+      return const CircularProgressIndicator(color: Colors.white);
+    }
+
+    if (_currentPriceError != null) {
+      return Text(
+        'Error: Please try again',
+        style: const TextStyle(color: Colors.white, fontSize: 18),
+      );
+    }
+
     if (_isEditingPrice) {
       return Container(
-        color: const Color(0xFF94ABBE),
+        color: editablePriceColor,
         width: 200, // Give it a specific width
         child: TextField(
           controller: _priceController,
@@ -234,7 +290,7 @@ class PropertyFloorAreaFilterScreenState
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           decoration: BoxDecoration(
-            color: const Color(0xFF94ABBE),
+            color: editablePriceColor,
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Text(
@@ -248,6 +304,8 @@ class PropertyFloorAreaFilterScreenState
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
+
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
@@ -302,11 +360,11 @@ class PropertyFloorAreaFilterScreenState
                       if (_isLoadingHistoricalPrice)
                         const CircularProgressIndicator()
                       else if (_historicalPrice != null)
-                        Text(NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(_historicalPrice), style: const TextStyle(color: Color(0xFF94529C)))
+                        Text(currencyFormat.format(_historicalPrice), style: const TextStyle(color: accentColor))
                       else if (_historicalPriceError != null)
-                        Text(_historicalPriceError!, style: const TextStyle(color: Color(0xFF94529C)))
+                        Text(_historicalPriceError!, style: const TextStyle(color: accentColor))
                       else
-                        const Text('Prev. Price', style: TextStyle(color: Color(0xFF94529C))),
+                        const Text('Prev. Price', style: TextStyle(color: accentColor)),
                       const SizedBox(height: 8),
                       Container(width: 24, height: 24, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
                       const SizedBox(height: 8),
@@ -355,7 +413,7 @@ class PropertyFloorAreaFilterScreenState
             const SizedBox(height: 16),
             Container(
               width: double.infinity,
-              color: const Color(0xFF317CD3),
+              color: primaryColor,
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Column(
                 children: [
@@ -409,11 +467,11 @@ class PropertyFloorAreaFilterScreenState
                   const Divider(height: 32),
                   _buildScenarios(context),
                   const Divider(height: 32),
-                  Text('GDV: ${NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(_gdv)}', style: Theme.of(context).textTheme.titleMedium),
+                  Text('GDV: ${currencyFormat.format(_gdv)}', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
-                  Text('Total Cost: ${NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(_totalCost)}', style: Theme.of(context).textTheme.titleMedium),
+                  Text('Total Cost: ${currencyFormat.format(_totalCost)}', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
-                  Text('Uplift: ${NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(_uplift)}', style: Theme.of(context).textTheme.titleMedium),
+                  Text('Uplift: ${currencyFormat.format(_uplift)}', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   Text('ROI: ${_roi.toStringAsFixed(2)}%', style: Theme.of(context).textTheme.titleMedium),
                 ],

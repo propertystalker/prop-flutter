@@ -123,6 +123,7 @@ class _PropertyFloorAreaScreenState extends State<PropertyFloorAreaScreen> {
                         MaterialPageRoute(
                           builder: (context) => PropertyFloorAreaFilterScreen(
                             area: area,
+                            postcode: widget.postcode,
                           ),
                         ),
                       );
