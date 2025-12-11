@@ -102,6 +102,11 @@ class _PropertyFloorAreaScreenState extends State<PropertyFloorAreaScreen> {
             return const Center(child: Text('No floor area data found.'));
           } else {
             final floorAreas = snapshot.data!.knownFloorAreas;
+            floorAreas.sort((a, b) {
+              final houseNumberA = int.tryParse(a.address.split(' ').first.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+              final houseNumberB = int.tryParse(b.address.split(' ').first.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+              return houseNumberA.compareTo(houseNumberB);
+            });
             return ListView.builder(
               itemCount: floorAreas.length,
               itemBuilder: (context, index) {
