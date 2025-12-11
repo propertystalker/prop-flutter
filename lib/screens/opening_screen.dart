@@ -94,10 +94,12 @@ class _OpeningScreenState extends State<OpeningScreen> {
                     child: Container(
                       height: 200,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.purple, width: 2),
                         borderRadius: BorderRadius.circular(8.0),
+                        image: const DecorationImage(
+                          image: AssetImage('assets/images/gemini.png'),
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                      child: const Center(child: Text('Comparables')),
                     ),
                   ),
                   const SizedBox(width: 16),
