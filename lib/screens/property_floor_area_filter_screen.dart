@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,11 +12,11 @@ class PropertyFloorAreaFilterScreen extends StatefulWidget {
   const PropertyFloorAreaFilterScreen({super.key, required this.area});
 
   @override
-  _PropertyFloorAreaFilterScreenState createState() =>
-      _PropertyFloorAreaFilterScreenState();
+  PropertyFloorAreaFilterScreenState createState() =>
+      PropertyFloorAreaFilterScreenState();
 }
 
-class _PropertyFloorAreaFilterScreenState
+class PropertyFloorAreaFilterScreenState
     extends State<PropertyFloorAreaFilterScreen> {
   final PageController _pageController = PageController();
   final List<XFile> _images = [];
@@ -165,6 +164,7 @@ class _PropertyFloorAreaFilterScreenState
   }
 
   Future<void> _handleGenerateReport() async {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Generating report...')),
     );
@@ -172,6 +172,7 @@ class _PropertyFloorAreaFilterScreenState
       area: widget.area,
       images: _images,
     );
+    if (!mounted) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
@@ -210,111 +211,149 @@ class _PropertyFloorAreaFilterScreenState
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.purple, width: 2),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: const Center(child: Text('Comparables')),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  children: [
-                    if (_isLoadingHistoricalPrice)
-                      const CircularProgressIndicator()
-                    else if (_historicalPrice != null)
-                      Text(currencyFormat.format(_historicalPrice), style: const TextStyle(color: Color(0xFF94529C)))
-                    else if (_historicalPriceError != null)
-                      Text(_historicalPriceError!, style: const TextStyle(color: Color(0xFF94529C)))
-                    else
-                      const Text('Prev. Price', style: TextStyle(color: Color(0xFF94529C))),
-                    const SizedBox(height: 8),
-                    Container(width: 24, height: 24, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
-                    const SizedBox(height: 8),
-                    Container(width: 24, height: 24, decoration: const BoxDecoration(color: Colors.orange, shape: BoxShape.circle)),
-                    const SizedBox(height: 8),
-                    Container(width: 24, height: 24, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
-                  ],
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: _pickImages,
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
                     child: Container(
                       height: 200,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blue, width: 2),
+                        border: Border.all(color: Colors.purple, width: 2),
                         borderRadius: BorderRadius.circular(8.0),
                       ),
-                      child: _images.isNotEmpty
-                          ? Stack(
-                              children: [
-                                PageView.builder(
-                                  controller: _pageController,
-                                  itemCount: _images.length,
-                                  onPageChanged: (index) => setState(() => _currentImageIndex = index),
-                                  itemBuilder: (context, index) {
-                                    final image = _images[index];
-                                    return kIsWeb ? Image.network(image.path, fit: BoxFit.cover) : Image.file(File(image.path), fit: BoxFit.cover);
-                                  },
-                                ),
-                                Positioned(
-                                    top: 8,
-                                    left: 8,
-                                    child: IconButton(
-                                        icon: const Icon(Icons.remove_circle, color: Colors.white),
-                                        onPressed: () => _removeImage(_currentImageIndex))),
-                              ],
-                            )
-                          : const Center(child: Text('Photos')),
+                      child: const Center(child: Text('Comparables')),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: Text(currencyFormat.format(_currentPrice), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF317CD3))),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(widget.area.address, style: Theme.of(context).textTheme.headlineSmall),
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 16),
-                    _buildDetailRow(context, label: 'Size', value: widget.area.squareFeet.toString()),
-                    const SizedBox(height: 12),
-                    _buildDetailRow(context, label: 'Bedroom', value: widget.area.habitableRooms.toString()),
-                  ],
-                ),
+                  const SizedBox(width: 16),
+                  Column(
+                    children: [
+                      if (_isLoadingHistoricalPrice)
+                        const CircularProgressIndicator()
+                      else if (_historicalPrice != null)
+                        Text(currencyFormat.format(_historicalPrice), style: const TextStyle(color: Color(0xFF94529C)))
+                      else if (_historicalPriceError != null)
+                        Text(_historicalPriceError!, style: const TextStyle(color: Color(0xFF94529C)))
+                      else
+                        const Text('Prev. Price', style: TextStyle(color: Color(0xFF94529C))),
+                      const SizedBox(height: 8),
+                      Container(width: 24, height: 24, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
+                      const SizedBox(height: 8),
+                      Container(width: 24, height: 24, decoration: const BoxDecoration(color: Colors.orange, shape: BoxShape.circle)),
+                      const SizedBox(height: 8),
+                      Container(width: 24, height: 24, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
+                    ],
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _pickImages,
+                      child: Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.blue, width: 2),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: _images.isNotEmpty
+                            ? Stack(
+                                children: [
+                                  PageView.builder(
+                                    controller: _pageController,
+                                    itemCount: _images.length,
+                                    onPageChanged: (index) => setState(() => _currentImageIndex = index),
+                                    itemBuilder: (context, index) {
+                                      final image = _images[index];
+                                      return kIsWeb ? Image.network(image.path, fit: BoxFit.cover) : Image.file(File(image.path), fit: BoxFit.cover);
+                                    },
+                                  ),
+                                  Positioned(
+                                      top: 8,
+                                      left: 8,
+                                      child: IconButton(
+                                          icon: const Icon(Icons.remove_circle, color: Colors.white),
+                                          onPressed: () => _removeImage(_currentImageIndex))),
+                                ],
+                              )
+                            : const Center(child: Text('Photos')),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const Divider(height: 32),
-            _buildScenarios(context),
-            const Divider(height: 32),
-            Text('GDV: ${currencyFormat.format(_gdv)}', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text('Total Cost: ${currencyFormat.format(_totalCost)}', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text('Uplift: ${currencyFormat.format(_uplift)}', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text('ROI: ${_roi.toStringAsFixed(2)}%', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              color: const Color(0xFF317CD3),
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Column(
+                children: [
+                  Text(
+                    widget.area.address,
+                    style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    currencyFormat.format(_currentPrice),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 16),
+                  Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Size', style: Theme.of(context).textTheme.titleMedium),
+                                Text(widget.area.squareFeet.toString(), style: Theme.of(context).textTheme.titleMedium),
+                              ],
+                            ),
+                          ),
+                          const Divider(),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Bedroom', style: Theme.of(context).textTheme.titleMedium),
+                                Text(widget.area.habitableRooms.toString(), style: Theme.of(context).textTheme.titleMedium),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 32),
+                  _buildScenarios(context),
+                  const Divider(height: 32),
+                  Text('GDV: ${currencyFormat.format(_gdv)}', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Text('Total Cost: ${currencyFormat.format(_totalCost)}', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Text('Uplift: ${currencyFormat.format(_uplift)}', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Text('ROI: ${_roi.toStringAsFixed(2)}%', style: Theme.of(context).textTheme.titleMedium),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -336,16 +375,6 @@ class _PropertyFloorAreaFilterScreenState
           if (index == 1) _pickImages();
         },
       ),
-    );
-  }
-
-  Widget _buildDetailRow(BuildContext context, {required String label, required String value}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
-        Text(value, style: Theme.of(context).textTheme.titleMedium),
-      ],
     );
   }
 }
