@@ -34,27 +34,39 @@ class PropertyFloorAreaFilterScreenState
     'Garage Conversion',
   ];
 
-  // Financial variables
+  // --- Financial variables ---
   double _gdv = 0;
   double _totalCost = 0;
   double _uplift = 0;
   double _roi = 0;
-  final double _currentPrice = 575000; // Using the placeholder price from the UI
+  double _currentPrice = 575000;
+
+  // --- Editing State ---
+  bool _isEditingPrice = false;
+  late TextEditingController _priceController;
+  final FocusNode _priceFocusNode = FocusNode();
 
   final Map<String, double> _developmentCosts = {
     'Full Refurbishment': 50000,
     'Extensions (Rear / Side / Front)': 100000,
     'Loft Conversion': 75000,
     'Garage Conversion': 25000,
-    'Flat Refurbishment Only (1–3 bed)': 40000, // Added for flats
+    'Flat Refurbishment Only (1–3 bed)': 40000,
   };
-  // --- End of Replicated code ---
 
   @override
   void initState() {
     super.initState();
+    _priceController = TextEditingController(text: _currentPrice.toStringAsFixed(0));
     _fetchHistoricalPrice();
-    _calculateFinancials(); // Initial calculation
+    _calculateFinancials();
+  }
+
+  @override
+  void dispose() {
+    _priceController.dispose();
+    _priceFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchHistoricalPrice() async {
@@ -69,7 +81,6 @@ class PropertyFloorAreaFilterScreenState
     });
   }
 
-  // --- Replicated and adapted from PropertyDetailScreen ---
   void _calculateFinancials() {
     final isFlat = widget.area.address.toLowerCase().contains('flat');
     final selectedScenario = isFlat
@@ -79,10 +90,22 @@ class PropertyFloorAreaFilterScreenState
 
     setState(() {
       _totalCost = _currentPrice + developmentCost;
-      // Estimated GDV: for demo purposes, let's assume GDV is total cost + 25% uplift
       _gdv = _totalCost * 1.25;
       _uplift = _gdv - _totalCost;
       _roi = (_totalCost > 0) ? (_uplift / _totalCost) * 100 : 0;
+    });
+  }
+
+  void _updatePrice(String value) {
+    final newPrice = double.tryParse(value);
+    if (newPrice != null && newPrice != _currentPrice) {
+      setState(() {
+        _currentPrice = newPrice;
+        _calculateFinancials();
+      });
+    }
+    setState(() {
+      _isEditingPrice = false;
     });
   }
 
@@ -142,7 +165,6 @@ class PropertyFloorAreaFilterScreenState
       );
     }
   }
-  // --- End of Replicated code ---
 
   Future<void> _pickImages() async {
     final picker = ImagePicker();
@@ -176,10 +198,56 @@ class PropertyFloorAreaFilterScreenState
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildEditablePrice() {
     final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
 
+    if (_isEditingPrice) {
+      return Container(
+        color: const Color(0xFF94ABBE),
+        width: 200, // Give it a specific width
+        child: TextField(
+          controller: _priceController,
+          focusNode: _priceFocusNode,
+          keyboardType: TextInputType.number,
+          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.all(8.0),
+          ),
+          onSubmitted: _updatePrice,
+          onTapOutside: (_) => _updatePrice(_priceController.text),
+        ),
+      );
+    } else {
+      return GestureDetector(
+        onTap: () {
+          setState(() {
+            _isEditingPrice = true;
+            _priceController.text = _currentPrice.toStringAsFixed(0);
+          });
+          // Request focus after the widget is built
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _priceFocusNode.requestFocus();
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          decoration: BoxDecoration(
+            color: const Color(0xFF94ABBE),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Text(
+            currencyFormat.format(_currentPrice),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
@@ -234,7 +302,7 @@ class PropertyFloorAreaFilterScreenState
                       if (_isLoadingHistoricalPrice)
                         const CircularProgressIndicator()
                       else if (_historicalPrice != null)
-                        Text(currencyFormat.format(_historicalPrice), style: const TextStyle(color: Color(0xFF94529C)))
+                        Text(NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(_historicalPrice), style: const TextStyle(color: Color(0xFF94529C)))
                       else if (_historicalPriceError != null)
                         Text(_historicalPriceError!, style: const TextStyle(color: Color(0xFF94529C)))
                       else
@@ -297,10 +365,7 @@ class PropertyFloorAreaFilterScreenState
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    currencyFormat.format(_currentPrice),
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
+                  _buildEditablePrice(),
                 ],
               ),
             ),
@@ -344,11 +409,11 @@ class PropertyFloorAreaFilterScreenState
                   const Divider(height: 32),
                   _buildScenarios(context),
                   const Divider(height: 32),
-                  Text('GDV: ${currencyFormat.format(_gdv)}', style: Theme.of(context).textTheme.titleMedium),
+                  Text('GDV: ${NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(_gdv)}', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
-                  Text('Total Cost: ${currencyFormat.format(_totalCost)}', style: Theme.of(context).textTheme.titleMedium),
+                  Text('Total Cost: ${NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(_totalCost)}', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
-                  Text('Uplift: ${currencyFormat.format(_uplift)}', style: Theme.of(context).textTheme.titleMedium),
+                  Text('Uplift: ${NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(_uplift)}', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   Text('ROI: ${_roi.toStringAsFixed(2)}%', style: Theme.of(context).textTheme.titleMedium),
                 ],
