@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:myapp/controllers/financial_controller.dart';
+import 'package:provider/provider.dart';
 import '../widgets/development_scenarios.dart';
 import '../widgets/financial_summary.dart';
 import '../widgets/filter_screen_bottom_nav.dart';
@@ -42,35 +44,11 @@ class PropertyFloorAreaFilterScreenState
   bool _isLoadingPrice = true;
   String? _currentPriceError;
 
-  // --- Replicated from PropertyDetailScreen ---
-  int _selectedScenarioIndex = 0;
-  final List<String> _houseScenarios = [
-    'Full Refurbishment',
-    'Extensions (Rear / Side / Front)',
-    'Loft Conversion',
-    'Garage Conversion',
-  ];
-
-  // Financial variables
-  double _gdv = 0;
-  double _totalCost = 0;
-  double _uplift = 0;
-  double _roi = 0;
-  double _currentPrice = 0;
-
   // --- Editing State ---
   bool _isEditingPrice = false;
   late TextEditingController _priceController;
   final FocusNode _priceFocusNode = FocusNode();
   late TextEditingController _addressController;
-
-  final Map<String, double> _developmentCosts = {
-    'Full Refurbishment': 50000,
-    'Extensions (Rear / Side / Front)': 100000,
-    'Loft Conversion': 75000,
-    'Garage Conversion': 25000,
-    'Flat Refurbishment Only (1–3 bed)': 40000, // Added for flats
-  };
 
   bool _isFinancePanelVisible = false;
   bool _sendReportToLender = false;
@@ -120,11 +98,9 @@ class PropertyFloorAreaFilterScreenState
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['status'] == 'success') {
-          setState(() {
-            _currentPrice = (data['data']['average'] as int).toDouble();
-            _priceController.text = _currentPrice.toStringAsFixed(0);
-            _calculateFinancials();
-          });
+          final currentPrice = (data['data']['average'] as int).toDouble();
+          Provider.of<FinancialController>(context, listen: false).setCurrentPrice(currentPrice);
+          _priceController.text = currentPrice.toStringAsFixed(0);
         } else {
           throw Exception('Failed to load price data: ${data['error']}');
         }
@@ -163,48 +139,13 @@ class PropertyFloorAreaFilterScreenState
     });
   }
 
-  void _calculateFinancials() {
-    final isFlat = widget.area.address.toLowerCase().contains('flat');
-    final selectedScenario = isFlat
-        ? 'Flat Refurbishment Only (1–3 bed)'
-        : _houseScenarios[_selectedScenarioIndex];
-    final developmentCost = _developmentCosts[selectedScenario] ?? 0;
-
-    setState(() {
-      _totalCost = _currentPrice + developmentCost;
-      // Estimated GDV: for demo purposes, let's assume GDV is total cost + 25% uplift
-      _gdv = _totalCost * 1.25;
-      _uplift = _gdv - _totalCost;
-      _roi = (_totalCost > 0) ? (_uplift / _totalCost) * 100 : 0;
-    });
-  }
-
   void _updatePrice(String value) {
     final newPrice = double.tryParse(value);
-    if (newPrice != null && newPrice != _currentPrice) {
-      setState(() {
-        _currentPrice = newPrice;
-        _calculateFinancials();
-      });
+    if (newPrice != null) {
+       Provider.of<FinancialController>(context, listen: false).setCurrentPrice(newPrice);
     }
     setState(() {
       _isEditingPrice = false;
-    });
-  }
-
-  void _nextScenario() {
-    setState(() {
-      _selectedScenarioIndex = (_selectedScenarioIndex + 1) % _houseScenarios.length;
-      _calculateFinancials();
-    });
-  }
-
-  void _previousScenario() {
-    setState(() {
-      _selectedScenarioIndex =
-          (_selectedScenarioIndex - 1 + _houseScenarios.length) %
-              _houseScenarios.length;
-      _calculateFinancials();
     });
   }
 
@@ -227,7 +168,7 @@ class PropertyFloorAreaFilterScreenState
     });
   }
 
-  Widget _buildEditablePrice() {
+  Widget _buildEditablePrice(FinancialController controller) {
     final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
 
     if (_isLoadingPrice) {
@@ -265,7 +206,7 @@ class PropertyFloorAreaFilterScreenState
         onTap: () {
           setState(() {
             _isEditingPrice = true;
-            _priceController.text = _currentPrice.toStringAsFixed(0);
+            _priceController.text = controller.currentPrice.toStringAsFixed(0);
           });
           // Request focus after the widget is built
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -279,7 +220,7 @@ class PropertyFloorAreaFilterScreenState
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Text(
-            currencyFormat.format(_currentPrice),
+            currencyFormat.format(controller.currentPrice),
             style: const TextStyle(
                 fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
           ),
@@ -290,315 +231,319 @@ class PropertyFloorAreaFilterScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const PropertyFilterAppBar(),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 200,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.purple, width: 2),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: Image.asset('assets/images/gemini.png'),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        TrafficLightIndicator(
-                          isLoading: _isLoadingHistoricalPrice,
-                          price: _historicalPrice,
-                          error: _historicalPriceError,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: _pickImages,
-                            child: Container(
-                              height: 200,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.blue, width: 2),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: _images.isNotEmpty
-                                  ? Stack(
-                                      fit: StackFit.expand,
-                                      children: [
-                                        PageView.builder(
-                                          controller: _pageController,
-                                          itemCount: _images.length,
-                                          onPageChanged: (index) =>
-                                              setState(() => _currentImageIndex = index),
-                                          itemBuilder: (context, index) {
-                                            final image = _images[index];
-                                            return ClipRRect(
-                                              borderRadius: BorderRadius.circular(8.0),
-                                              child: kIsWeb
-                                                  ? Image.network(image.path,
-                                                      fit: BoxFit.cover)
-                                                  : Image.file(File(image.path),
-                                                      fit: BoxFit.cover),
-                                            );
-                                          },
-                                        ),
-                                        Positioned(
-                                            top: 8,
-                                            left: 8,
-                                            child: IconButton(
-                                                icon: const Icon(Icons.remove_circle,
-                                                    color: Colors.white),
-                                                onPressed: () =>
-                                                    _removeImage(_currentImageIndex))),
-                                        Positioned(
-                                          bottom: 8,
-                                          left: 8,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8.0, vertical: 4.0),
-                                            decoration: BoxDecoration(
-                                              color: Colors.black.withOpacity(0.6),
-                                              borderRadius: BorderRadius.circular(8.0),
-                                            ),
-                                            child: Text(
-                                              '${_currentImageIndex + 1} / ${_images.length}',
-                                              style: const TextStyle(
-                                                  color: Colors.white, fontSize: 14),
-                                            ),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          bottom: 8,
-                                          right: 8,
-                                          child: Row(
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(
-                                                    Icons.arrow_back_ios,
-                                                    color: Colors.white),
-                                                onPressed: () {
-                                                  if (_currentImageIndex > 0) {
-                                                    _pageController.previousPage(
-                                                      duration: const Duration(
-                                                          milliseconds: 300),
-                                                      curve: Curves.easeInOut,
-                                                    );
-                                                  }
-                                                },
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(
-                                                    Icons.arrow_forward_ios,
-                                                    color: Colors.white),
-                                                onPressed: () {
-                                                  if (_currentImageIndex <
-                                                      _images.length - 1) {
-                                                    _pageController.nextPage(
-                                                      duration: const Duration(
-                                                          milliseconds: 300),
-                                                      curve: Curves.easeInOut,
-                                                    );
-                                                  }
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : const Center(
-                                      child: Text('Your photos will appear here')),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    color: primaryColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: TextFormField(
-                            controller: _addressController,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              suffixIcon: IconButton(
-                                icon: const Icon(Icons.search, color: Colors.white),
-                                onPressed: () =>
-                                    _searchByPostcode(_addressController.text),
+    return Consumer<FinancialController>(
+      builder: (context, controller, child) {
+        return Scaffold(
+          appBar: const PropertyFilterAppBar(),
+          body: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.purple, width: 2),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: Image.asset('assets/images/gemini.png'),
                               ),
                             ),
-                            onFieldSubmitted: _searchByPostcode,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildEditablePrice(),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 16),
-                        Card(
-                          elevation: 4,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Row(
-                                    children: [
-                                      Text('Size: ',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium),
-                                      Text(widget.area.squareFeet.toString(),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium),
-                                    ],
-                                  ),
-                                ),
-                                const Divider(),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Row(
-                                    children: [
-                                      Text('Bedroom: ',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium),
-                                      Text(widget.area.habitableRooms.toString(),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(width: 16),
+                            TrafficLightIndicator(
+                              isLoading: _isLoadingHistoricalPrice,
+                              price: _historicalPrice,
+                              error: _historicalPriceError,
                             ),
-                          ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: _pickImages,
+                                child: Container(
+                                  height: 200,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.blue, width: 2),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: _images.isNotEmpty
+                                      ? Stack(
+                                          fit: StackFit.expand,
+                                          children: [
+                                            PageView.builder(
+                                              controller: _pageController,
+                                              itemCount: _images.length,
+                                              onPageChanged: (index) =>
+                                                  setState(() => _currentImageIndex = index),
+                                              itemBuilder: (context, index) {
+                                                final image = _images[index];
+                                                return ClipRRect(
+                                                  borderRadius: BorderRadius.circular(8.0),
+                                                  child: kIsWeb
+                                                      ? Image.network(image.path,
+                                                          fit: BoxFit.cover)
+                                                      : Image.file(File(image.path),
+                                                          fit: BoxFit.cover),
+                                                );
+                                              },
+                                            ),
+                                            Positioned(
+                                                top: 8,
+                                                left: 8,
+                                                child: IconButton(
+                                                    icon: const Icon(Icons.remove_circle,
+                                                        color: Colors.white),
+                                                    onPressed: () =>
+                                                        _removeImage(_currentImageIndex))),
+                                            Positioned(
+                                              bottom: 8,
+                                              left: 8,
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                    horizontal: 8.0, vertical: 4.0),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black.withOpacity(0.6),
+                                                  borderRadius: BorderRadius.circular(8.0),
+                                                ),
+                                                child: Text(
+                                                  '${_currentImageIndex + 1} / ${_images.length}',
+                                                  style: const TextStyle(
+                                                      color: Colors.white, fontSize: 14),
+                                                ),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              bottom: 8,
+                                              right: 8,
+                                              child: Row(
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                        Icons.arrow_back_ios,
+                                                        color: Colors.white),
+                                                    onPressed: () {
+                                                      if (_currentImageIndex > 0) {
+                                                        _pageController.previousPage(
+                                                          duration: const Duration(
+                                                              milliseconds: 300),
+                                                          curve: Curves.easeInOut,
+                                                        );
+                                                      }
+                                                    },
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                        Icons.arrow_forward_ios,
+                                                        color: Colors.white),
+                                                    onPressed: () {
+                                                      if (_currentImageIndex <
+                                                          _images.length - 1) {
+                                                        _pageController.nextPage(
+                                                          duration: const Duration(
+                                                              milliseconds: 300),
+                                                          curve: Curves.easeInOut,
+                                                        );
+                                                      }
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : const Center(
+                                          child: Text('Your photos will appear here')),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const Divider(height: 32),
-                        DevelopmentScenarios(
-                          isFlat: widget.area.address.toLowerCase().contains('flat'),
-                          selectedScenario: _houseScenarios[_selectedScenarioIndex],
-                          onPrevious: _previousScenario,
-                          onNext: _nextScenario,
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: double.infinity,
+                        color: primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: TextFormField(
+                                controller: _addressController,
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  suffixIcon: IconButton(
+                                    icon: const Icon(Icons.search, color: Colors.white),
+                                    onPressed: () =>
+                                        _searchByPostcode(_addressController.text),
+                                  ),
+                                ),
+                                onFieldSubmitted: _searchByPostcode,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            _buildEditablePrice(controller),
+                          ],
                         ),
-                        const Divider(height: 32),
-                        FinancialSummary(
-                          gdv: _gdv,
-                          totalCost: _totalCost,
-                          uplift: _uplift,
-                          roi: _roi,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(height: 16),
+                            Card(
+                              elevation: 4,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0, vertical: 8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                      child: Row(
+                                        children: [
+                                          Text('Size: ',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium),
+                                          Text(widget.area.squareFeet.toString(),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium),
+                                        ],
+                                      ),
+                                    ),
+                                    const Divider(),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                      child: Row(
+                                        children: [
+                                          Text('Bedroom: ',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium),
+                                          Text(widget.area.habitableRooms.toString(),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const Divider(height: 32),
+                            DevelopmentScenarios(
+                              isFlat: widget.area.address.toLowerCase().contains('flat'),
+                              selectedScenario: controller.houseScenarios[controller.selectedScenarioIndex],
+                              onPrevious: () => controller.previousScenario(widget.area.address.toLowerCase().contains('flat')),
+                              onNext: () => controller.nextScenario(widget.area.address.toLowerCase().contains('flat')),
+                            ),
+                            const Divider(height: 32),
+                            FinancialSummary(
+                              gdv: controller.gdv,
+                              totalCost: controller.totalCost,
+                              uplift: controller.uplift,
+                              roi: controller.roi,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (_isFinancePanelVisible)
-            FinancePanel(
-              sendReportToLender: _sendReportToLender,
-              onSendReportToLenderChanged: (bool? value) {
-                setState(() {
-                  _sendReportToLender = value ?? false;
-                });
-              },
-              onSend: () {
-                setState(() {
-                  _isFinancePanelVisible = false;
-                });
-              },
-            ),
-          if (_isReportPanelVisible)
-            ReportPanel(
-              inviteToSetupAccount: _inviteToSetupAccount,
-              onInviteToSetupAccountChanged: (bool? value) {
-                setState(() {
-                  _inviteToSetupAccount = value ?? false;
-                });
-              },
-              onSend: () {
-                setState(() {
-                  _isReportPanelVisible = false;
-                });
-              },
-            ),
-        ],
-      ),
-      bottomNavigationBar: FilterScreenBottomNav(
-        onTap: (index) {
-          if (index == 0) {
-            setState(() {
-              _isFinancePanelVisible = !_isFinancePanelVisible;
-              _isReportPanelVisible = false;
-            });
-          }
-          if (index == 1) _pickImages();
-          if (index == 2) {
-            setState(() {
-              _isReportPanelVisible = !_isReportPanelVisible;
-              _isFinancePanelVisible = false;
-            });
-          }
-          if (index == 3) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ReportSentScreen()),
-            );
-          }
-          if (index == 4) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ShareScreen(
-                  property: Property(
-                    price: _currentPrice.toInt(),
-                    bedrooms: widget.area.habitableRooms,
-                    lat: '51.5074',
-                    lng: '0.1278',
-                    type: widget.area.address.toLowerCase().contains('flat')
-                        ? 'flat'
-                        : 'house',
-                    distance: '0.1',
-                    sstc: 0,
-                    portal: 'OnTheMarket',
-                    postcode: widget.postcode,
+                      ),
+                    ],
                   ),
                 ),
               ),
-            );
-          }
-        },
-      ),
+              if (_isFinancePanelVisible)
+                FinancePanel(
+                  sendReportToLender: _sendReportToLender,
+                  onSendReportToLenderChanged: (bool? value) {
+                    setState(() {
+                      _sendReportToLender = value ?? false;
+                    });
+                  },
+                  onSend: () {
+                    setState(() {
+                      _isFinancePanelVisible = false;
+                    });
+                  },
+                ),
+              if (_isReportPanelVisible)
+                ReportPanel(
+                  inviteToSetupAccount: _inviteToSetupAccount,
+                  onInviteToSetupAccountChanged: (bool? value) {
+                    setState(() {
+                      _inviteToSetupAccount = value ?? false;
+                    });
+                  },
+                  onSend: () {
+                    setState(() {
+                      _isReportPanelVisible = false;
+                    });
+                  },
+                ),
+            ],
+          ),
+          bottomNavigationBar: FilterScreenBottomNav(
+            onTap: (index) {
+              if (index == 0) {
+                setState(() {
+                  _isFinancePanelVisible = !_isFinancePanelVisible;
+                  _isReportPanelVisible = false;
+                });
+              }
+              if (index == 1) _pickImages();
+              if (index == 2) {
+                setState(() {
+                  _isReportPanelVisible = !_isReportPanelVisible;
+                  _isFinancePanelVisible = false;
+                });
+              }
+              if (index == 3) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ReportSentScreen()),
+                );
+              }
+              if (index == 4) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ShareScreen(
+                      property: Property(
+                        price: controller.currentPrice.toInt(),
+                        bedrooms: widget.area.habitableRooms,
+                        lat: '51.5074',
+                        lng: '0.1278',
+                        type: widget.area.address.toLowerCase().contains('flat')
+                            ? 'flat'
+                            : 'house',
+                        distance: '0.1',
+                        sstc: 0,
+                        portal: 'OnTheMarket',
+                        postcode: widget.postcode,
+                      ),
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+        );
+      },
     );
   }
 }
