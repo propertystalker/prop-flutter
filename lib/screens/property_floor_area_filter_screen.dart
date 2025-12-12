@@ -338,7 +338,14 @@ class PropertyFloorAreaFilterScreenState
   Widget _buildReportPanel() {
     return Container(
       padding: const EdgeInsets.all(16.0),
-      color: Colors.white,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: trafficYellow, width: 2),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16.0),
+          topRight: Radius.circular(16.0),
+        ),
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
