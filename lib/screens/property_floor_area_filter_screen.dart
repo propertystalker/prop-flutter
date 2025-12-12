@@ -237,6 +237,7 @@ class PropertyFloorAreaFilterScreenState
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
     return Consumer3<FinancialController, CompanyController, PersonController>(
       builder: (context, financialController, companyController, personController, child) {
         return Scaffold(
@@ -520,6 +521,7 @@ class PropertyFloorAreaFilterScreenState
               if (_isReportPanelVisible)
                 ReportPanel(
                   address: _addressController.text,
+                  price: currencyFormat.format(financialController.currentPrice),
                   images: _images,
                   inviteToSetupAccount: _inviteToSetupAccount,
                   onInviteToSetupAccountChanged: (bool? value) {

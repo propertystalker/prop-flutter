@@ -35,6 +35,4 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/PS_v7_3_Dummy_Report_Standard Author Chris May.docx
-    - assets/images/app_icon.png
     - assets/images/gemini.png

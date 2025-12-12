@@ -8,6 +8,7 @@ class ReportPanel extends StatelessWidget {
   final ValueChanged<bool?> onInviteToSetupAccountChanged;
   final VoidCallback onSend;
   final String address;
+  final String price;
   final List<XFile> images;
 
   const ReportPanel({
@@ -16,6 +17,7 @@ class ReportPanel extends StatelessWidget {
     required this.onInviteToSetupAccountChanged,
     required this.onSend,
     required this.address,
+    required this.price,
     required this.images,
   });
 
@@ -74,7 +76,7 @@ class ReportPanel extends StatelessWidget {
                 foregroundColor: Colors.white,
               ),
               onPressed: () {
-                PdfGenerator.generateAndOpenPdf(address, images);
+                PdfGenerator.generateAndOpenPdf(address, price, images);
                 onSend();
               },
               child: const Text('Send'),

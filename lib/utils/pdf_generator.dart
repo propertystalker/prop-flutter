@@ -6,7 +6,7 @@ import 'package:printing/printing.dart';
 
 class PdfGenerator {
   static Future<void> generateAndOpenPdf(
-      String address, List<XFile> images) async {
+      String address, String price, List<XFile> images) async {
     final pdf = pw.Document();
 
     final imageProviders = <pw.MemoryImage>[];
@@ -23,6 +23,7 @@ class PdfGenerator {
         theme: pw.ThemeData.withFont(base: font),
         build: (context) => [
           pw.Header(text: address, level: 1),
+          pw.Text(price, style: pw.TextStyle(fontSize: 24)),
           pw.SizedBox(height: 20),
           ...imageProviders.map((imageProvider) {
             return pw.Padding(
