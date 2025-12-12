@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import '../models/property.dart';
 import '../models/property_floor_area.dart';
-import '../services/report_generator.dart';
 import '../utils/constants.dart';
 import 'property_floor_area_screen.dart';
+import 'report_sent_screen.dart';
+import 'share_screen.dart';
 
 class PropertyFloorAreaFilterScreen extends StatefulWidget {
   final KnownFloorArea area;
@@ -62,6 +64,9 @@ class PropertyFloorAreaFilterScreenState
     'Garage Conversion': 25000,
     'Flat Refurbishment Only (1–3 bed)': 40000, // Added for flats
   };
+
+  bool _isFinancePanelVisible = false;
+  bool _sendReportToLender = false;
 
   @override
   void initState() {
@@ -253,17 +258,67 @@ class PropertyFloorAreaFilterScreenState
     });
   }
 
-  Future<void> _handleGenerateReport() async {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Generating report...')),
+  Widget _buildFinancePanel() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      color: Colors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Request Finance Proposal',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 16.0),
+          TextFormField(
+            initialValue: 'Golden Trust Capital',
+            decoration: const InputDecoration(
+              labelText: 'Company Name',
+              icon: Icon(Icons.business),
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          TextFormField(
+            initialValue: 'chris@goldentrustcapital.co.uk',
+            decoration: const InputDecoration(
+              labelText: 'Company email address',
+              icon: Icon(Icons.email),
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          TextFormField(
+            initialValue: 'devfinance@bigbanklender.com',
+            decoration: const InputDecoration(
+              labelText: 'Bank lender email address',
+              icon: Icon(Icons.account_balance),
+            ),
+          ),
+          CheckboxListTile(
+            title: const Text('Also send report to lender'),
+            value: _sendReportToLender,
+            onChanged: (bool? value) {
+              setState(() {
+                _sendReportToLender = value ?? false;
+              });
+            },
+            controlAffinity: ListTileControlAffinity.leading,
+          ),
+          const SizedBox(height: 16.0),
+          Center(
+            child: ElevatedButton(
+              child: const Text('Send'),
+              onPressed: () {
+                // Implement send logic
+                setState(() {
+                  _isFinancePanelVisible = false;
+                });
+              },
+            ),
+          ),
+        ],
+      ),
     );
-    await ReportGenerator.generateReport(
-      area: widget.area,
-      images: _images,
-    );
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   Widget _buildEditablePrice() {
@@ -288,7 +343,8 @@ class PropertyFloorAreaFilterScreenState
           controller: _priceController,
           focusNode: _priceFocusNode,
           keyboardType: TextInputType.number,
-          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
           decoration: const InputDecoration(
             border: InputBorder.none,
@@ -318,7 +374,8 @@ class PropertyFloorAreaFilterScreenState
           ),
           child: Text(
             currencyFormat.format(_currentPrice),
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+            style: const TextStyle(
+                fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
       );
@@ -359,216 +416,274 @@ class PropertyFloorAreaFilterScreenState
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.purple, width: 2),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Image.asset('assets/images/gemini.png'),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Column(
-                    children: [
-                      if (_isLoadingHistoricalPrice)
-                        const CircularProgressIndicator()
-                      else if (_historicalPrice != null)
-                        Text(currencyFormat.format(_historicalPrice), style: const TextStyle(color: accentColor))
-                      else if (_historicalPriceError != null)
-                        Text(_historicalPriceError!, style: const TextStyle(color: accentColor))
-                      else
-                        const Text('Prev. Price', style: TextStyle(color: accentColor)),
-                      const SizedBox(height: 8),
-                      Container(width: 24, height: 24, decoration: const BoxDecoration(color: trafficRed, shape: BoxShape.circle)),
-                      const SizedBox(height: 8),
-                      Container(width: 24, height: 24, decoration: const BoxDecoration(color: trafficYellow, shape: BoxShape.circle)),
-                      const SizedBox(height: 8),
-                      Container(width: 24, height: 24, decoration: const BoxDecoration(color: trafficGreen, shape: BoxShape.circle)),
-                    ],
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _pickImages,
-                      child: Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.blue, width: 2),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: _images.isNotEmpty
-                            ? Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  PageView.builder(
-                                    controller: _pageController,
-                                    itemCount: _images.length,
-                                    onPageChanged: (index) => setState(() => _currentImageIndex = index),
-                                    itemBuilder: (context, index) {
-                                      final image = _images[index];
-                                      return ClipRRect(
-                                        borderRadius: BorderRadius.circular(8.0),
-                                        child: kIsWeb
-                                            ? Image.network(image.path, fit: BoxFit.cover)
-                                            : Image.file(File(image.path), fit: BoxFit.cover),
-                                      );
-                                    },
-                                  ),
-                                  Positioned(
-                                      top: 8,
-                                      left: 8,
-                                      child: IconButton(
-                                          icon: const Icon(Icons.remove_circle, color: Colors.white),
-                                          onPressed: () => _removeImage(_currentImageIndex))),
-                                  Positioned(
-                                    bottom: 8,
-                                    left: 8,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.6),
-                                        borderRadius: BorderRadius.circular(8.0),
-                                      ),
-                                      child: Text(
-                                        '${_currentImageIndex + 1} / ${_images.length}',
-                                        style: const TextStyle(color: Colors.white, fontSize: 14),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: 8,
-                                    right: 8,
-                                    child: Row(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                                          onPressed: () {
-                                            if (_currentImageIndex > 0) {
-                                              _pageController.previousPage(
-                                                duration: const Duration(milliseconds: 300),
-                                                curve: Curves.easeInOut,
-                                              );
-                                            }
-                                          },
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
-                                          onPressed: () {
-                                            if (_currentImageIndex < _images.length - 1) {
-                                              _pageController.nextPage(
-                                                duration: const Duration(milliseconds: 300),
-                                                curve: Curves.easeInOut,
-                                              );
-                                            }
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : const Center(child: Text('Your photos will appear here')),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              color: primaryColor,
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: TextFormField(
-                      controller: _addressController,
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.search, color: Colors.white),
-                          onPressed: () =>
-                              _searchByPostcode(_addressController.text),
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 200,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.purple, width: 2),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Image.asset('assets/images/gemini.png'),
+                          ),
                         ),
-                      ),
-                      onFieldSubmitted: _searchByPostcode,
+                        const SizedBox(width: 16),
+                        Column(
+                          children: [
+                            if (_isLoadingHistoricalPrice)
+                              const CircularProgressIndicator()
+                            else if (_historicalPrice != null)
+                              Text(currencyFormat.format(_historicalPrice),
+                                  style: const TextStyle(color: accentColor))
+                            else if (_historicalPriceError != null)
+                              Text(_historicalPriceError!,
+                                  style: const TextStyle(color: accentColor))
+                            else
+                              const Text('Prev. Price',
+                                  style: TextStyle(color: accentColor)),
+                            const SizedBox(height: 8),
+                            Container(
+                                width: 24,
+                                height: 24,
+                                decoration: const BoxDecoration(
+                                    color: trafficRed, shape: BoxShape.circle)),
+                            const SizedBox(height: 8),
+                            Container(
+                                width: 24,
+                                height: 24,
+                                decoration: const BoxDecoration(
+                                    color: trafficYellow, shape: BoxShape.circle)),
+                            const SizedBox(height: 8),
+                            Container(
+                                width: 24,
+                                height: 24,
+                                decoration: const BoxDecoration(
+                                    color: trafficGreen, shape: BoxShape.circle)),
+                          ],
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: _pickImages,
+                            child: Container(
+                              height: 200,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.blue, width: 2),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: _images.isNotEmpty
+                                  ? Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        PageView.builder(
+                                          controller: _pageController,
+                                          itemCount: _images.length,
+                                          onPageChanged: (index) =>
+                                              setState(() => _currentImageIndex = index),
+                                          itemBuilder: (context, index) {
+                                            final image = _images[index];
+                                            return ClipRRect(
+                                              borderRadius: BorderRadius.circular(8.0),
+                                              child: kIsWeb
+                                                  ? Image.network(image.path,
+                                                      fit: BoxFit.cover)
+                                                  : Image.file(File(image.path),
+                                                      fit: BoxFit.cover),
+                                            );
+                                          },
+                                        ),
+                                        Positioned(
+                                            top: 8,
+                                            left: 8,
+                                            child: IconButton(
+                                                icon: const Icon(Icons.remove_circle,
+                                                    color: Colors.white),
+                                                onPressed: () =>
+                                                    _removeImage(_currentImageIndex))),
+                                        Positioned(
+                                          bottom: 8,
+                                          left: 8,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8.0, vertical: 4.0),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withOpacity(0.6),
+                                              borderRadius: BorderRadius.circular(8.0),
+                                            ),
+                                            child: Text(
+                                              '${_currentImageIndex + 1} / ${_images.length}',
+                                              style: const TextStyle(
+                                                  color: Colors.white, fontSize: 14),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          bottom: 8,
+                                          right: 8,
+                                          child: Row(
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(
+                                                    Icons.arrow_back_ios,
+                                                    color: Colors.white),
+                                                onPressed: () {
+                                                  if (_currentImageIndex > 0) {
+                                                    _pageController.previousPage(
+                                                      duration: const Duration(
+                                                          milliseconds: 300),
+                                                      curve: Curves.easeInOut,
+                                                    );
+                                                  }
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(
+                                                    Icons.arrow_forward_ios,
+                                                    color: Colors.white),
+                                                onPressed: () {
+                                                  if (_currentImageIndex <
+                                                      _images.length - 1) {
+                                                    _pageController.nextPage(
+                                                      duration: const Duration(
+                                                          milliseconds: 300),
+                                                      curve: Curves.easeInOut,
+                                                    );
+                                                  }
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : const Center(
+                                      child: Text('Your photos will appear here')),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  _buildEditablePrice(),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
                   const SizedBox(height: 16),
-                  Card(
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Row(
-                              children: [
-                                Text('Size: ', style: Theme.of(context).textTheme.titleMedium),
-                                Text(widget.area.squareFeet.toString(), style: Theme.of(context).textTheme.titleMedium),
-                              ],
+                  Container(
+                    width: double.infinity,
+                    color: primaryColor,
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: TextFormField(
+                            controller: _addressController,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.search, color: Colors.white),
+                                onPressed: () =>
+                                    _searchByPostcode(_addressController.text),
+                              ),
                             ),
+                            onFieldSubmitted: _searchByPostcode,
                           ),
-                          const Divider(),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Row(
-                              children: [
-                                Text('Bedroom: ', style: Theme.of(context).textTheme.titleMedium),
-                                Text(widget.area.habitableRooms.toString(), style: Theme.of(context).textTheme.titleMedium),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildEditablePrice(),
+                      ],
                     ),
                   ),
-                  const Divider(height: 32),
-                  _buildScenarios(context),
-                  const Divider(height: 32),
-                  Text('GDV: ${currencyFormat.format(_gdv)}', style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  Text('Total Cost: ${currencyFormat.format(_totalCost)}', style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  Text('Uplift: ${currencyFormat.format(_uplift)}', style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  Text('ROI: ${_roi.toStringAsFixed(2)}%', style: Theme.of(context).textTheme.titleMedium),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 16),
+                        Card(
+                          elevation: 4,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(
+                                    children: [
+                                      Text('Size: ',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium),
+                                      Text(widget.area.squareFeet.toString(),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium),
+                                    ],
+                                  ),
+                                ),
+                                const Divider(),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(
+                                    children: [
+                                      Text('Bedroom: ',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium),
+                                      Text(widget.area.habitableRooms.toString(),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const Divider(height: 32),
+                        _buildScenarios(context),
+                        const Divider(height: 32),
+                        Text('GDV: ${currencyFormat.format(_gdv)}',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 8),
+                        Text('Total Cost: ${currencyFormat.format(_totalCost)}',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 8),
+                        Text('Uplift: ${currencyFormat.format(_uplift)}',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 8),
+                        Text('ROI: ${_roi.toStringAsFixed(2)}%',
+                            style: Theme.of(context).textTheme.titleMedium),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          if (_isFinancePanelVisible) _buildFinancePanel(),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Text('£', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)), label: ''),
+          BottomNavigationBarItem(
+              icon: Text('£', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.add), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.share), label: ''),
@@ -580,8 +695,40 @@ class PropertyFloorAreaFilterScreenState
         showUnselectedLabels: false,
         type: BottomNavigationBarType.fixed,
         onTap: (index) {
-          if (index == 0) _handleGenerateReport();
+          if (index == 0) {
+            setState(() {
+              _isFinancePanelVisible = !_isFinancePanelVisible;
+            });
+          }
           if (index == 1) _pickImages();
+          if (index == 3) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ReportSentScreen()),
+            );
+          }
+          if (index == 4) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ShareScreen(
+                  property: Property(
+                    price: _currentPrice.toInt(),
+                    bedrooms: widget.area.habitableRooms,
+                    lat: '51.5074',
+                    lng: '0.1278',
+                    type: widget.area.address.toLowerCase().contains('flat')
+                        ? 'flat'
+                        : 'house',
+                    distance: '0.1',
+                    sstc: 0,
+                    portal: 'OnTheMarket',
+                    postcode: widget.postcode,
+                  ),
+                ),
+              ),
+            );
+          }
         },
       ),
     );
