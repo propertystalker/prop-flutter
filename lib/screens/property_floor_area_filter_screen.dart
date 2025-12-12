@@ -7,7 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/controllers/company_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
+import 'package:myapp/controllers/person_controller.dart';
 import 'package:myapp/widgets/company_account.dart';
+import 'package:myapp/widgets/person_account.dart';
 import 'package:provider/provider.dart';
 import '../widgets/development_scenarios.dart';
 import '../widgets/financial_summary.dart';
@@ -58,6 +60,7 @@ class PropertyFloorAreaFilterScreenState
   bool _isReportPanelVisible = false;
   bool _inviteToSetupAccount = false;
   bool _isCompanyAccountVisible = false;
+  bool _isPersonAccountVisible = false;
 
   @override
   void initState() {
@@ -234,13 +237,18 @@ class PropertyFloorAreaFilterScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<FinancialController, CompanyController>(
-      builder: (context, financialController, companyController, child) {
+    return Consumer3<FinancialController, CompanyController, PersonController>(
+      builder: (context, financialController, companyController, personController, child) {
         return Scaffold(
           appBar: PropertyFilterAppBar(
             onLogoTap: () {
               setState(() {
                 _isCompanyAccountVisible = !_isCompanyAccountVisible;
+              });
+            },
+            onAvatarTap: () {
+              setState(() {
+                _isPersonAccountVisible = !_isPersonAccountVisible;
               });
             },
           ),
@@ -254,6 +262,14 @@ class PropertyFloorAreaFilterScreenState
                   onSave: () {
                     setState(() {
                       _isCompanyAccountVisible = false;
+                    });
+                  },
+                ),
+              if (_isPersonAccountVisible)
+                PersonAccount(
+                  onSave: () {
+                    setState(() {
+                      _isPersonAccountVisible = false;
                     });
                   },
                 ),

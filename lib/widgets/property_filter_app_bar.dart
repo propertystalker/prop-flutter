@@ -3,12 +3,15 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/controllers/company_controller.dart';
+import 'package:myapp/controllers/person_controller.dart';
 import 'package:provider/provider.dart';
 
 class PropertyFilterAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onLogoTap;
+  final VoidCallback onAvatarTap;
 
-  const PropertyFilterAppBar({super.key, required this.onLogoTap});
+  const PropertyFilterAppBar(
+      {super.key, required this.onLogoTap, required this.onAvatarTap});
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +31,10 @@ class PropertyFilterAppBar extends StatelessWidget implements PreferredSizeWidge
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
                           child: kIsWeb
-                              ? Image.network(controller.companyLogo!.path, fit: BoxFit.cover)
-                              : Image.file(File(controller.companyLogo!.path), fit: BoxFit.cover),
+                              ? Image.network(controller.companyLogo!.path,
+                                  fit: BoxFit.cover)
+                              : Image.file(File(controller.companyLogo!.path),
+                                  fit: BoxFit.cover),
                         )
                       : const Icon(Icons.business));
             },
@@ -41,7 +46,8 @@ class PropertyFilterAppBar extends StatelessWidget implements PreferredSizeWidge
           return Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const Text('98375', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text('98375',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(width: 16),
               Text(controller.companyName, style: const TextStyle(fontSize: 18)),
             ],
@@ -50,10 +56,23 @@ class PropertyFilterAppBar extends StatelessWidget implements PreferredSizeWidge
       ),
       actions: [
         IconButton(icon: const Icon(Icons.settings), onPressed: () {}),
-        const Padding(
-          padding: EdgeInsets.only(right: 16.0),
-          child: CircleAvatar(
-            backgroundImage: NetworkImage('https://picsum.photos/seed/picsum/200/300'),
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: GestureDetector(
+            onTap: onAvatarTap,
+            child: Consumer<PersonController>(
+              builder: (context, controller, child) {
+                return CircleAvatar(
+                  backgroundImage: controller.avatar != null
+                      ? (kIsWeb
+                          ? NetworkImage(controller.avatar!.path)
+                          : FileImage(File(controller.avatar!.path)))
+                          as ImageProvider
+                      : const NetworkImage(
+                          'https://picsum.photos/seed/picsum/200/300'),
+                );
+              },
+            ),
           ),
         ),
       ],
