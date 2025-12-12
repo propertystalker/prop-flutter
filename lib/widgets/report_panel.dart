@@ -1,17 +1,22 @@
-
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:myapp/utils/pdf_generator.dart';
 import '../utils/constants.dart';
 
 class ReportPanel extends StatelessWidget {
   final bool inviteToSetupAccount;
   final ValueChanged<bool?> onInviteToSetupAccountChanged;
   final VoidCallback onSend;
+  final String address;
+  final List<XFile> images;
 
   const ReportPanel({
     super.key,
     required this.inviteToSetupAccount,
     required this.onInviteToSetupAccountChanged,
     required this.onSend,
+    required this.address,
+    required this.images,
   });
 
   @override
@@ -68,7 +73,10 @@ class ReportPanel extends StatelessWidget {
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
               ),
-              onPressed: onSend,
+              onPressed: () {
+                PdfGenerator.generateAndOpenPdf(address, images);
+                onSend();
+              },
               child: const Text('Send'),
             ),
           ),

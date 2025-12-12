@@ -519,6 +519,8 @@ class PropertyFloorAreaFilterScreenState
                 ),
               if (_isReportPanelVisible)
                 ReportPanel(
+                  address: _addressController.text,
+                  images: _images,
                   inviteToSetupAccount: _inviteToSetupAccount,
                   onInviteToSetupAccountChanged: (bool? value) {
                     setState(() {
@@ -529,6 +531,11 @@ class PropertyFloorAreaFilterScreenState
                     setState(() {
                       _isReportPanelVisible = false;
                     });
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ReportSentScreen()),
+                    );
                   },
                 ),
             ],

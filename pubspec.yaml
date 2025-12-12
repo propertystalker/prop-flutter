@@ -19,8 +19,11 @@ dependencies:
   # Added for report generation
   docx_template: ^0.4.0
   path_provider: ^2.1.1
-  open_file: ^3.3.2
+  open_file: ^3.5.10
   provider: ^6.1.5+1
+  pdf: ^3.11.3
+  printing: ^5.14.2
+  google_fonts: ^6.3.3
 
 dev_dependencies:
   flutter_test:
