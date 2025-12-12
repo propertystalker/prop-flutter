@@ -373,7 +373,7 @@ class PropertyFloorAreaFilterScreenState
                         border: Border.all(color: Colors.purple, width: 2),
                         borderRadius: BorderRadius.circular(8.0),
                       ),
-                      child: const Center(child: Text('Comparables')),
+                      child: Image.asset('assets/images/gemini.png'),
                     ),
                   ),
                   const SizedBox(width: 16),
