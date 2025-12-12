@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:myapp/controllers/company_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
+import 'package:myapp/widgets/company_account.dart';
 import 'package:provider/provider.dart';
 import '../widgets/development_scenarios.dart';
 import '../widgets/financial_summary.dart';
@@ -55,6 +57,7 @@ class PropertyFloorAreaFilterScreenState
 
   bool _isReportPanelVisible = false;
   bool _inviteToSetupAccount = false;
+  bool _isCompanyAccountVisible = false;
 
   @override
   void initState() {
@@ -231,12 +234,29 @@ class PropertyFloorAreaFilterScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<FinancialController>(
-      builder: (context, controller, child) {
+    return Consumer2<FinancialController, CompanyController>(
+      builder: (context, financialController, companyController, child) {
         return Scaffold(
-          appBar: const PropertyFilterAppBar(),
+          appBar: PropertyFilterAppBar(
+            onLogoTap: () {
+              setState(() {
+                _isCompanyAccountVisible = !_isCompanyAccountVisible;
+              });
+            },
+          ),
           body: Column(
             children: [
+              if (_isCompanyAccountVisible)
+                CompanyAccount(
+                  onCompanyChanged: (name) {
+                    companyController.setCompanyName(name);
+                  },
+                  onSave: () {
+                    setState(() {
+                      _isCompanyAccountVisible = false;
+                    });
+                  },
+                ),
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -393,7 +413,7 @@ class PropertyFloorAreaFilterScreenState
                               ),
                             ),
                             const SizedBox(height: 8),
-                            _buildEditablePrice(controller),
+                            _buildEditablePrice(financialController),
                           ],
                         ),
                       ),
@@ -449,16 +469,16 @@ class PropertyFloorAreaFilterScreenState
                             const Divider(height: 32),
                             DevelopmentScenarios(
                               isFlat: widget.area.address.toLowerCase().contains('flat'),
-                              selectedScenario: controller.houseScenarios[controller.selectedScenarioIndex],
-                              onPrevious: () => controller.previousScenario(widget.area.address.toLowerCase().contains('flat')),
-                              onNext: () => controller.nextScenario(widget.area.address.toLowerCase().contains('flat')),
+                              selectedScenario: financialController.houseScenarios[financialController.selectedScenarioIndex],
+                              onPrevious: () => financialController.previousScenario(widget.area.address.toLowerCase().contains('flat')),
+                              onNext: () => financialController.nextScenario(widget.area.address.toLowerCase().contains('flat')),
                             ),
                             const Divider(height: 32),
                             FinancialSummary(
-                              gdv: controller.gdv,
-                              totalCost: controller.totalCost,
-                              uplift: controller.uplift,
-                              roi: controller.roi,
+                              gdv: financialController.gdv,
+                              totalCost: financialController.totalCost,
+                              uplift: financialController.uplift,
+                              roi: financialController.roi,
                             ),
                           ],
                         ),
@@ -524,7 +544,7 @@ class PropertyFloorAreaFilterScreenState
                   MaterialPageRoute(
                     builder: (context) => ShareScreen(
                       property: Property(
-                        price: controller.currentPrice.toInt(),
+                        price: financialController.currentPrice.toInt(),
                         bedrooms: widget.area.habitableRooms,
                         lat: '51.5074',
                         lng: '0.1278',

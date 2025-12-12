@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myapp/controllers/company_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/screens/opening_screen.dart';
 import 'package:myapp/screens/property_floor_area_screen.dart' show PropertyFloorAreaScreen;
@@ -8,8 +9,11 @@ import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => FinancialController(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => FinancialController()),
+        ChangeNotifierProvider(create: (context) => CompanyController()),
+      ],
       child: const MyApp(),
     ),
   );
