@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import '../widgets/development_scenarios.dart';
 import '../widgets/financial_summary.dart';
 import '../widgets/filter_screen_bottom_nav.dart';
 import '../widgets/finance_panel.dart';
@@ -205,47 +206,6 @@ class PropertyFloorAreaFilterScreenState
               _houseScenarios.length;
       _calculateFinancials();
     });
-  }
-
-  Widget _buildScenarios(BuildContext context) {
-    final bool isFlat = widget.area.address.toLowerCase().contains('flat');
-
-    if (isFlat) {
-      return const ListTile(
-        leading: Icon(Icons.apartment),
-        title: Text('Flat Refurbishment Only (1–3 bed)'),
-        subtitle: Text('Scenario'),
-      );
-    } else {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Development Scenarios',
-              style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_left),
-                onPressed: _previousScenario,
-              ),
-              Expanded(
-                child: Text(
-                  _houseScenarios[_selectedScenarioIndex],
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_right),
-                onPressed: _nextScenario,
-              ),
-            ],
-          ),
-        ],
-      );
-    }
   }
 
   Future<void> _pickImages() async {
@@ -544,7 +504,12 @@ class PropertyFloorAreaFilterScreenState
                           ),
                         ),
                         const Divider(height: 32),
-                        _buildScenarios(context),
+                        DevelopmentScenarios(
+                          isFlat: widget.area.address.toLowerCase().contains('flat'),
+                          selectedScenario: _houseScenarios[_selectedScenarioIndex],
+                          onPrevious: _previousScenario,
+                          onNext: _nextScenario,
+                        ),
                         const Divider(height: 32),
                         FinancialSummary(
                           gdv: _gdv,
