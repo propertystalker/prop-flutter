@@ -477,7 +477,7 @@ class PropertyFloorAreaFilterScreenState
                                   ),
                                 ],
                               )
-                            : const Center(child: Text('Photos')),
+                            : const Center(child: Text('Your photos will appear here')),
                       ),
                     ),
                   ),
