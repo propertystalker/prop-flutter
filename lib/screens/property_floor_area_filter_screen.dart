@@ -5,6 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import '../widgets/financial_summary.dart';
+import '../widgets/filter_screen_bottom_nav.dart';
+import '../widgets/finance_panel.dart';
+import '../widgets/property_filter_app_bar.dart';
+import '../widgets/report_panel.dart';
+import '../widgets/traffic_light_indicator.dart';
 import '../models/property.dart';
 import '../models/property_floor_area.dart';
 import '../utils/constants.dart';
@@ -261,151 +267,6 @@ class PropertyFloorAreaFilterScreenState
     });
   }
 
-  Widget _buildFinancePanel() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: trafficGreen, width: 2),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16.0),
-          topRight: Radius.circular(16.0),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Request Finance Proposal',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 16.0),
-          TextFormField(
-            initialValue: 'Golden Trust Capital',
-            decoration: const InputDecoration(
-              labelText: 'Company Name',
-              icon: Icon(Icons.business),
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          TextFormField(
-            initialValue: 'chris@goldentrustcapital.co.uk',
-            decoration: const InputDecoration(
-              labelText: 'Company email address',
-              icon: Icon(Icons.email),
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          TextFormField(
-            initialValue: 'devfinance@bigbanklender.com',
-            decoration: const InputDecoration(
-              labelText: 'Bank lender email address',
-              icon: Icon(Icons.account_balance),
-            ),
-          ),
-          CheckboxListTile(
-            title: const Text('Also send report to lender'),
-            value: _sendReportToLender,
-            onChanged: (bool? value) {
-              setState(() {
-                _sendReportToLender = value ?? false;
-              });
-            },
-            controlAffinity: ListTileControlAffinity.leading,
-          ),
-          const SizedBox(height: 16.0),
-          Center(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Send'),
-              onPressed: () {
-                // Implement send logic
-                setState(() {
-                  _isFinancePanelVisible = false;
-                });
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReportPanel() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: trafficYellow, width: 2),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16.0),
-          topRight: Radius.circular(16.0),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Create & Send Report',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 16.0),
-          TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'From',
-              icon: Icon(Icons.person),
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'To',
-              icon: Icon(Icons.person_outline),
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'CC',
-              icon: Icon(Icons.people_outline),
-            ),
-          ),
-          CheckboxListTile(
-            title: const Text('Also invite to setup account'),
-            value: _inviteToSetupAccount,
-            onChanged: (bool? value) {
-              setState(() {
-                _inviteToSetupAccount = value ?? false;
-              });
-            },
-            controlAffinity: ListTileControlAffinity.leading,
-          ),
-          const SizedBox(height: 16.0),
-          Center(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Send'),
-              onPressed: () {
-                // Implement send logic
-                setState(() {
-                  _isReportPanelVisible = false;
-                });
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEditablePrice() {
     final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
 
@@ -469,38 +330,8 @@ class PropertyFloorAreaFilterScreenState
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
-
     return Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: const Icon(Icons.business),
-          ),
-        ),
-        title: const Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text('98375', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            SizedBox(width: 16),
-            Text('British Land', style: TextStyle(fontSize: 18)),
-          ],
-        ),
-        actions: [
-          IconButton(icon: const Icon(Icons.settings), onPressed: () {}),
-          const Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundImage: NetworkImage('https://picsum.photos/seed/picsum/200/300'),
-            ),
-          ),
-        ],
-      ),
+      appBar: const PropertyFilterAppBar(),
       body: Column(
         children: [
           Expanded(
@@ -523,38 +354,10 @@ class PropertyFloorAreaFilterScreenState
                           ),
                         ),
                         const SizedBox(width: 16),
-                        Column(
-                          children: [
-                            if (_isLoadingHistoricalPrice)
-                              const CircularProgressIndicator()
-                            else if (_historicalPrice != null)
-                              Text(currencyFormat.format(_historicalPrice),
-                                  style: const TextStyle(color: accentColor))
-                            else if (_historicalPriceError != null)
-                              Text(_historicalPriceError!,
-                                  style: const TextStyle(color: accentColor))
-                            else
-                              const Text('Prev. Price',
-                                  style: TextStyle(color: accentColor)),
-                            const SizedBox(height: 8),
-                            Container(
-                                width: 24,
-                                height: 24,
-                                decoration: const BoxDecoration(
-                                    color: trafficRed, shape: BoxShape.circle)),
-                            const SizedBox(height: 8),
-                            Container(
-                                width: 24,
-                                height: 24,
-                                decoration: const BoxDecoration(
-                                    color: trafficYellow, shape: BoxShape.circle)),
-                            const SizedBox(height: 8),
-                            Container(
-                                width: 24,
-                                height: 24,
-                                decoration: const BoxDecoration(
-                                    color: trafficGreen, shape: BoxShape.circle)),
-                          ],
+                        TrafficLightIndicator(
+                          isLoading: _isLoadingHistoricalPrice,
+                          price: _historicalPrice,
+                          error: _historicalPriceError,
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -743,17 +546,12 @@ class PropertyFloorAreaFilterScreenState
                         const Divider(height: 32),
                         _buildScenarios(context),
                         const Divider(height: 32),
-                        Text('GDV: ${currencyFormat.format(_gdv)}',
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: 8),
-                        Text('Total Cost: ${currencyFormat.format(_totalCost)}',
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: 8),
-                        Text('Uplift: ${currencyFormat.format(_uplift)}',
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: 8),
-                        Text('ROI: ${_roi.toStringAsFixed(2)}%',
-                            style: Theme.of(context).textTheme.titleMedium),
+                        FinancialSummary(
+                          gdv: _gdv,
+                          totalCost: _totalCost,
+                          uplift: _uplift,
+                          roi: _roi,
+                        ),
                       ],
                     ),
                   ),
@@ -761,25 +559,37 @@ class PropertyFloorAreaFilterScreenState
               ),
             ),
           ),
-          if (_isFinancePanelVisible) _buildFinancePanel(),
-          if (_isReportPanelVisible) _buildReportPanel(),
+          if (_isFinancePanelVisible)
+            FinancePanel(
+              sendReportToLender: _sendReportToLender,
+              onSendReportToLenderChanged: (bool? value) {
+                setState(() {
+                  _sendReportToLender = value ?? false;
+                });
+              },
+              onSend: () {
+                setState(() {
+                  _isFinancePanelVisible = false;
+                });
+              },
+            ),
+          if (_isReportPanelVisible)
+            ReportPanel(
+              inviteToSetupAccount: _inviteToSetupAccount,
+              onInviteToSetupAccountChanged: (bool? value) {
+                setState(() {
+                  _inviteToSetupAccount = value ?? false;
+                });
+              },
+              onSend: () {
+                setState(() {
+                  _isReportPanelVisible = false;
+                });
+              },
+            ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-              icon: Text('£', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-              label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.share), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.message), label: ''),
-        ],
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        type: BottomNavigationBarType.fixed,
+      bottomNavigationBar: FilterScreenBottomNav(
         onTap: (index) {
           if (index == 0) {
             setState(() {
