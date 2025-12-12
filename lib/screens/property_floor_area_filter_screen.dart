@@ -307,6 +307,10 @@ class PropertyFloorAreaFilterScreenState
           const SizedBox(height: 16.0),
           Center(
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
               child: const Text('Send'),
               onPressed: () {
                 // Implement send logic
