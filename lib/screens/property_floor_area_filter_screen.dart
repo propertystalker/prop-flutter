@@ -129,6 +129,7 @@ class PropertyFloorAreaFilterScreenState
 
   @override
   void dispose() {
+    _pageController.dispose();
     _priceController.dispose();
     _addressController.dispose();
     _priceFocusNode.dispose();
@@ -407,6 +408,7 @@ class PropertyFloorAreaFilterScreenState
                         ),
                         child: _images.isNotEmpty
                             ? Stack(
+                                fit: StackFit.expand,
                                 children: [
                                   PageView.builder(
                                     controller: _pageController,
@@ -414,7 +416,12 @@ class PropertyFloorAreaFilterScreenState
                                     onPageChanged: (index) => setState(() => _currentImageIndex = index),
                                     itemBuilder: (context, index) {
                                       final image = _images[index];
-                                      return kIsWeb ? Image.network(image.path, fit: BoxFit.cover) : Image.file(File(image.path), fit: BoxFit.cover);
+                                      return ClipRRect(
+                                        borderRadius: BorderRadius.circular(8.0),
+                                        child: kIsWeb
+                                            ? Image.network(image.path, fit: BoxFit.cover)
+                                            : Image.file(File(image.path), fit: BoxFit.cover),
+                                      );
                                     },
                                   ),
                                   Positioned(
@@ -423,6 +430,51 @@ class PropertyFloorAreaFilterScreenState
                                       child: IconButton(
                                           icon: const Icon(Icons.remove_circle, color: Colors.white),
                                           onPressed: () => _removeImage(_currentImageIndex))),
+                                  Positioned(
+                                    bottom: 8,
+                                    left: 8,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.6),
+                                        borderRadius: BorderRadius.circular(8.0),
+                                      ),
+                                      child: Text(
+                                        '${_currentImageIndex + 1} / ${_images.length}',
+                                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 8,
+                                    right: 8,
+                                    child: Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                                          onPressed: () {
+                                            if (_currentImageIndex > 0) {
+                                              _pageController.previousPage(
+                                                duration: const Duration(milliseconds: 300),
+                                                curve: Curves.easeInOut,
+                                              );
+                                            }
+                                          },
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+                                          onPressed: () {
+                                            if (_currentImageIndex < _images.length - 1) {
+                                              _pageController.nextPage(
+                                                duration: const Duration(milliseconds: 300),
+                                                curve: Curves.easeInOut,
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               )
                             : const Center(child: Text('Photos')),
