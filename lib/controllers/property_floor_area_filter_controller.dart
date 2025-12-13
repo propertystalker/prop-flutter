@@ -1,0 +1,205 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:myapp/controllers/financial_controller.dart';
+import 'package:myapp/utils/constants.dart';
+
+class PropertyFloorAreaFilterController with ChangeNotifier {
+  final String postcode;
+  final int habitableRooms;
+  final FinancialController financialController;
+
+  PropertyFloorAreaFilterController(
+      {required this.postcode, required this.habitableRooms, required this.financialController}) {
+    _fetchCurrentPrice();
+    _fetchHistoricalPrice();
+  }
+
+  final PageController _pageController = PageController();
+  PageController get pageController => _pageController;
+
+  final List<XFile> _images = [];
+  List<XFile> get images => _images;
+
+  int _currentImageIndex = 0;
+  int get currentImageIndex => _currentImageIndex;
+
+  int? _historicalPrice;
+  int? get historicalPrice => _historicalPrice;
+
+  bool _isLoadingHistoricalPrice = false;
+  bool get isLoadingHistoricalPrice => _isLoadingHistoricalPrice;
+
+  String? _historicalPriceError;
+  String? get historicalPriceError => _historicalPriceError;
+
+  bool _isLoadingPrice = true;
+  bool get isLoadingPrice => _isLoadingPrice;
+
+  String? _currentPriceError;
+  String? get currentPriceError => _currentPriceError;
+
+  bool _isEditingPrice = false;
+  bool get isEditingPrice => _isEditingPrice;
+
+  final FocusNode _priceFocusNode = FocusNode();
+  FocusNode get priceFocusNode => _priceFocusNode;
+
+  bool _isFinancePanelVisible = false;
+  bool get isFinancePanelVisible => _isFinancePanelVisible;
+
+  bool _sendReportToLender = false;
+  bool get sendReportToLender => _sendReportToLender;
+
+  bool _isReportPanelVisible = false;
+  bool get isReportPanelVisible => _isReportPanelVisible;
+
+  bool _inviteToSetupAccount = false;
+  bool get inviteToSetupAccount => _inviteToSetupAccount;
+
+  bool _isCompanyAccountVisible = false;
+  bool get isCompanyAccountVisible => _isCompanyAccountVisible;
+
+  bool _isPersonAccountVisible = false;
+  bool get isPersonAccountVisible => _isPersonAccountVisible;
+
+  Future<void> _fetchCurrentPrice() async {
+    _isLoadingPrice = true;
+    _currentPriceError = null;
+    notifyListeners();
+
+    final url = Uri.parse(
+        'https://api.propertydata.co.uk/prices?key=$apiKey&postcode=$postcode&bedrooms=$habitableRooms');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          final currentPrice = (data['data']['average'] as int).toDouble();
+          financialController.setCurrentPrice(currentPrice);
+        } else {
+          throw Exception('Failed to load price data: ${data['error']}');
+        }
+      } else {
+        throw Exception('Failed to load price data');
+      }
+    } catch (e) {
+      _currentPriceError = e.toString();
+    } finally {
+      _isLoadingPrice = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _fetchHistoricalPrice() async {
+    _isLoadingHistoricalPrice = true;
+    _historicalPriceError = null;
+    notifyListeners();
+    await Future.delayed(const Duration(seconds: 2));
+    _isLoadingHistoricalPrice = false;
+    _historicalPrice = 153000;
+    notifyListeners();
+  }
+
+  void updatePrice(String value) {
+    final newPrice = double.tryParse(value);
+    if (newPrice != null) {
+      financialController.setCurrentPrice(newPrice);
+    }
+    _isEditingPrice = false;
+    notifyListeners();
+  }
+
+  void editPrice() {
+    _isEditingPrice = true;
+    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _priceFocusNode.requestFocus();
+    });
+  }
+
+  Future<void> pickImages() async {
+    final picker = ImagePicker();
+    final pickedFiles = await picker.pickMultiImage();
+    if (pickedFiles.isNotEmpty) {
+      _images.addAll(pickedFiles);
+      notifyListeners();
+    }
+  }
+
+  void removeImage(int index) {
+    _images.removeAt(index);
+    if (_currentImageIndex >= _images.length && _images.isNotEmpty) {
+      _currentImageIndex = _images.length - 1;
+    }
+    notifyListeners();
+  }
+
+  void onPageChanged(int index) {
+    _currentImageIndex = index;
+    notifyListeners();
+  }
+
+  void toggleCompanyAccountVisibility() {
+    _isCompanyAccountVisible = !_isCompanyAccountVisible;
+    notifyListeners();
+  }
+
+  void togglePersonAccountVisibility() {
+    _isPersonAccountVisible = !_isPersonAccountVisible;
+    notifyListeners();
+  }
+
+  void toggleFinancePanelVisibility() {
+    _isFinancePanelVisible = !_isFinancePanelVisible;
+    _isReportPanelVisible = false;
+    notifyListeners();
+  }
+
+  void toggleReportPanelVisibility() {
+    _isReportPanelVisible = !_isReportPanelVisible;
+    _isFinancePanelVisible = false;
+    notifyListeners();
+  }
+
+  void setSendReportToLender(bool? value) {
+    _sendReportToLender = value ?? false;
+    notifyListeners();
+  }
+
+  void setInviteToSetupAccount(bool? value) {
+    _inviteToSetupAccount = value ?? false;
+    notifyListeners();
+  }
+
+  void hideCompanyAccount() {
+    _isCompanyAccountVisible = false;
+    notifyListeners();
+  }
+
+  void hidePersonAccount() {
+    _isPersonAccountVisible = false;
+    notifyListeners();
+  }
+
+    void hideFinancePanel() {
+    _isFinancePanelVisible = false;
+    notifyListeners();
+  }
+
+  void hideReportPanel() {
+    _isReportPanelVisible = false;
+    notifyListeners();
+  }
+
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _priceFocusNode.dispose();
+    super.dispose();
+  }
+}

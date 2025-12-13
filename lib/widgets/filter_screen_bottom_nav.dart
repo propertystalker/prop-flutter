@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
 
-class FilterScreenBottomNav extends StatelessWidget {
-  final Function(int) onTap;
+class FilterScreenBottomNav extends StatefulWidget {
+  final Function(int)? onTap;
 
-  const FilterScreenBottomNav({super.key, required this.onTap});
+  const FilterScreenBottomNav({super.key, this.onTap});
+
+  @override
+  State<FilterScreenBottomNav> createState() => _FilterScreenBottomNavState();
+}
+
+class _FilterScreenBottomNavState extends State<FilterScreenBottomNav> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (widget.onTap != null) {
+      widget.onTap!(index);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +33,13 @@ class FilterScreenBottomNav extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.share), label: ''),
         BottomNavigationBarItem(icon: Icon(Icons.message), label: ''),
       ],
+      currentIndex: _selectedIndex,
       selectedItemColor: Theme.of(context).colorScheme.primary,
       unselectedItemColor: Colors.grey,
       showSelectedLabels: false,
       showUnselectedLabels: false,
       type: BottomNavigationBarType.fixed,
-      onTap: onTap,
+      onTap: _onItemTapped,
     );
   }
 }

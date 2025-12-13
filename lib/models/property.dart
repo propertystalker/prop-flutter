@@ -1,4 +1,3 @@
-
 class Property {
   final int price;
   final String lat;
@@ -9,10 +8,10 @@ class Property {
   final int sstc;
   final String portal;
   final String postcode;
-  final double? gdv_sold;
-  final double? gdv_onmarket;
-  final double? gdv_area;
-  final double? gdv_final;
+  final double? gdvSold;
+  final double? gdvOnMarket;
+  final double? gdvArea;
+  final double? gdvFinal;
 
   Property({
     required this.price,
@@ -24,10 +23,10 @@ class Property {
     required this.sstc,
     required this.portal,
     required this.postcode,
-    this.gdv_sold,
-    this.gdv_onmarket,
-    this.gdv_area,
-    this.gdv_final,
+    this.gdvSold,
+    this.gdvOnMarket,
+    this.gdvArea,
+    this.gdvFinal,
   });
 
   factory Property.fromJson(Map<String, dynamic> json, {String? postcode}) {
@@ -41,18 +40,10 @@ class Property {
       sstc: json['sstc'],
       portal: json['portal'],
       postcode: postcode ?? '',
-      gdv_sold: json['gdv_sold']?.toDouble(),
-      gdv_onmarket: json['gdv_onmarket']?.toDouble(),
-      gdv_area: json['gdv_area']?.toDouble(),
-      gdv_final: json['gdv_final']?.toDouble(),
+      gdvSold: json['gdv_sold']?.toDouble(),
+      gdvOnMarket: json['gdv_onmarket']?.toDouble(),
+      gdvArea: json['gdv_area']?.toDouble(),
+      gdvFinal: json['gdv_final']?.toDouble(),
     );
   }
-
-  get gdvSold => null;
-
-  get gdvOnmarket => null;
-
-  get gdvArea => null;
-
-  get gdvFinal => null;
 }
