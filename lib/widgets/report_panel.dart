@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/utils/pdf_generator.dart';
+import 'package:provider/provider.dart';
 import '../utils/constants.dart';
 
 class ReportPanel extends StatelessWidget {
-  final bool inviteToSetupAccount;
-  final ValueChanged<bool?> onInviteToSetupAccountChanged;
   final VoidCallback onSend;
   final String address;
   final String price;
@@ -13,8 +13,6 @@ class ReportPanel extends StatelessWidget {
 
   const ReportPanel({
     super.key,
-    required this.inviteToSetupAccount,
-    required this.onInviteToSetupAccountChanged,
     required this.onSend,
     required this.address,
     required this.price,
@@ -23,6 +21,9 @@ class ReportPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Provider.of<SendReportRequestController>(context);
+    final request = controller.request;
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -43,29 +44,35 @@ class ReportPanel extends StatelessWidget {
           ),
           const SizedBox(height: 16.0),
           TextFormField(
+            initialValue: request.from,
             decoration: const InputDecoration(
               labelText: 'From',
               icon: Icon(Icons.person),
             ),
+            onChanged: (value) => controller.setFrom(value),
           ),
           const SizedBox(height: 8.0),
           TextFormField(
+            initialValue: request.to,
             decoration: const InputDecoration(
               labelText: 'To',
               icon: Icon(Icons.person_outline),
             ),
+            onChanged: (value) => controller.setTo(value),
           ),
           const SizedBox(height: 8.0),
           TextFormField(
+            initialValue: request.cc,
             decoration: const InputDecoration(
               labelText: 'CC',
               icon: Icon(Icons.people_outline),
             ),
+            onChanged: (value) => controller.setCc(value),
           ),
           CheckboxListTile(
             title: const Text('Also invite to setup account'),
-            value: inviteToSetupAccount,
-            onChanged: onInviteToSetupAccountChanged,
+            value: request.inviteToSetupAccount,
+            onChanged: (value) => controller.setInviteToSetupAccount(value ?? false),
             controlAffinity: ListTileControlAffinity.leading,
           ),
           const SizedBox(height: 16.0),

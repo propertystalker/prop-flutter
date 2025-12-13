@@ -7,6 +7,7 @@ import 'package:myapp/controllers/finance_proposal_request_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/controllers/person_controller.dart';
 import 'package:myapp/controllers/property_floor_area_filter_controller.dart';
+import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/widgets/company_account.dart';
 import 'package:myapp/widgets/person_account.dart';
 import 'package:provider/provider.dart';
@@ -58,9 +59,12 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => FinanceProposalRequestController(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => SendReportRequestController(),
+        ),
       ],
-      child: Consumer5<PropertyFloorAreaFilterController, FinancialController, CompanyController, PersonController, FinanceProposalRequestController>(
-        builder: (context, controller, financialController, companyController, personController, financeRequestController, child) {
+      child: Consumer6<PropertyFloorAreaFilterController, FinancialController, CompanyController, PersonController, FinanceProposalRequestController, SendReportRequestController>(
+        builder: (context, controller, financialController, companyController, personController, financeRequestController, sendReportRequestController, child) {
           final postcodeController = TextEditingController(text: postcode);
 
           return Scaffold(
@@ -245,8 +249,6 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
                     address: area.address,
                     price: NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(financialController.currentPrice),
                     images: controller.images,
-                    inviteToSetupAccount: controller.inviteToSetupAccount,
-                    onInviteToSetupAccountChanged: controller.setInviteToSetupAccount,
                     onSend: () {
                       controller.hideReportPanel();
                       Navigator.push(
