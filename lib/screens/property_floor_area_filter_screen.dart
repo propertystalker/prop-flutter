@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/controllers/company_controller.dart';
+import 'package:myapp/controllers/finance_proposal_request_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/controllers/person_controller.dart';
 import 'package:myapp/controllers/property_floor_area_filter_controller.dart';
@@ -45,14 +46,21 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final financialController = Provider.of<FinancialController>(context, listen: false);
-    return ChangeNotifierProvider(
-      create: (_) => PropertyFloorAreaFilterController(
-        postcode: postcode,
-        habitableRooms: area.habitableRooms,
-        financialController: financialController,
-      ),
-      child: Consumer4<PropertyFloorAreaFilterController, FinancialController, CompanyController, PersonController>(
-        builder: (context, controller, financialController, companyController, personController, child) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => PropertyFloorAreaFilterController(
+            postcode: postcode,
+            habitableRooms: area.habitableRooms,
+            financialController: financialController,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => FinanceProposalRequestController(),
+        ),
+      ],
+      child: Consumer5<PropertyFloorAreaFilterController, FinancialController, CompanyController, PersonController, FinanceProposalRequestController>(
+        builder: (context, controller, financialController, companyController, personController, financeRequestController, child) {
           final postcodeController = TextEditingController(text: postcode);
 
           return Scaffold(
@@ -230,8 +238,6 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
                 ),
                 if (controller.isFinancePanelVisible)
                   FinancePanel(
-                    sendReportToLender: controller.sendReportToLender,
-                    onSendReportToLenderChanged: controller.setSendReportToLender,
                     onSend: controller.hideFinancePanel,
                   ),
                 if (controller.isReportPanelVisible)

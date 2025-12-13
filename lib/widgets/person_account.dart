@@ -49,6 +49,7 @@ class PersonAccount extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final personController = Provider.of<PersonController>(context);
+    final person = personController.person;
 
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -56,22 +57,22 @@ class PersonAccount extends StatelessWidget {
       child: Column(
         children: [
           TextFormField(
-            initialValue: personController.fullName,
+            initialValue: person.fullName,
             decoration: const InputDecoration(labelText: 'Full Name'),
             onChanged: (name) => personController.setFullName(name),
           ),
           TextFormField(
-            initialValue: personController.email,
+            initialValue: person.email,
             decoration: const InputDecoration(labelText: 'Email'),
             onChanged: (email) => personController.setEmail(email),
           ),
           TextFormField(
-            initialValue: personController.mobile,
+            initialValue: person.mobile,
             decoration: const InputDecoration(labelText: 'Mobile'),
             onChanged: (mobile) => personController.setMobile(mobile),
           ),
           TextFormField(
-            initialValue: personController.linkedin,
+            initialValue: person.linkedin,
             decoration: const InputDecoration(labelText: 'LinkedIn'),
             onChanged: (linkedin) => personController.setLinkedin(linkedin),
           ),

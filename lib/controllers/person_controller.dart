@@ -1,36 +1,36 @@
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:myapp/models/person.dart';
 
 class PersonController with ChangeNotifier {
-  String _fullName = 'Keith Lyons';
-  String _email = 'emilySmith@belvoragency.com';
-  String _mobile = '+44 7123 456 789';
-  String _linkedin = 'Keith Lyons';
+  Person _person = Person(
+    fullName: 'Keith Lyons',
+    email: 'emilySmith@belvoragency.com',
+    mobile: '+44 7123 456 789',
+    linkedin: 'Keith Lyons',
+  );
   XFile? _avatar;
 
-  String get fullName => _fullName;
-  String get email => _email;
-  String get mobile => _mobile;
-  String get linkedin => _linkedin;
+  Person get person => _person;
   XFile? get avatar => _avatar;
 
   void setFullName(String name) {
-    _fullName = name;
+    _person.fullName = name;
     notifyListeners();
   }
 
   void setEmail(String email) {
-    _email = email;
+    _person.email = email;
     notifyListeners();
   }
 
   void setMobile(String mobile) {
-    _mobile = mobile;
+    _person.mobile = mobile;
     notifyListeners();
   }
 
   void setLinkedin(String linkedin) {
-    _linkedin = linkedin;
+    _person.linkedin = linkedin;
     notifyListeners();
   }
 

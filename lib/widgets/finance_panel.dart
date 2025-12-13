@@ -1,21 +1,18 @@
-
 import 'package:flutter/material.dart';
+import 'package:myapp/controllers/finance_proposal_request_controller.dart';
+import 'package:provider/provider.dart';
 import '../utils/constants.dart';
 
 class FinancePanel extends StatelessWidget {
-  final bool sendReportToLender;
-  final ValueChanged<bool?> onSendReportToLenderChanged;
   final VoidCallback onSend;
 
-  const FinancePanel({
-    super.key,
-    required this.sendReportToLender,
-    required this.onSendReportToLenderChanged,
-    required this.onSend,
-  });
+  const FinancePanel({super.key, required this.onSend});
 
   @override
   Widget build(BuildContext context) {
+    final controller = Provider.of<FinanceProposalRequestController>(context);
+    final request = controller.request;
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -36,32 +33,35 @@ class FinancePanel extends StatelessWidget {
           ),
           const SizedBox(height: 16.0),
           TextFormField(
-            initialValue: 'Golden Trust Capital',
+            initialValue: request.companyName,
             decoration: const InputDecoration(
               labelText: 'Company Name',
               icon: Icon(Icons.business),
             ),
+            onChanged: (value) => controller.setCompanyName(value),
           ),
           const SizedBox(height: 8.0),
           TextFormField(
-            initialValue: 'chris@goldentrustcapital.co.uk',
+            initialValue: request.companyEmail,
             decoration: const InputDecoration(
               labelText: 'Company email address',
               icon: Icon(Icons.email),
             ),
+            onChanged: (value) => controller.setCompanyEmail(value),
           ),
           const SizedBox(height: 8.0),
           TextFormField(
-            initialValue: 'devfinance@bigbanklender.com',
+            initialValue: request.lenderEmail,
             decoration: const InputDecoration(
               labelText: 'Bank lender email address',
               icon: Icon(Icons.account_balance),
             ),
+            onChanged: (value) => controller.setLenderEmail(value),
           ),
           CheckboxListTile(
             title: const Text('Also send report to lender'),
-            value: sendReportToLender,
-            onChanged: onSendReportToLenderChanged,
+            value: request.sendToLender,
+            onChanged: (value) => controller.setSendToLender(value ?? false),
             controlAffinity: ListTileControlAffinity.leading,
           ),
           const SizedBox(height: 16.0),
