@@ -1,8 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/screens/login_screen.dart';
+import 'package:myapp/services/mapbox_service.dart';
 import 'package:myapp/services/postcode_service.dart';
 import 'package:myapp/widgets/filter_screen_bottom_nav.dart';
 import 'package:myapp/widgets/property_filter_app_bar.dart';
@@ -22,17 +22,118 @@ class _OpeningScreenState extends State<OpeningScreen> {
   final TextEditingController _limitController = TextEditingController();
   final TextEditingController _radiusController = TextEditingController();
   final PostcodeService _postcodeService = PostcodeService();
+  final MapboxService _mapboxService =
+      MapboxService('pk.eyJ1IjoibGliZXJ0eWFwcHMiLCJhIjoiY21qNWxmaWI2MGJweDNlcXl0YWVuZDNwOCJ9.IoDlZx2i4TkloNRt9P8Q-w');
+  List<String> _suggestions = [];
+  final FocusNode _focusNode = FocusNode();
+  final LayerLink _layerLink = LayerLink();
+  final GlobalKey _searchFieldKey = GlobalKey();
+  OverlayEntry? _overlayEntry;
+
   bool _isGettingLocation = false;
   bool _isGettingPostcode = false;
 
   @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        _showOverlay();
+      } else {
+        _hideOverlay();
+      }
+    });
+    _postcodeController.addListener(_onSearchChanged);
+  }
+
+  @override
   void dispose() {
+    _postcodeController.removeListener(_onSearchChanged);
     _postcodeController.dispose();
     _latitudeController.dispose();
     _longitudeController.dispose();
     _limitController.dispose();
     _radiusController.dispose();
+    _focusNode.dispose();
+    _hideOverlay();
     super.dispose();
+  }
+
+  void _showOverlay() {
+    if (_overlayEntry == null) {
+      _overlayEntry = _createOverlayEntry();
+      Overlay.of(context).insert(_overlayEntry!);
+    }
+  }
+
+  void _hideOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  void _onSearchChanged() async {
+    // A small delay to prevent firing requests on every keystroke
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (_postcodeController.text.isNotEmpty && _focusNode.hasFocus) {
+      final suggestions = await _mapboxService.getAutocompleteSuggestions(_postcodeController.text);
+      if (mounted) {
+        setState(() {
+          _suggestions = suggestions;
+        });
+        _overlayEntry?.markNeedsBuild();
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _suggestions = [];
+        });
+        _overlayEntry?.markNeedsBuild();
+      }
+    }
+  }
+
+  OverlayEntry _createOverlayEntry() {
+    final RenderBox renderBox = _searchFieldKey.currentContext!.findRenderObject() as RenderBox;
+    final size = renderBox.size;
+
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        width: size.width,
+        child: CompositedTransformFollower(
+          link: _layerLink,
+          showWhenUnlinked: false,
+          offset: Offset(0.0, size.height + 5.0),
+          child: Material(
+            elevation: 4.0,
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              itemCount: _suggestions.length,
+              itemBuilder: (context, index) {
+                final suggestion = _suggestions[index];
+                return ListTile(
+                  title: Text(suggestion),
+                  onTap: () {
+                    // THE FIX:
+                    // 1. Stop listening to prevent the race condition.
+                    _postcodeController.removeListener(_onSearchChanged);
+
+                    // 2. Update the controller's text.
+                    _postcodeController.text = suggestion;
+
+                    // 3. Unfocus the field, which will trigger the listener to hide the overlay.
+                    _focusNode.unfocus();
+                    
+                    // 4. Re-add the listener for the next search.
+                    _postcodeController.addListener(_onSearchChanged);
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _searchByPostcode(String postcode) {
@@ -309,25 +410,30 @@ class _OpeningScreenState extends State<OpeningScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: TextFormField(
-                      controller: _postcodeController,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        hintText: 'Address, Postcode, What2Words etc...',
-                        hintStyle:
-                            TextStyle(color: Colors.white.withAlpha(179)),
-                        border: InputBorder.none,
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.search, color: Colors.white),
-                          onPressed: () =>
-                              _searchByPostcode(_postcodeController.text),
+                    child: CompositedTransformTarget(
+                      key: _searchFieldKey, // Assign the key here
+                      link: _layerLink,
+                      child: TextFormField(
+                        focusNode: _focusNode,
+                        controller: _postcodeController,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          hintText: 'Address, Postcode, What2Words etc...',
+                          hintStyle:
+                              TextStyle(color: Colors.white.withAlpha(179)),
+                          border: InputBorder.none,
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.search, color: Colors.white),
+                            onPressed: () =>
+                                _searchByPostcode(_postcodeController.text),
+                          ),
                         ),
+                        onFieldSubmitted: _searchByPostcode,
                       ),
-                      onFieldSubmitted: _searchByPostcode,
                     ),
                   ),
                 ],
