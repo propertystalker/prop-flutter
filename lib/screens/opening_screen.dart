@@ -1,47 +1,200 @@
+
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/screens/login_screen.dart';
+import 'package:myapp/services/postcode_service.dart';
 import 'package:myapp/widgets/filter_screen_bottom_nav.dart';
 import 'package:myapp/widgets/property_filter_app_bar.dart';
 import '../utils/constants.dart';
 
-class OpeningScreen extends StatelessWidget {
+class OpeningScreen extends StatefulWidget {
   const OpeningScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController postcodeController = TextEditingController();
+  State<OpeningScreen> createState() => _OpeningScreenState();
+}
 
-    void searchByPostcode(String postcode) {
-      if (postcode.isNotEmpty) {
-        context.push('/property_floor_area?postcode=$postcode');
+class _OpeningScreenState extends State<OpeningScreen> {
+  final TextEditingController _postcodeController = TextEditingController();
+  final TextEditingController _latitudeController = TextEditingController();
+  final TextEditingController _longitudeController = TextEditingController();
+  final PostcodeService _postcodeService = PostcodeService();
+  bool _isGettingLocation = false;
+  bool _isGettingPostcode = false;
+
+  @override
+  void dispose() {
+    _postcodeController.dispose();
+    _latitudeController.dispose();
+    _longitudeController.dispose();
+    super.dispose();
+  }
+
+  void _searchByPostcode(String postcode) {
+    if (postcode.isNotEmpty) {
+      context.push('/property_floor_area?postcode=$postcode');
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    setState(() {
+      _isGettingLocation = true;
+    });
+
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _showErrorSnackBar('Location permissions are denied');
+          return;
+        }
       }
+
+      if (permission == LocationPermission.deniedForever) {
+        _showPermissionDeniedSnackBar();
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+      setState(() {
+        _latitudeController.text = position.latitude.toString();
+        _longitudeController.text = position.longitude.toString();
+      });
+      _showSuccessSnackBar('Location acquired successfully!');
+    } catch (e) {
+      _showErrorSnackBar('Error getting location: $e');
+    } finally {
+      setState(() {
+        _isGettingLocation = false;
+      });
+    }
+  }
+
+  Future<void> _getPostcode() async {
+    final lat = double.tryParse(_latitudeController.text);
+    final lon = double.tryParse(_longitudeController.text);
+
+    if (lat == null || lon == null) {
+      _showErrorSnackBar('Invalid latitude or longitude format.');
+      return;
     }
 
-    Widget buildGreyedOutField(String label) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Row(
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500),
-              ),
-            ],
+    setState(() {
+      _isGettingPostcode = true;
+    });
+
+    try {
+      final postcodes = await _postcodeService.getPostcodeFromCoordinates(lat, lon);
+
+      if (postcodes != null && postcodes.isNotEmpty) {
+        _showPostcodeDialog(postcodes);
+      } else {
+        _showErrorSnackBar('Could not find any postcodes for the given coordinates.');
+      }
+    } catch (e) {
+      _showErrorSnackBar('Error fetching postcode: $e');
+    } finally {
+      setState(() {
+        _isGettingPostcode = false;
+      });
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _showPermissionDeniedSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Location permissions are permanently denied.'),
+        backgroundColor: Colors.red,
+        action: SnackBarAction(
+          label: 'OPEN SETTINGS',
+          textColor: Colors.white,
+          onPressed: () {
+            Geolocator.openAppSettings();
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showPostcodeDialog(List<String> postcodes) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Found Postcodes'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: postcodes.length,
+            itemBuilder: (context, index) {
+              final postcode = postcodes[index];
+              return ListTile(
+                title: Text(postcode),
+                onTap: () {
+                  _postcodeController.text = postcode;
+                  Navigator.of(context).pop();
+                  _showSuccessSnackBar('Postcode selected: $postcode');
+                },
+              );
+            },
           ),
         ),
-      );
-    }
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
 
+  Widget buildGreyedOutField(String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Row(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: PropertyFilterAppBar(
         onLogoTap: () {},
@@ -81,17 +234,28 @@ class OpeningScreen extends StatelessWidget {
                       SizedBox(
                           width: 24,
                           height: 24,
-                          child: DecoratedBox(decoration: BoxDecoration(shape: BoxShape.circle, border: Border.fromBorderSide(BorderSide(color: trafficRed, width: 2))))),
+                          child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.fromBorderSide(BorderSide(
+                                      color: trafficRed, width: 2))))),
                       SizedBox(height: 8),
                       SizedBox(
                           width: 24,
                           height: 24,
-                          child: DecoratedBox(decoration: BoxDecoration(color: trafficYellow, shape: BoxShape.circle))),
+                          child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                  color: trafficYellow,
+                                  shape: BoxShape.circle))),
                       SizedBox(height: 8),
                       SizedBox(
                           width: 24,
                           height: 24,
-                          child: DecoratedBox(decoration: BoxDecoration(shape: BoxShape.circle, border: Border.fromBorderSide(BorderSide(color: trafficGreen, width: 2))))),
+                          child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.fromBorderSide(BorderSide(
+                                      color: trafficGreen, width: 2))))),
                     ],
                   ),
                   const SizedBox(width: 16),
@@ -142,7 +306,7 @@ class OpeningScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: TextFormField(
-                      controller: postcodeController,
+                      controller: _postcodeController,
                       style: const TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -150,14 +314,16 @@ class OpeningScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(
                         hintText: 'Address, Postcode, What2Words etc...',
-                        hintStyle: TextStyle(color: Colors.white.withAlpha(179)),
+                        hintStyle:
+                            TextStyle(color: Colors.white.withAlpha(179)),
                         border: InputBorder.none,
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.search, color: Colors.white),
-                          onPressed: () => searchByPostcode(postcodeController.text),
+                          onPressed: () =>
+                              _searchByPostcode(_postcodeController.text),
                         ),
                       ),
-                      onFieldSubmitted: searchByPostcode,
+                      onFieldSubmitted: _searchByPostcode,
                     ),
                   ),
                 ],
@@ -171,10 +337,88 @@ class OpeningScreen extends StatelessWidget {
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Text('£266k', style: TextStyle(color: accentColor, fontSize: 24)),
-                      Text('£270k', style: TextStyle(color: accentColor, fontSize: 36, fontWeight: FontWeight.bold)),
-                      Text('£307k', style: TextStyle(color: accentColor, fontSize: 24)),
+                      Text('£266k',
+                          style: TextStyle(color: accentColor, fontSize: 24)),
+                      Text('£270k',
+                          style: TextStyle(
+                              color: accentColor,
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold)),
+                      Text('£307k',
+                          style: TextStyle(color: accentColor, fontSize: 24)),
                     ],
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _isGettingLocation ? null : _getCurrentLocation,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accentColor,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: _isGettingLocation
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text(
+                            'GET LOCATION',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _latitudeController,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Latitude',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _longitudeController,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Longitude',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _isGettingPostcode ? null : _getPostcode,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: _isGettingPostcode
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text(
+                            'GET POSTCODE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
                   ),
                   const SizedBox(height: 16),
                   Container(

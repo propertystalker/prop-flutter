@@ -24,6 +24,8 @@ dependencies:
   printing: ^5.14.2
   google_fonts: ^6.3.3
   sign_in_button: ^4.0.1
+  geolocator: ^14.0.2
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
