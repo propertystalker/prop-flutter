@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/controllers/person_controller.dart';
+import 'package:myapp/controllers/user_controller.dart';
+import 'package:myapp/models/person.dart';
 import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -57,11 +58,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                final personController = context.read<PersonController>();
-                personController.setEmail(_emailController.text);
-                personController.setCompany(_companyController.text);
-                // In a real app, you would also save the password securely
-                // and handle the registration logic.
+                final userController = context.read<UserController>();
+                final newUser = Person(
+                  email: _emailController.text,
+                  company: _companyController.text,
+                  password: _passwordController.text,
+                );
+                userController.addUser(newUser);
                 Navigator.of(context)
                     .popUntil((route) => route.isFirst);
               },

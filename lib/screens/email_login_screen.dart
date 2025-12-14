@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/controllers/person_controller.dart';
+import 'package:myapp/controllers/user_controller.dart';
 import 'package:myapp/screens/register_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -49,11 +50,22 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
+                final userController = context.read<UserController>();
                 final personController = context.read<PersonController>();
-                personController.setEmail(_emailController.text);
-                // In a real app, you would authenticate here.
-                Navigator.of(context)
-                    .popUntil((route) => route.isFirst);
+                final user = userController.getUserByEmail(_emailController.text);
+
+                if (user != null && user.password == _passwordController.text) {
+                  personController.setEmail(user.email);
+                  personController.setCompany(user.company);
+                  Navigator.of(context)
+                      .popUntil((route) => route.isFirst);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Invalid email or password'),
+                    ),
+                  );
+                }
               },
               child: const Text('Login'),
             ),
