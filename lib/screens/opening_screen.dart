@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myapp/screens/login_screen.dart';
 import 'package:myapp/widgets/filter_screen_bottom_nav.dart';
 import 'package:myapp/widgets/property_filter_app_bar.dart';
 import '../utils/constants.dart';
@@ -45,6 +46,12 @@ class OpeningScreen extends StatelessWidget {
       appBar: PropertyFilterAppBar(
         onLogoTap: () {},
         onAvatarTap: () {},
+        onSettingsTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        },
       ),
       body: SingleChildScrollView(
         child: Column(

@@ -9,9 +9,10 @@ import 'package:provider/provider.dart';
 class PropertyFilterAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onLogoTap;
   final VoidCallback onAvatarTap;
+  final VoidCallback? onSettingsTap;
 
   const PropertyFilterAppBar(
-      {super.key, required this.onLogoTap, required this.onAvatarTap});
+      {super.key, required this.onLogoTap, required this.onAvatarTap, this.onSettingsTap});
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +56,7 @@ class PropertyFilterAppBar extends StatelessWidget implements PreferredSizeWidge
         },
       ),
       actions: [
-        IconButton(icon: const Icon(Icons.settings), onPressed: () {}),
+        IconButton(icon: const Icon(Icons.settings), onPressed: onSettingsTap ?? () {}),
         Padding(
           padding: const EdgeInsets.only(right: 16.0),
           child: GestureDetector(

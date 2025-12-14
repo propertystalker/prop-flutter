@@ -34,6 +34,11 @@ class PersonController with ChangeNotifier {
     notifyListeners();
   }
 
+  void setCompany(String company) {
+    _person.company = company;
+    notifyListeners();
+  }
+
   void setAvatar(XFile? avatar) {
     _avatar = avatar;
     notifyListeners();
