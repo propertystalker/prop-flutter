@@ -30,7 +30,7 @@ class PdfGenerator {
               padding: const pw.EdgeInsets.only(bottom: 10),
               child: pw.Image(imageProvider),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

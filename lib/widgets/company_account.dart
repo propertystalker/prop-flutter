@@ -16,6 +16,7 @@ class CompanyAccount extends StatelessWidget {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      if (!context.mounted) return;
       Provider.of<CompanyController>(context, listen: false)
           .setCompanyLogo(pickedFile);
     }
@@ -109,8 +110,8 @@ class CompanyAccount extends StatelessWidget {
             const SizedBox(height: 24.0),
             Center(
               child: ElevatedButton(
-                child: const Text('Save'),
                 onPressed: onSave,
+                child: const Text('Save'),
               ),
             ),
           ],

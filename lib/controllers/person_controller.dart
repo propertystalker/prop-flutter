@@ -3,7 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:myapp/models/person.dart';
 
 class PersonController with ChangeNotifier {
-  Person _person = Person(
+  final Person _person = Person(
     fullName: 'Keith Lyons',
     email: 'emilySmith@belvoragency.com',
     mobile: '+44 7123 456 789',

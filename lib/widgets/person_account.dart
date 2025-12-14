@@ -14,6 +14,7 @@ class PersonAccount extends StatelessWidget {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      if (!context.mounted) return;
       Provider.of<PersonController>(context, listen: false).setAvatar(pickedFile);
     }
   }
