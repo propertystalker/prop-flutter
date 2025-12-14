@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/screens/login_screen.dart';
-import 'package:myapp/services/mapbox_service.dart';
 import 'package:myapp/services/postcode_service.dart';
 import 'package:myapp/widgets/filter_screen_bottom_nav.dart';
 import 'package:myapp/widgets/property_filter_app_bar.dart';
@@ -22,8 +21,6 @@ class _OpeningScreenState extends State<OpeningScreen> {
   final TextEditingController _limitController = TextEditingController();
   final TextEditingController _radiusController = TextEditingController();
   final PostcodeService _postcodeService = PostcodeService();
-  final MapboxService _mapboxService =
-      MapboxService('pk.eyJ1IjoibGliZXJ0eWFwcHMiLCJhIjoiY21qNWxmaWI2MGJweDNlcXl0YWVuZDNwOCJ9.IoDlZx2i4TkloNRt9P8Q-w');
   List<String> _suggestions = [];
   final FocusNode _focusNode = FocusNode();
   final LayerLink _layerLink = LayerLink();
@@ -75,7 +72,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
     // A small delay to prevent firing requests on every keystroke
     await Future.delayed(const Duration(milliseconds: 300));
     if (_postcodeController.text.isNotEmpty && _focusNode.hasFocus) {
-      final suggestions = await _mapboxService.getAutocompleteSuggestions(_postcodeController.text);
+      final suggestions = await _postcodeService.getAutocompleteSuggestions(_postcodeController.text);
       if (mounted) {
         setState(() {
           _suggestions = suggestions;
