@@ -11,6 +11,19 @@ class UserController with ChangeNotifier {
     notifyListeners();
   }
 
+  void removeUser(Person user) {
+    _users.remove(user);
+    notifyListeners();
+  }
+
+  void updateUser(Person oldUser, Person newUser) {
+    final index = _users.indexOf(oldUser);
+    if (index != -1) {
+      _users[index] = newUser;
+      notifyListeners();
+    }
+  }
+
   Person? getUserByEmail(String email) {
     try {
       return _users.firstWhere((user) => user.email == email);

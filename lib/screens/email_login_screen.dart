@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/controllers/person_controller.dart';
 import 'package:myapp/controllers/user_controller.dart';
+import 'package:myapp/screens/admin_screen.dart';
 import 'package:myapp/screens/register_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -70,14 +71,29 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
               child: const Text('Login'),
             ),
             const SizedBox(height: 16),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const RegisterScreen()),
-                );
-              },
-              child: const Text('Register'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                    );
+                  },
+                  child: const Text('Register'),
+                ),
+                const SizedBox(width: 16),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AdminScreen()),
+                    );
+                  },
+                  child: const Text('Admin'),
+                ),
+              ],
             ),
           ],
         ),
