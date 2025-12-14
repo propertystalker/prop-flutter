@@ -16,18 +16,14 @@ This project is a Flutter web application designed to interact with the Property
 
 ## Current Plan
 
-### Objective: Create an interactive latitude/longitude to postcode converter.
+### Objective: Add limit and radius fields to the postcode converter.
 
-1.  **Add Input Fields**: Add "Latitude" and "Longitude" text fields to the `OpeningScreen`.
-2.  **Update "Get Location" Button**: The "Get Location" button will now populate these fields with the device's current coordinates.
-3.  **Add "Get Postcode" Button**: Add a new button to trigger the postcode conversion.
-4.  **Implement "Get Postcode" Logic**: This button will take the values from the text fields, use the `PostcodeService` to get the postcode, and display the result in a pop-up dialog.
+1.  **Add Input Fields**: Add "Limit" and "Radius" text fields to the `OpeningScreen` below the longitude field.
 
-### Previous Plan: Add "Get Location" feature.
+### Previous Plan: Create an interactive latitude/longitude to postcode converter.
 
-1.  **Add `geolocator` Dependency**: Added the `geolocator` package for location services.
-2.  **Modify `OpeningScreen`**:
-    *   Converted `OpeningScreen` to a `StatefulWidget`.
-    *   Added a "Get Location" button.
-    *   Implemented logic to request permissions, fetch location, and convert to a postcode.
+1.  **Add Input Fields**: Added "Latitude" and "Longitude" text fields to the `OpeningScreen`.
+2.  **Update "Get Location" Button**: The "Get Location" button now populates these fields with the device's current coordinates.
+3.  **Add "Get Postcode" Button**: Added a new button to trigger the postcode conversion.
+4.  **Implement "Get Postcode" Logic**: This button takes the values from the text fields, uses the `PostcodeService` to get the postcode, and displays the result in a pop-up dialog.
 

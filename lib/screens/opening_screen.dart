@@ -19,6 +19,8 @@ class _OpeningScreenState extends State<OpeningScreen> {
   final TextEditingController _postcodeController = TextEditingController();
   final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
+  final TextEditingController _limitController = TextEditingController();
+  final TextEditingController _radiusController = TextEditingController();
   final PostcodeService _postcodeService = PostcodeService();
   bool _isGettingLocation = false;
   bool _isGettingPostcode = false;
@@ -28,6 +30,8 @@ class _OpeningScreenState extends State<OpeningScreen> {
     _postcodeController.dispose();
     _latitudeController.dispose();
     _longitudeController.dispose();
+    _limitController.dispose();
+    _radiusController.dispose();
     super.dispose();
   }
 
@@ -391,6 +395,24 @@ class _OpeningScreenState extends State<OpeningScreen> {
                         const TextInputType.numberWithOptions(decimal: true),
                     decoration: const InputDecoration(
                       labelText: 'Longitude',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _limitController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Limit',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _radiusController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Radius',
                       border: OutlineInputBorder(),
                     ),
                   ),
