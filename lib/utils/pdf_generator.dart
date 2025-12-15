@@ -69,9 +69,13 @@ class PdfGenerator {
     );
 
     final Uint8List pdfBytes = await pdf.save();
+
+    // Sanitize the address to create a valid filename
+    final sanitizedAddress = address.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+
     await Printing.sharePdf(
       bytes: pdfBytes,
-      filename: 'report.pdf',
+      filename: 'Property_Stalker_${sanitizedAddress}.pdf',
     );
   }
 }
