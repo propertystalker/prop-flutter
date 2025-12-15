@@ -1,0 +1,289 @@
+
+{
+  "info": {
+    "_postman_id": "a8c5d1b2-2e5f-4f7b-9c6d-3e8a7f6b9a2c",
+    "name": "Property Stalker App APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "PropertyData API",
+      "item": [
+        {
+          "name": "Get Properties by Postcode",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://propertydata.co.uk/api/v1/properties?key={{api_key}}&postcode={{postcode}}",
+              "protocol": "https",
+              "host": [
+                "propertydata",
+                "co",
+                "uk"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "properties"
+              ],
+              "query": [
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "postcode",
+                  "value": "{{postcode}}"
+                }
+              ]
+            },
+            "description": "Fetches a list of properties for a given postcode."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Historical Valuation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://propertydata.co.uk/api/v1/valuation-historical?key={{api_key}}&postcode={{postcode}}&current_price=500000&historic_value_year=2015&historic_value_month=January",
+              "protocol": "https",
+              "host": [
+                "propertydata",
+                "co",
+                "uk"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "valuation-historical"
+              ],
+              "query": [
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "postcode",
+                  "value": "{{postcode}}"
+                },
+                {
+                  "key": "current_price",
+                  "value": "500000"
+                },
+                {
+                  "key": "historic_value_year",
+                  "value": "2015"
+                },
+                {
+                  "key": "historic_value_month",
+                  "value": "January"
+                }
+              ]
+            },
+            "description": "Calculates a historical valuation based on a current price."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Postcodes.io",
+      "item": [
+        {
+          "name": "Autocomplete Postcode",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://api.postcodes.io/postcodes/{{postcode_partial}}/autocomplete",
+              "protocol": "https",
+              "host": [
+                "api",
+                "postcodes",
+                "io"
+              ],
+              "path": [
+                "postcodes",
+                "{{postcode_partial}}",
+                "autocomplete"
+              ]
+            },
+            "description": "Returns a list of matching postcodes for a partial postcode input."
+          },
+          "response": []
+        },
+        {
+          "name": "Reverse Geocode (Coords to Postcode)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://api.postcodes.io/postcodes?lon={{longitude}}&lat={{latitude}}",
+              "protocol": "https",
+              "host": [
+                "api",
+                "postcodes",
+                "io"
+              ],
+              "path": [
+                "postcodes"
+              ],
+              "query": [
+                {
+                  "key": "lon",
+                  "value": "{{longitude}}"
+                },
+                {
+                  "key": "lat",
+                  "value": "{{latitude}}"
+                }
+              ]
+            },
+            "description": "Finds the nearest postcodes for a given latitude and longitude."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "EPC Open Data",
+      "item": [
+        {
+          "name": "Search EPC by Postcode",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Basic {{epc_token}}",
+                "type": "text",
+                "description": "Base64 encoded credentials (email:api_key)"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://epc.opendatacommunities.org/api/v1/domestic/search?postcode={{postcode}}&size=100",
+              "protocol": "https",
+              "host": [
+                "epc",
+                "opendatacommunities",
+                "org"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "domestic",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "postcode",
+                  "value": "{{postcode}}"
+                },
+                {
+                  "key": "size",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Searches for Energy Performance Certificates by postcode. The token is a Base64 encoding of your registered email and API key in the format `email:key`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "UK Land Registry - Price Paid Data",
+      "item": [
+        {
+          "name": "Get Price Paid by Postcode",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://landregistry.data.gov.uk/data/ppd/transaction-data.json?property_type=any&postcode={{postcode}}&_page=1&_limit=100",
+              "protocol": "https",
+              "host": [
+                "landregistry",
+                "data",
+                "gov",
+                "uk"
+              ],
+              "path": [
+                "data",
+                "ppd",
+                "transaction-data.json"
+              ],
+              "query": [
+                {
+                  "key": "property_type",
+                  "value": "any"
+                },
+                {
+                  "key": "postcode",
+                  "value": "{{postcode}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Fetches property transaction data for a specific postcode."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+        "name": "Mapbox API",
+        "item": [
+            {
+                "name": "Get Static Map Image",
+                "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                        "raw": "https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s-home+000000({{longitude}},{{latitude}})/{{longitude}},{{latitude}},15,0/600x400?access_token={{mapbox_token}}",
+                        "protocol": "https",
+                        "host": [
+                            "api",
+                            "mapbox",
+                            "com"
+                        ],
+                        "path": [
+                            "styles",
+                            "v1",
+                            "mapbox",
+                            "streets-v11",
+                            "static",
+                            "pin-s-home+000000({{longitude}},{{latitude}})",
+                            "{{longitude}},{{latitude}},15,0",
+                            "600x400"
+                        ],
+                        "query": [
+                            {
+                                "key": "access_token",
+                                "value": "{{mapbox_token}}"
+                            }
+                        ]
+                    },
+                    "description": "Generates a static map image for a given set of coordinates."
+                },
+                "response": []
+            }
+        ]
+    }
+  ]
+}
