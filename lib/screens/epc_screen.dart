@@ -3,6 +3,33 @@ import 'package:myapp/controllers/epc_controller.dart';
 import 'package:myapp/models/epc_model.dart';
 import 'package:provider/provider.dart';
 
+// Helper function for natural sorting of addresses
+int _compareAddresses(String addressA, String addressB) {
+  final re = RegExp(r'(\d+)|(\D+)');
+  final matchesA = re.allMatches(addressA);
+  final matchesB = re.allMatches(addressB);
+
+  final numMatches = matchesA.length < matchesB.length ? matchesA.length : matchesB.length;
+
+  for (int i = 0; i < numMatches; i++) {
+    final matchA = matchesA.elementAt(i).group(0)!;
+    final matchB = matchesB.elementAt(i).group(0)!;
+
+    final isNumA = int.tryParse(matchA) != null;
+    final isNumB = int.tryParse(matchB) != null;
+
+    if (isNumA && isNumB) {
+      final comp = int.parse(matchA).compareTo(int.parse(matchB));
+      if (comp != 0) return comp;
+    } else {
+      final comp = matchA.compareTo(matchB);
+      if (comp != 0) return comp;
+    }
+  }
+
+  return matchesA.length.compareTo(matchesB.length);
+}
+
 class EpcScreen extends StatefulWidget {
   final String postcode;
 
@@ -38,10 +65,14 @@ class _EpcScreenState extends State<EpcScreen> {
           } else if (controller.epcData.isEmpty) {
             return const Center(child: Text('No EPC data found.'));
           } else {
+            // Sort the data by address using natural sorting
+            final sortedData = List<EpcModel>.from(controller.epcData);
+            sortedData.sort((a, b) => _compareAddresses(a.address, b.address));
+
             return ListView.builder(
-              itemCount: controller.epcData.length,
+              itemCount: sortedData.length,
               itemBuilder: (context, index) {
-                final EpcModel epc = controller.epcData[index];
+                final EpcModel epc = sortedData[index];
                 return Card(
                   margin: const EdgeInsets.all(8.0),
                   child: ListTile(

@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 const String apiKey = 'ZVUJN5EMPV';
 const String googleMapsApiKey = 'AIzaSyAWH-995ieT0FufCX62LnacYVTM830P_yY';
 
+// EPC API
+const String epcBaseUrl = 'https://epc.opendatacommunities.org/api/v1/domestic';
+const String epcEmail = 'steve@libertyapps.co.uk';
+const String epcApiKey = '3ce43250e7f8017c83fa5ce440916be1f404669f';
+
 const Color primaryColor = Color(0xFF317CD3);
 const Color accentColor = Color(0xFF94529C);
 const Color editablePriceColor = Color(0xFF94ABBE);
