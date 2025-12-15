@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/screens/login_screen.dart';
+import 'package:myapp/screens/price_paid_screen.dart';
 import 'package:myapp/services/postcode_service.dart';
 import 'package:myapp/widgets/filter_screen_bottom_nav.dart';
 import 'package:myapp/widgets/property_filter_app_bar.dart';
@@ -544,6 +545,35 @@ class _OpeningScreenState extends State<OpeningScreen> {
                               letterSpacing: 1.5,
                             ),
                           ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_postcodeController.text.isNotEmpty) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PricePaidScreen(
+                              postcode: _postcodeController.text,
+                            ),
+                          ),
+                        );
+                      } else {
+                        _showErrorSnackBar('Please enter a postcode');
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accentColor,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text(
+                      'GET PRICE',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Container(

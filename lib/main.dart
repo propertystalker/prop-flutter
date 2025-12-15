@@ -7,6 +7,7 @@ import 'package:myapp/controllers/person_controller.dart';
 import 'package:myapp/controllers/user_controller.dart';
 import 'package:myapp/firebase_options.dart';
 import 'package:myapp/screens/opening_screen.dart';
+import 'package:myapp/screens/price_paid_screen.dart';
 import 'package:myapp/screens/property_floor_area_screen.dart'
     show PropertyFloorAreaScreen;
 import 'package:myapp/utils/constants.dart';
@@ -43,6 +44,13 @@ final GoRouter _router = GoRouter(
           builder: (BuildContext context, GoRouterState state) {
             final String postcode = state.uri.queryParameters['postcode']!;
             return PropertyFloorAreaScreen(postcode: postcode, apiKey: apiKey);
+          },
+        ),
+        GoRoute(
+          path: 'price_paid',
+          builder: (BuildContext context, GoRouterState state) {
+            final String postcode = state.uri.queryParameters['postcode']!;
+            return PricePaidScreen(postcode: postcode);
           },
         ),
       ],
