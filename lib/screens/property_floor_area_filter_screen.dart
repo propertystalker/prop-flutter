@@ -221,10 +221,12 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
                               ),
                               const Divider(height: 32),
                               DevelopmentScenarios(
-                                isFlat: area.address.toLowerCase().contains('flat'),
                                 selectedScenario: financialController.houseScenarios[financialController.selectedScenarioIndex],
                                 onPrevious: () => financialController.previousScenario(area.address.toLowerCase().contains('flat')),
                                 onNext: () => financialController.nextScenario(area.address.toLowerCase().contains('flat')),
+                                gdv: financialController.gdv,
+                                totalCost: financialController.totalCost,
+                                uplift: financialController.uplift,
                               ),
                               const Divider(height: 32),
                               FinancialSummary(
@@ -249,6 +251,9 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
                     address: area.address,
                     price: NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(financialController.currentPrice),
                     images: controller.images,
+                    gdv: financialController.gdv,
+                    totalCost: financialController.totalCost,
+                    uplift: financialController.uplift,
                     onSend: () {
                       controller.hideReportPanel();
                       Navigator.push(

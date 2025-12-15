@@ -10,6 +10,9 @@ class ReportPanel extends StatelessWidget {
   final String address;
   final String price;
   final List<XFile> images;
+  final double gdv;
+  final double totalCost;
+  final double uplift;
 
   const ReportPanel({
     super.key,
@@ -17,6 +20,9 @@ class ReportPanel extends StatelessWidget {
     required this.address,
     required this.price,
     required this.images,
+    required this.gdv,
+    required this.totalCost,
+    required this.uplift,
   });
 
   @override
@@ -83,7 +89,14 @@ class ReportPanel extends StatelessWidget {
                 foregroundColor: Colors.white,
               ),
               onPressed: () {
-                PdfGenerator.generateAndOpenPdf(address, price, images);
+                PdfGenerator.generateAndOpenPdf(
+                  address,
+                  price,
+                  images,
+                  gdv,
+                  totalCost,
+                  uplift,
+                );
                 onSend();
               },
               child: const Text('Send'),

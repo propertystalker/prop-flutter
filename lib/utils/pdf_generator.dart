@@ -1,12 +1,19 @@
 import 'dart:typed_data';
 
 import 'package:image_picker/image_picker.dart';
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 class PdfGenerator {
   static Future<void> generateAndOpenPdf(
-      String address, String price, List<XFile> images) async {
+    String address,
+    String price,
+    List<XFile> images,
+    double gdv,
+    double totalCost,
+    double uplift,
+  ) async {
     final pdf = pw.Document();
 
     final imageProviders = <pw.MemoryImage>[];
@@ -15,15 +22,41 @@ class PdfGenerator {
       imageProviders.add(pw.MemoryImage(bytes));
     }
 
-    // Fetch a Unicode-compatible font using the printing package's helper
     final font = await PdfGoogleFonts.notoSansRegular();
+
+    final chart = pw.Chart(
+      title: pw.Text(
+        'GDV: £${(gdv / 1000).toStringAsFixed(0)}K',
+        style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+      ),
+      grid: pw.PieGrid(),
+      datasets: [
+        pw.PieDataSet(
+          legend: 'Uplift',
+          value: uplift,
+          color: PdfColors.blue,
+          legendStyle: pw.TextStyle(font: font),
+        ),
+        pw.PieDataSet(
+          legend: 'Total Cost',
+          value: totalCost,
+          color: PdfColors.grey500,
+          legendStyle: pw.TextStyle(font: font),
+        ),
+      ],
+    );
 
     pdf.addPage(
       pw.MultiPage(
         theme: pw.ThemeData.withFont(base: font),
         build: (context) => [
           pw.Header(text: address, level: 1),
-          pw.Text(price, style: pw.TextStyle(fontSize: 24)),
+          pw.Text(price, style: const pw.TextStyle(fontSize: 24)),
+          pw.SizedBox(height: 20),
+          pw.SizedBox(
+            height: 250,
+            child: chart,
+          ),
           pw.SizedBox(height: 20),
           ...imageProviders.map((imageProvider) {
             return pw.Padding(
