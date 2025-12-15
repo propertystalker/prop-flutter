@@ -576,6 +576,28 @@ class _OpeningScreenState extends State<OpeningScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_postcodeController.text.isNotEmpty) {
+                        context.push('/epc?postcode=${_postcodeController.text}');
+                      } else {
+                        _showErrorSnackBar('Please enter a postcode');
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accentColor,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text(
+                      'GET EPC',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   Container(
                     color: accentColor,
                     padding: const EdgeInsets.symmetric(vertical: 8),

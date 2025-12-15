@@ -2,10 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/controllers/company_controller.dart';
+import 'package:myapp/controllers/epc_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/controllers/person_controller.dart';
 import 'package:myapp/controllers/user_controller.dart';
 import 'package:myapp/firebase_options.dart';
+import 'package:myapp/screens/epc_screen.dart';
 import 'package:myapp/screens/opening_screen.dart';
 import 'package:myapp/screens/price_paid_screen.dart';
 import 'package:myapp/screens/property_floor_area_screen.dart'
@@ -25,6 +27,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => CompanyController()),
         ChangeNotifierProvider(create: (context) => PersonController()),
         ChangeNotifierProvider(create: (context) => UserController()),
+        ChangeNotifierProvider(create: (context) => EpcController()),
       ],
       child: const MyApp(),
     ),
@@ -51,6 +54,13 @@ final GoRouter _router = GoRouter(
           builder: (BuildContext context, GoRouterState state) {
             final String postcode = state.uri.queryParameters['postcode']!;
             return PricePaidScreen(postcode: postcode);
+          },
+        ),
+        GoRoute(
+          path: 'epc',
+          builder: (BuildContext context, GoRouterState state) {
+            final String postcode = state.uri.queryParameters['postcode']!;
+            return EpcScreen(postcode: postcode);
           },
         ),
       ],
