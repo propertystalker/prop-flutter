@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 const String apiKey = 'ZVUJN5EMPV';
+const String googleMapsApiKey = 'AIzaSyAWH-995ieT0FufCX62LnacYVTM830P_yY';
 
 const Color primaryColor = Color(0xFF317CD3);
 const Color accentColor = Color(0xFF94529C);
