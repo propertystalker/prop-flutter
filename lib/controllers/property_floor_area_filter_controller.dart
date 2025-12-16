@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/controllers/financial_controller.dart';
+import 'package:myapp/utils/constants.dart';
 
 class PropertyFloorAreaFilterController with ChangeNotifier {
   final String postcode;
@@ -18,21 +22,6 @@ class PropertyFloorAreaFilterController with ChangeNotifier {
 
   int _currentImageIndex = 0;
   int get currentImageIndex => _currentImageIndex;
-
-  int? _historicalPrice;
-  int? get historicalPrice => _historicalPrice;
-
-  bool _isLoadingHistoricalPrice = false;
-  bool get isLoadingHistoricalPrice => _isLoadingHistoricalPrice;
-
-  String? _historicalPriceError;
-  String? get historicalPriceError => _historicalPriceError;
-
-  bool _isLoadingPrice = true;
-  bool get isLoadingPrice => _isLoadingPrice;
-
-  String? _currentPriceError;
-  String? get currentPriceError => _currentPriceError;
 
   bool _isEditingPrice = false;
   bool get isEditingPrice => _isEditingPrice;
@@ -57,6 +46,30 @@ class PropertyFloorAreaFilterController with ChangeNotifier {
 
   bool _isPersonAccountVisible = false;
   bool get isPersonAccountVisible => _isPersonAccountVisible;
+
+Future<void> fetchEstimatedPrice() async {
+    final url = Uri.parse(
+        'https://api.propertydata.co.uk/prices?key=$apiKey&postcode=$postcode&bedrooms=$habitableRooms');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success' && data['data']['average'] != null) {
+          final estimatedPrice = (data['data']['average'] as int).toDouble();
+          financialController.setCurrentPrice(estimatedPrice);
+        } else {
+          financialController.setCurrentPrice(0.0);
+        }
+      } else {
+        financialController.setCurrentPrice(0.0);
+      }
+    } catch (e) {
+      financialController.setCurrentPrice(0.0);
+    } finally {
+      notifyListeners();
+    }
+  }
 
   void updatePrice(String value) {
     final newPrice = double.tryParse(value);

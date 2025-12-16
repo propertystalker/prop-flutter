@@ -38,11 +38,18 @@ class PropertyFloorAreaFilterScreen extends StatefulWidget {
 class _PropertyFloorAreaFilterScreenState
     extends State<PropertyFloorAreaFilterScreen> {
   late PricePaidController _pricePaidController;
+  late PropertyFloorAreaFilterController _propertyFloorAreaFilterController;
 
   @override
   void initState() {
     super.initState();
     _pricePaidController = Provider.of<PricePaidController>(context, listen: false);
+    final financialController = Provider.of<FinancialController>(context, listen: false);
+    _propertyFloorAreaFilterController = PropertyFloorAreaFilterController(
+        postcode: widget.postcode,
+        habitableRooms: widget.area.habitableRooms,
+        financialController: financialController);
+        
     _pricePaidController.addListener(_onPriceHistoryChanged);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -57,16 +64,15 @@ class _PropertyFloorAreaFilterScreenState
   }
 
   void _onPriceHistoryChanged() {
-    if (!_pricePaidController.isLoading) {
+    if (mounted && !_pricePaidController.isLoading) {
       if (_pricePaidController.priceHistory.isNotEmpty) {
         final latestPrice =
             _pricePaidController.priceHistory.first.amount.toDouble();
         Provider.of<FinancialController>(context, listen: false)
             .setCurrentPrice(latestPrice);
       } else {
-        // If there's no price history, set the current price to 0, allowing manual entry.
-        Provider.of<FinancialController>(context, listen: false)
-            .setCurrentPrice(0.0);
+        // If there's no price history, fetch an estimated price as a fallback.
+        _propertyFloorAreaFilterController.fetchEstimatedPrice();
       }
     }
   }
@@ -87,12 +93,8 @@ class _PropertyFloorAreaFilterScreenState
         Provider.of<FinancialController>(context, listen: false);
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => PropertyFloorAreaFilterController(
-            postcode: widget.postcode,
-            habitableRooms: widget.area.habitableRooms,
-            financialController: financialController,
-          ),
+        ChangeNotifierProvider.value(
+          value: _propertyFloorAreaFilterController,
         ),
         ChangeNotifierProvider(
           create: (_) => FinanceProposalRequestController(),
@@ -144,12 +146,6 @@ class _PropertyFloorAreaFilterScreenState
                                 ),
                               ),
                               const SizedBox(width: 16),
-                              TrafficLightIndicator(
-                                isLoading:
-                                    controller.isLoadingHistoricalPrice,
-                                price: controller.historicalPrice,
-                                error: controller.historicalPriceError,
-                              ),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: GestureDetector(
