@@ -50,18 +50,19 @@ class PricePaidController with ChangeNotifier {
       // 1. Fetch all transactions for the postcode.
       final allTransactions = await _pricePaidService.getPricePaidData(postcode);
 
-      // 2. Filter the results in-memory by Primary Addressable Object Name (paon).
+      // 2. Filter the results in-memory.
       if (houseNumber.isNotEmpty) {
-        _priceHistory = allTransactions
-            .where((item) =>
-                item.paon?.toUpperCase().trim() == houseNumber.toUpperCase().trim())
-            .toList();
+        final searchNumber = houseNumber.toUpperCase().trim();
+        _priceHistory = allTransactions.where((item) {
+          final paon = item.paon?.toUpperCase().trim() ?? '';
+          final saon = item.saon?.toUpperCase().trim() ?? '';
+          return paon.contains(searchNumber) || saon.contains(searchNumber);
+        }).toList();
       } else {
         // If no house number is given, we return the whole list for the postcode.
         _priceHistory = allTransactions;
       }
       
-      // Corrected the logging statement here
       developer.log('Found ${_priceHistory.length} transactions for house $houseNumber at postcode $postcode.');
 
       if (_priceHistory.isEmpty && houseNumber.isNotEmpty) {

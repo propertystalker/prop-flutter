@@ -87,19 +87,8 @@ class PropertyHeader extends StatelessWidget {
     final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
     final priceController = TextEditingController();
 
-    if (controller.isLoadingPrice) {
-      return const CircularProgressIndicator(color: Colors.white);
-    }
-
-    if (controller.currentPriceError != null) {
-      return const Text(
-        'Error: Please try again',
-        style: TextStyle(color: Colors.white, fontSize: 18),
-      );
-    }
-
     if (controller.isEditingPrice) {
-      priceController.text = financialController.currentPrice.toStringAsFixed(0);
+      priceController.text = financialController.currentPrice?.toStringAsFixed(0) ?? '';
       return Container(
         color: editablePriceColor,
         width: 200,
@@ -118,11 +107,21 @@ class PropertyHeader extends StatelessWidget {
           onTapOutside: (_) => controller.updatePrice(priceController.text),
         ),
       );
-    } else {
+    } 
+
+    if (financialController.currentPrice == null) {
+        return const SizedBox(
+          height: 30,
+          width: 30,
+          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3,),
+        );
+    }
+    
+    else {
       return GestureDetector(
         onTap: () {
           controller.editPrice();
-          priceController.text = financialController.currentPrice.toStringAsFixed(0);
+          priceController.text = financialController.currentPrice!.toStringAsFixed(0);
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -131,7 +130,7 @@ class PropertyHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Text(
-            currencyFormat.format(financialController.currentPrice),
+            currencyFormat.format(financialController.currentPrice!),
             style: const TextStyle(
                 fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
           ),

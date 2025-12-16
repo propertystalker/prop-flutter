@@ -1,10 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/controllers/financial_controller.dart';
-import 'package:myapp/utils/constants.dart';
 
 class PropertyFloorAreaFilterController with ChangeNotifier {
   final String postcode;
@@ -12,10 +8,7 @@ class PropertyFloorAreaFilterController with ChangeNotifier {
   final FinancialController financialController;
 
   PropertyFloorAreaFilterController(
-      {required this.postcode, required this.habitableRooms, required this.financialController}) {
-    _fetchCurrentPrice();
-    _fetchHistoricalPrice();
-  }
+      {required this.postcode, required this.habitableRooms, required this.financialController});
 
   final PageController _pageController = PageController();
   PageController get pageController => _pageController;
@@ -64,45 +57,6 @@ class PropertyFloorAreaFilterController with ChangeNotifier {
 
   bool _isPersonAccountVisible = false;
   bool get isPersonAccountVisible => _isPersonAccountVisible;
-
-  Future<void> _fetchCurrentPrice() async {
-    _isLoadingPrice = true;
-    _currentPriceError = null;
-    notifyListeners();
-
-    final url = Uri.parse(
-        'https://api.propertydata.co.uk/prices?key=$apiKey&postcode=$postcode&bedrooms=$habitableRooms');
-
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['status'] == 'success') {
-          final currentPrice = (data['data']['average'] as int).toDouble();
-          financialController.setCurrentPrice(currentPrice);
-        } else {
-          throw Exception('Failed to load price data: ${data['error']}');
-        }
-      } else {
-        throw Exception('Failed to load price data');
-      }
-    } catch (e) {
-      _currentPriceError = e.toString();
-    } finally {
-      _isLoadingPrice = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> _fetchHistoricalPrice() async {
-    _isLoadingHistoricalPrice = true;
-    _historicalPriceError = null;
-    notifyListeners();
-    await Future.delayed(const Duration(seconds: 2));
-    _isLoadingHistoricalPrice = false;
-    _historicalPrice = 153000;
-    notifyListeners();
-  }
 
   void updatePrice(String value) {
     final newPrice = double.tryParse(value);

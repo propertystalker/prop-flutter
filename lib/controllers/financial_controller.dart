@@ -5,7 +5,7 @@ class FinancialController with ChangeNotifier {
   double _totalCost = 0;
   double _uplift = 0;
   double _roi = 0;
-  double _currentPrice = 0;
+  double? _currentPrice;
 
   int _selectedScenarioIndex = 0;
   final List<String> _houseScenarios = [
@@ -27,17 +27,19 @@ class FinancialController with ChangeNotifier {
   double get totalCost => _totalCost;
   double get uplift => _uplift;
   double get roi => _roi;
-  double get currentPrice => _currentPrice;
+  double? get currentPrice => _currentPrice;
   int get selectedScenarioIndex => _selectedScenarioIndex;
   List<String> get houseScenarios => _houseScenarios;
 
   void calculateFinancials(bool isFlat) {
+    if (_currentPrice == null) return;
+
     final selectedScenario = isFlat
         ? 'Flat Refurbishment Only (1–3 bed)'
         : _houseScenarios[_selectedScenarioIndex];
     final developmentCost = _developmentCosts[selectedScenario] ?? 0;
 
-    _totalCost = _currentPrice + developmentCost;
+    _totalCost = _currentPrice! + developmentCost;
     // Estimated GDV: for demo purposes, let's assume GDV is total cost + 25% uplift
     _gdv = _totalCost * 1.25;
     _uplift = _gdv - _totalCost;

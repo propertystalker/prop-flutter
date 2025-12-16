@@ -37,12 +37,38 @@ class PropertyFloorAreaFilterScreen extends StatefulWidget {
 
 class _PropertyFloorAreaFilterScreenState
     extends State<PropertyFloorAreaFilterScreen> {
+  late PricePaidController _pricePaidController;
+
   @override
   void initState() {
     super.initState();
+    _pricePaidController = Provider.of<PricePaidController>(context, listen: false);
+    _pricePaidController.addListener(_onPriceHistoryChanged);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchPriceHistory();
     });
+  }
+
+  @override
+  void dispose() {
+    _pricePaidController.removeListener(_onPriceHistoryChanged);
+    super.dispose();
+  }
+
+  void _onPriceHistoryChanged() {
+    if (!_pricePaidController.isLoading) {
+      if (_pricePaidController.priceHistory.isNotEmpty) {
+        final latestPrice =
+            _pricePaidController.priceHistory.first.amount.toDouble();
+        Provider.of<FinancialController>(context, listen: false)
+            .setCurrentPrice(latestPrice);
+      } else {
+        // If there's no price history, set the current price to 0, allowing manual entry.
+        Provider.of<FinancialController>(context, listen: false)
+            .setCurrentPrice(0.0);
+      }
+    }
   }
 
   void _fetchPriceHistory() {
@@ -50,9 +76,7 @@ class _PropertyFloorAreaFilterScreenState
     final houseNumber = addressParts.isNotEmpty ? addressParts.first.trim() : '';
 
     if (houseNumber.isNotEmpty) {
-      final pricePaidController =
-          Provider.of<PricePaidController>(context, listen: false);
-      pricePaidController.fetchPricePaidHistoryForProperty(
+      _pricePaidController.fetchPricePaidHistoryForProperty(
           widget.postcode, houseNumber);
     }
   }
@@ -88,7 +112,10 @@ class _PropertyFloorAreaFilterScreenState
               children: [
                 if (controller.isCompanyAccountVisible)
                   CompanyAccount(
-                    onCompanyChanged: (name) => Provider.of<CompanyController>(context, listen: false).setCompanyName(name),
+                    onCompanyChanged: (name) => Provider.of<CompanyController>(
+                            context,
+                            listen: false)
+                        .setCompanyName(name),
                     onSave: controller.hideCompanyAccount,
                   ),
                 if (controller.isPersonAccountVisible)
@@ -108,15 +135,18 @@ class _PropertyFloorAreaFilterScreenState
                                 child: Container(
                                   height: 200,
                                   decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.purple, width: 2),
+                                    border: Border.all(
+                                        color: Colors.purple, width: 2),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
-                                  child: Image.asset('assets/images/gemini.png'),
+                                  child:
+                                      Image.asset('assets/images/gemini.png'),
                                 ),
                               ),
                               const SizedBox(width: 16),
                               TrafficLightIndicator(
-                                isLoading: controller.isLoadingHistoricalPrice,
+                                isLoading:
+                                    controller.isLoadingHistoricalPrice,
                                 price: controller.historicalPrice,
                                 error: controller.historicalPriceError,
                               ),
@@ -127,7 +157,8 @@ class _PropertyFloorAreaFilterScreenState
                                   child: Container(
                                     height: 200,
                                     decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.blue, width: 2),
+                                      border: Border.all(
+                                          color: Colors.blue, width: 2),
                                       borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     child: const ImageGallery(),
@@ -154,18 +185,28 @@ class _PropertyFloorAreaFilterScreenState
                               ),
                               const Divider(height: 32),
                               Consumer<FinancialController>(
-                                builder: (context, financialController, child) => DevelopmentScenarios(
-                                  selectedScenario: financialController.houseScenarios[financialController.selectedScenarioIndex],
-                                  onPrevious: () => financialController.previousScenario(widget.area.address.toLowerCase().contains('flat')),
-                                  onNext: () => financialController.nextScenario(widget.area.address.toLowerCase().contains('flat')),
+                                builder: (context, financialController, child) =>
+                                    DevelopmentScenarios(
+                                  selectedScenario: financialController
+                                          .houseScenarios[
+                                      financialController.selectedScenarioIndex],
+                                  onPrevious: () => financialController
+                                      .previousScenario(widget.area.address
+                                          .toLowerCase()
+                                          .contains('flat')),
+                                  onNext: () => financialController.nextScenario(
+                                      widget.area.address
+                                          .toLowerCase()
+                                          .contains('flat')),
                                   gdv: financialController.gdv,
                                   totalCost: financialController.totalCost,
                                   uplift: financialController.uplift,
                                 ),
                               ),
                               const Divider(height: 32),
-                               Consumer<FinancialController>(
-                                builder: (context, financialController, child) => FinancialSummary(
+                              Consumer<FinancialController>(
+                                builder: (context, financialController, child) =>
+                                    FinancialSummary(
                                   gdv: financialController.gdv,
                                   totalCost: financialController.totalCost,
                                   uplift: financialController.uplift,
@@ -189,7 +230,8 @@ class _PropertyFloorAreaFilterScreenState
                   Consumer<FinancialController>(
                     builder: (context, financialController, child) => ReportPanel(
                       address: widget.area.address,
-                      price: NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(financialController.currentPrice),
+                      price: NumberFormat.compactSimpleCurrency(locale: 'en_GB')
+                          .format(financialController.currentPrice ?? 0),
                       images: controller.images,
                       gdv: financialController.gdv,
                       totalCost: financialController.totalCost,

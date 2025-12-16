@@ -66,4 +66,6 @@ class PricePaidModel {
       paon: paon,
     );
   }
+
+  get saon => null;
 }
