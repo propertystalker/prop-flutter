@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 // Helper function for natural sorting of addresses
 int _compareAddresses(String addressA, String addressB) {
-  final re = RegExp(r'(\d+)|(\D+)');
+  final re = RegExp(r'(\\d+)|(\\D+)');
   final matchesA = re.allMatches(addressA);
   final matchesB = re.allMatches(addressB);
 
@@ -45,7 +45,6 @@ class _EpcScreenState extends State<EpcScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // We fetch all data for the postcode. The filtering happens in the build method.
       Provider.of<EpcController>(context, listen: false)
           .fetchEpcData(widget.postcode);
     });
@@ -69,26 +68,20 @@ class _EpcScreenState extends State<EpcScreen> {
             return const Center(child: Text('No EPC data found for this postcode.'));
           }
 
-          // 1. Start with the full, sorted list of properties
+          // 1. Initial sort of all data by address
           final sortedData = List<EpcModel>.from(controller.epcData);
           sortedData.sort((a, b) => _compareAddresses(a.address, b.address));
 
-          // 2. Determine the final list to display
-          List<EpcModel> displayData;
-
-          // If a house number is provided and is not empty, filter the list.
+          // 2. Filter by house number if provided
+          List<EpcModel> filteredData;
           if (widget.houseNumber != null && widget.houseNumber!.trim().isNotEmpty) {
             final houseNumberQuery = widget.houseNumber!.trim();
-            
-            // Use a robust RegExp to match the house number at the start of the address.
-            // '\b' creates a word boundary to prevent partial matches (e.g., '2' matching '12').
-            displayData = sortedData.where((epc) {
+            filteredData = sortedData.where((epc) {
               return RegExp(r'^' + RegExp.escape(houseNumberQuery) + r'\b', caseSensitive: false)
                   .hasMatch(epc.address);
             }).toList();
 
-            // If after filtering, no properties match, show a specific message.
-            if (displayData.isEmpty) {
+            if (filteredData.isEmpty) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -100,11 +93,29 @@ class _EpcScreenState extends State<EpcScreen> {
               );
             }
           } else {
-            // If no house number is provided, display all properties.
-            displayData = sortedData;
+            filteredData = sortedData;
           }
 
-          // 3. Build the list view with the final 'displayData'.
+          // 3. De-duplicate: Keep only the most recent EPC record for each address
+          final Map<String, EpcModel> latestEpcByAddress = {};
+          for (final epc in filteredData) {
+            // THE FIX: Remove ALL commas and extra whitespace to correctly group addresses.
+            final normalizedAddress = epc.address
+                .replaceAll(',', '')
+                .replaceAll(RegExp(r'\\s+'), ' ')
+                .trim();
+
+            if (!latestEpcByAddress.containsKey(normalizedAddress) ||
+                epc.lodgementDate.compareTo(latestEpcByAddress[normalizedAddress]!.lodgementDate) > 0) {
+              latestEpcByAddress[normalizedAddress] = epc;
+            }
+          }
+
+          final displayData = latestEpcByAddress.values.toList();
+          // Re-sort the final list after de-duplication
+          displayData.sort((a, b) => _compareAddresses(a.address, b.address));
+
+          // 4. Build the final list view
           return ListView.builder(
             itemCount: displayData.length,
             itemBuilder: (context, index) {
