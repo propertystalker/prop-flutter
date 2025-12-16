@@ -1,35 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:myapp/models/price_paid_model.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/controllers/price_paid_controller.dart';
-
-// Helper function for natural sorting of addresses
-int _compareAddresses(String addressA, String addressB) {
-  final re = RegExp(r'(\d+)|(\D+)');
-  final matchesA = re.allMatches(addressA);
-  final matchesB = re.allMatches(addressB);
-
-  final numMatches = matchesA.length < matchesB.length ? matchesA.length : matchesB.length;
-
-  for (int i = 0; i < numMatches; i++) {
-    final matchA = matchesA.elementAt(i).group(0)!;
-    final matchB = matchesB.elementAt(i).group(0)!;
-
-    final isNumA = int.tryParse(matchA) != null;
-    final isNumB = int.tryParse(matchB) != null;
-
-    if (isNumA && isNumB) {
-      final comp = int.parse(matchA).compareTo(int.parse(matchB));
-      if (comp != 0) return comp;
-    } else {
-      final comp = matchA.compareTo(matchB);
-      if (comp != 0) return comp;
-    }
-  }
-
-  return matchesA.length.compareTo(matchesB.length);
-}
 
 class PricePaidScreen extends StatelessWidget {
   final String postcode;
@@ -53,14 +25,23 @@ class PricePaidScreen extends StatelessWidget {
             } else if (controller.pricePaidData.isEmpty) {
               return const Center(child: Text('No price paid data found.'));
             } else {
-              // Sort the data by address using natural sorting
-              final sortedData = List<PricePaidModel>.from(controller.pricePaidData);
-              sortedData.sort((a, b) => _compareAddresses(a.fullAddress, b.fullAddress));
+              // 1. Find the most recent transaction in the entire dataset for the postcode.
+              final mostRecentTransaction = controller.pricePaidData.reduce((a, b) => a.transactionDate.isAfter(b.transactionDate) ? a : b);
+              final targetAddress = mostRecentTransaction.fullAddress;
 
+              // 2. Filter the list to get all transactions for that single property.
+              final propertyHistory = controller.pricePaidData
+                  .where((p) => p.fullAddress == targetAddress)
+                  .toList();
+
+              // 3. Sort the history for that property by date (most recent first).
+              propertyHistory.sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
+
+              // 4. Display the results.
               return ListView.builder(
-                itemCount: sortedData.length,
+                itemCount: propertyHistory.length,
                 itemBuilder: (context, index) {
-                  final data = sortedData[index];
+                  final data = propertyHistory[index];
                   return Card(
                     margin: const EdgeInsets.all(8.0),
                     child: ListTile(
