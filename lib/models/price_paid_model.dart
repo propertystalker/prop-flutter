@@ -6,6 +6,8 @@ class PricePaidModel {
   final DateTime transactionDate;
   final String propertyType;
   final String fullAddress;
+  // 1. Add the paon field to the model
+  final String? paon;
 
   PricePaidModel({
     required this.transactionId,
@@ -13,6 +15,8 @@ class PricePaidModel {
     required this.transactionDate,
     required this.propertyType,
     required this.fullAddress,
+    // 2. Add paon to the constructor
+    required this.paon,
   });
 
   static String _getPropertyType(String? typeUrl) {
@@ -40,12 +44,10 @@ class PricePaidModel {
         .where((part) => part.isNotEmpty)
         .toList();
 
-    // Correctly parse the date format e.g. "Thu, 03 Jul 2025"
     final transactionDateString = json['transactionDate'] as String?;
     DateTime transactionDate;
     if (transactionDateString != null) {
       try {
-        // Use DateFormat for non-standard date formats
         transactionDate = DateFormat("E, d MMM yyyy").parse(transactionDateString);
       } catch (e) {
         transactionDate = DateTime.parse('1970-01-01');
@@ -60,6 +62,8 @@ class PricePaidModel {
       transactionDate: transactionDate,
       propertyType: _getPropertyType(json['propertyType']?['_about'] as String?),
       fullAddress: addressParts.join(', '),
+      // 3. Pass the parsed paon value to the constructor
+      paon: paon,
     );
   }
 }

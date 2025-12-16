@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/screens/login_screen.dart';
-import 'package:myapp/screens/price_paid_screen.dart';
 import 'package:myapp/services/postcode_service.dart';
 import 'package:myapp/widgets/filter_screen_bottom_nav.dart';
 import 'package:myapp/widgets/property_filter_app_bar.dart';
@@ -114,17 +113,9 @@ class _OpeningScreenState extends State<OpeningScreen> {
                 return ListTile(
                   title: Text(suggestion),
                   onTap: () {
-                    // THE FIX:
-                    // 1. Stop listening to prevent the race condition.
                     _postcodeController.removeListener(_onSearchChanged);
-
-                    // 2. Update the controller's text.
                     _postcodeController.text = suggestion;
-
-                    // 3. Unfocus the field, which will trigger the listener to hide the overlay.
                     _focusNode.unfocus();
-                    
-                    // 4. Re-add the listener for the next search.
                     _postcodeController.addListener(_onSearchChanged);
                   },
                 );
@@ -136,9 +127,11 @@ class _OpeningScreenState extends State<OpeningScreen> {
     );
   }
 
-  void _searchByPostcode(String postcode) {
+  void _searchByPostcode() {
+    final postcode = _postcodeController.text;
+    final houseNumber = _houseNumberController.text;
     if (postcode.isNotEmpty) {
-      context.push('/property_floor_area?postcode=$postcode');
+      context.push('/price_paid?postcode=$postcode&houseNumber=$houseNumber');
     }
   }
 
@@ -413,7 +406,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: CompositedTransformTarget(
-                      key: _searchFieldKey, // Assign the key here
+                      key: _searchFieldKey,
                       link: _layerLink,
                       child: Row(
                         children: [
@@ -452,11 +445,10 @@ class _OpeningScreenState extends State<OpeningScreen> {
                                 border: InputBorder.none,
                                 suffixIcon: IconButton(
                                   icon: const Icon(Icons.search, color: Colors.white),
-                                  onPressed: () =>
-                                      _searchByPostcode(_postcodeController.text),
+                                  onPressed: _searchByPostcode,
                                 ),
                               ),
-                              onFieldSubmitted: _searchByPostcode,
+                              onFieldSubmitted: (_) => _searchByPostcode(),
                             ),
                           ),
                         ],
@@ -474,15 +466,9 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Text('£266k',
-                          style: TextStyle(color: accentColor, fontSize: 24)),
-                      Text('£270k',
-                          style: TextStyle(
-                              color: accentColor,
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold)),
-                      Text('£307k',
-                          style: TextStyle(color: accentColor, fontSize: 24)),
+                      Text('£266k', style: TextStyle(color: accentColor, fontSize: 24)),
+                      Text('£270k', style: TextStyle(color: accentColor, fontSize: 36, fontWeight: FontWeight.bold)),
+                      Text('£307k', style: TextStyle(color: accentColor, fontSize: 24)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -498,8 +484,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
                         : const Text(
@@ -514,8 +499,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _latitudeController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     decoration: const InputDecoration(
                       labelText: 'Latitude',
                       border: OutlineInputBorder(),
@@ -524,8 +508,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _longitudeController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     decoration: const InputDecoration(
                       labelText: 'Longitude',
                       border: OutlineInputBorder(),
@@ -562,8 +545,8 @@ class _OpeningScreenState extends State<OpeningScreen> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              // Corrected typo here
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
                         : const Text(
@@ -579,14 +562,9 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   ElevatedButton(
                     onPressed: () {
                       if (_postcodeController.text.isNotEmpty) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PricePaidScreen(
-                              postcode: _postcodeController.text,
-                            ),
-                          ),
-                        );
+                        final postcode = _postcodeController.text;
+                        final houseNumber = _houseNumberController.text;
+                        context.push('/price_paid?postcode=$postcode&houseNumber=$houseNumber');
                       } else {
                         _showErrorSnackBar('Please enter a postcode');
                       }

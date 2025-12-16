@@ -5,6 +5,7 @@ import 'package:myapp/controllers/company_controller.dart';
 import 'package:myapp/controllers/epc_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/controllers/person_controller.dart';
+import 'package:myapp/controllers/price_paid_controller.dart';
 import 'package:myapp/controllers/user_controller.dart';
 import 'package:myapp/firebase_options.dart';
 import 'package:myapp/screens/epc_screen.dart';
@@ -28,6 +29,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => PersonController()),
         ChangeNotifierProvider(create: (context) => UserController()),
         ChangeNotifierProvider(create: (context) => EpcController()),
+        ChangeNotifierProvider(create: (context) => PricePaidController()),
       ],
       child: const MyApp(),
     ),
@@ -53,7 +55,11 @@ final GoRouter _router = GoRouter(
           path: 'price_paid',
           builder: (BuildContext context, GoRouterState state) {
             final String postcode = state.uri.queryParameters['postcode']!;
-            return PricePaidScreen(postcode: postcode);
+            // This line ensures that if 'houseNumber' is missing from the URL,
+            // a non-null empty string is passed to the screen, satisfying the
+            // `required` constraint.
+            final String houseNumber = state.uri.queryParameters['houseNumber'] ?? '';
+            return PricePaidScreen(postcode: postcode, houseNumber: houseNumber);
           },
         ),
         GoRoute(
@@ -79,6 +85,7 @@ class MyApp extends StatelessWidget {
       title: 'Property Data',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
     );
   }
