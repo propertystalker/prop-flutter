@@ -127,11 +127,11 @@ class _OpeningScreenState extends State<OpeningScreen> {
     );
   }
 
+  // This is the original search function, now correctly restored.
   void _searchByPostcode() {
     final postcode = _postcodeController.text;
-    final houseNumber = _houseNumberController.text;
     if (postcode.isNotEmpty) {
-      context.push('/price_paid?postcode=$postcode&houseNumber=$houseNumber');
+      context.push('/property_floor_area?postcode=$postcode');
     }
   }
 
@@ -545,7 +545,6 @@ class _OpeningScreenState extends State<OpeningScreen> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              // Corrected typo here
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
