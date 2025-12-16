@@ -6,6 +6,7 @@ import 'package:myapp/controllers/company_controller.dart';
 import 'package:myapp/controllers/finance_proposal_request_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/controllers/person_controller.dart';
+import 'package:myapp/controllers/price_paid_controller.dart';
 import 'package:myapp/controllers/property_floor_area_filter_controller.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/widgets/company_account.dart';
@@ -23,12 +24,36 @@ import '../utils/constants.dart';
 import 'property_floor_area_screen.dart';
 import 'report_sent_screen.dart';
 
-class PropertyFloorAreaFilterScreen extends StatelessWidget {
+class PropertyFloorAreaFilterScreen extends StatefulWidget {
   final KnownFloorArea area;
   final String postcode;
 
   const PropertyFloorAreaFilterScreen(
       {super.key, required this.area, required this.postcode});
+
+  @override
+  State<PropertyFloorAreaFilterScreen> createState() => _PropertyFloorAreaFilterScreenState();
+}
+
+class _PropertyFloorAreaFilterScreenState extends State<PropertyFloorAreaFilterScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchPriceHistory();
+    });
+  }
+
+  void _fetchPriceHistory() {
+    final addressParts = widget.area.address.split(',');
+    final houseNumber = addressParts.isNotEmpty ? addressParts.first.trim() : '';
+
+    if (houseNumber.isNotEmpty) {
+      final pricePaidController = Provider.of<PricePaidController>(context, listen: false);
+      pricePaidController.fetchPricePaidHistoryForProperty(widget.postcode, houseNumber);
+    }
+  }
 
   void _searchByPostcode(BuildContext context, String postcode) {
     if (postcode.isNotEmpty) {
@@ -37,7 +62,7 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
         MaterialPageRoute(
           builder: (context) => PropertyFloorAreaScreen(
             postcode: postcode,
-            apiKey: apiKey, // Assuming apiKey is accessible here
+            apiKey: apiKey,
           ),
         ),
       );
@@ -51,8 +76,8 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (_) => PropertyFloorAreaFilterController(
-            postcode: postcode,
-            habitableRooms: area.habitableRooms,
+            postcode: widget.postcode,
+            habitableRooms: widget.area.habitableRooms,
             financialController: financialController,
           ),
         ),
@@ -65,7 +90,7 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
       ],
       child: Consumer6<PropertyFloorAreaFilterController, FinancialController, CompanyController, PersonController, FinanceProposalRequestController, SendReportRequestController>(
         builder: (context, controller, financialController, companyController, personController, financeRequestController, sendReportRequestController, child) {
-          final postcodeController = TextEditingController(text: postcode);
+          final postcodeController = TextEditingController(text: widget.postcode);
 
           return Scaffold(
             appBar: PropertyFilterAppBar(
@@ -137,7 +162,7 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
                                 child: Column(
                                   children: [
                                     Text(
-                                      area.address,
+                                      widget.area.address,
                                       style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 18,
@@ -192,7 +217,7 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .titleMedium),
-                                            Text(area.squareFeet.toString(),
+                                            Text(widget.area.squareFeet.toString(),
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .titleMedium),
@@ -208,7 +233,7 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .titleMedium),
-                                            Text(area.habitableRooms.toString(),
+                                            Text(widget.area.habitableRooms.toString(),
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .titleMedium),
@@ -222,8 +247,8 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
                               const Divider(height: 32),
                               DevelopmentScenarios(
                                 selectedScenario: financialController.houseScenarios[financialController.selectedScenarioIndex],
-                                onPrevious: () => financialController.previousScenario(area.address.toLowerCase().contains('flat')),
-                                onNext: () => financialController.nextScenario(area.address.toLowerCase().contains('flat')),
+                                onPrevious: () => financialController.previousScenario(widget.area.address.toLowerCase().contains('flat')),
+                                onNext: () => financialController.nextScenario(widget.area.address.toLowerCase().contains('flat')),
                                 gdv: financialController.gdv,
                                 totalCost: financialController.totalCost,
                                 uplift: financialController.uplift,
@@ -235,6 +260,8 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
                                 uplift: financialController.uplift,
                                 roi: financialController.roi,
                               ),
+                              const Divider(height: 32),
+                              _buildPriceHistorySection(), // New section added here
                             ],
                           ),
                         ),
@@ -248,7 +275,7 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
                   ),
                 if (controller.isReportPanelVisible)
                   ReportPanel(
-                    address: area.address,
+                    address: widget.area.address,
                     price: NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(financialController.currentPrice),
                     images: controller.images,
                     gdv: financialController.gdv,
@@ -378,7 +405,7 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
       priceController.text = financialController.currentPrice.toStringAsFixed(0);
       return Container(
         color: editablePriceColor,
-        width: 200, // Give it a specific width
+        width: 200,
         child: TextField(
           controller: priceController,
           focusNode: controller.priceFocusNode,
@@ -415,4 +442,76 @@ class PropertyFloorAreaFilterScreen extends StatelessWidget {
       );
     }
   }
+
+  Widget _buildPriceHistorySection() {
+    return Consumer<PricePaidController>(
+      builder: (context, controller, child) {
+        if (controller.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (controller.error != null) {
+          return Card(
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Price History',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    controller.error!,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        if (controller.priceHistory.isEmpty) {
+          return const SizedBox.shrink(); // Don't show the section if there's no history
+        }
+
+        return Card(
+          elevation: 4,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Price History',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 16),
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: controller.priceHistory.length,
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final item = controller.priceHistory[index];
+                    final formattedDate = DateFormat.yMMMMd().format(item.transactionDate);
+                    final formattedPrice = NumberFormat.simpleCurrency(locale: 'en_GB').format(item.amount);
+                    return ListTile(
+                      title: Text(formattedPrice, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text('Sold on $formattedDate'),
+                      trailing: Text(item.propertyType, style: Theme.of(context).textTheme.bodySmall),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
 }
