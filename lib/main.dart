@@ -60,7 +60,8 @@ final GoRouter _router = GoRouter(
           path: 'epc',
           builder: (BuildContext context, GoRouterState state) {
             final String postcode = state.uri.queryParameters['postcode']!;
-            return EpcScreen(postcode: postcode);
+            final String? houseNumber = state.uri.queryParameters['houseNumber'];
+            return EpcScreen(postcode: postcode, houseNumber: houseNumber);
           },
         ),
       ],

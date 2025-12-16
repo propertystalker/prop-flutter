@@ -5,6 +5,8 @@ import 'package:myapp/utils/constants.dart';
 import 'dart:developer' as developer;
 
 class EpcService {
+  // The service only needs to fetch all data for a postcode.
+  // The filtering will be handled by the UI (EpcScreen).
   Future<List<EpcModel>> getEpcData(String postcode) async {
     final url = '$epcBaseUrl/search?postcode=${postcode.replaceAll(' ', '+')}&size=100';
     

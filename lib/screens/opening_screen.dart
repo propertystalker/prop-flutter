@@ -17,6 +17,7 @@ class OpeningScreen extends StatefulWidget {
 
 class _OpeningScreenState extends State<OpeningScreen> {
   final TextEditingController _postcodeController = TextEditingController();
+  final TextEditingController _houseNumberController = TextEditingController();
   final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
   final TextEditingController _limitController = TextEditingController();
@@ -48,6 +49,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
   void dispose() {
     _postcodeController.removeListener(_onSearchChanged);
     _postcodeController.dispose();
+    _houseNumberController.dispose();
     _latitudeController.dispose();
     _longitudeController.dispose();
     _limitController.dispose();
@@ -413,26 +415,51 @@ class _OpeningScreenState extends State<OpeningScreen> {
                     child: CompositedTransformTarget(
                       key: _searchFieldKey, // Assign the key here
                       link: _layerLink,
-                      child: TextFormField(
-                        focusNode: _focusNode,
-                        controller: _postcodeController,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                        decoration: InputDecoration(
-                          hintText: 'Address, Postcode, What2Words etc...',
-                          hintStyle:
-                              TextStyle(color: Colors.white.withAlpha(179)),
-                          border: InputBorder.none,
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.search, color: Colors.white),
-                            onPressed: () =>
-                                _searchByPostcode(_postcodeController.text),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              controller: _houseNumberController,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                              decoration: InputDecoration(
+                                hintText: 'House No.',
+                                hintStyle:
+                                    TextStyle(color: Colors.white.withAlpha(179)),
+                                border: InputBorder.none,
+                              ),
+                            ),
                           ),
-                        ),
-                        onFieldSubmitted: _searchByPostcode,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: 5,
+                            child: TextFormField(
+                              focusNode: _focusNode,
+                              controller: _postcodeController,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                              decoration: InputDecoration(
+                                hintText: 'Address, Postcode, What2Words etc...',
+                                hintStyle:
+                                    TextStyle(color: Colors.white.withAlpha(179)),
+                                border: InputBorder.none,
+                                suffixIcon: IconButton(
+                                  icon: const Icon(Icons.search, color: Colors.white),
+                                  onPressed: () =>
+                                      _searchByPostcode(_postcodeController.text),
+                                ),
+                              ),
+                              onFieldSubmitted: _searchByPostcode,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -581,7 +608,8 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   ElevatedButton(
                     onPressed: () {
                       if (_postcodeController.text.isNotEmpty) {
-                        context.push('/epc?postcode=${_postcodeController.text}');
+                        final houseNumber = _houseNumberController.text;
+                        context.push('/epc?postcode=${_postcodeController.text}&houseNumber=$houseNumber');
                       } else {
                         _showErrorSnackBar('Please enter a postcode');
                       }

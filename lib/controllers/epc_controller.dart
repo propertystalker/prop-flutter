@@ -12,6 +12,7 @@ class EpcController with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  // The controller only needs to fetch all data for a postcode.
   Future<void> fetchEpcData(String postcode) async {
     _isLoading = true;
     _error = null;

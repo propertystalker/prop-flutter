@@ -32,8 +32,9 @@ int _compareAddresses(String addressA, String addressB) {
 
 class EpcScreen extends StatefulWidget {
   final String postcode;
+  final String? houseNumber;
 
-  const EpcScreen({super.key, required this.postcode});
+  const EpcScreen({super.key, required this.postcode, this.houseNumber});
 
   @override
   State<EpcScreen> createState() => _EpcScreenState();
@@ -43,8 +44,8 @@ class _EpcScreenState extends State<EpcScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch EPC data when the screen is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // We fetch all data for the postcode. The filtering happens in the build method.
       Provider.of<EpcController>(context, listen: false)
           .fetchEpcData(widget.postcode);
     });
@@ -60,41 +61,75 @@ class _EpcScreenState extends State<EpcScreen> {
         builder: (context, controller, child) {
           if (controller.isLoading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (controller.error != null) {
-            return Center(child: Text('Error: ${controller.error}'));
-          } else if (controller.epcData.isEmpty) {
-            return const Center(child: Text('No EPC data found.'));
-          } else {
-            // Sort the data by address using natural sorting
-            final sortedData = List<EpcModel>.from(controller.epcData);
-            sortedData.sort((a, b) => _compareAddresses(a.address, b.address));
-
-            return ListView.builder(
-              itemCount: sortedData.length,
-              itemBuilder: (context, index) {
-                final EpcModel epc = sortedData[index];
-                return Card(
-                  margin: const EdgeInsets.all(8.0),
-                  child: ListTile(
-                    title: Text(epc.address),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Postcode: ${epc.postcode}'),
-                        Text('Current Rating: ${epc.currentEnergyRating}'),
-                        Text('Potential Rating: ${epc.potentialEnergyRating}'),
-                        Text('Property Type: ${epc.propertyType}'),
-                        Text('Built Form: ${epc.builtForm}'),
-                        Text('Main Fuel: ${epc.mainFuel}'),
-                        Text('Total Floor Area: ${epc.totalFloorArea} sq m'),
-                        Text('Lodgement Date: ${epc.lodgementDate}'),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
           }
+          if (controller.error != null) {
+            return Center(child: Text('Error: ${controller.error}'));
+          }
+          if (controller.epcData.isEmpty) {
+            return const Center(child: Text('No EPC data found for this postcode.'));
+          }
+
+          // 1. Start with the full, sorted list of properties
+          final sortedData = List<EpcModel>.from(controller.epcData);
+          sortedData.sort((a, b) => _compareAddresses(a.address, b.address));
+
+          // 2. Determine the final list to display
+          List<EpcModel> displayData;
+
+          // If a house number is provided and is not empty, filter the list.
+          if (widget.houseNumber != null && widget.houseNumber!.trim().isNotEmpty) {
+            final houseNumberQuery = widget.houseNumber!.trim();
+            
+            // Use a robust RegExp to match the house number at the start of the address.
+            // '\b' creates a word boundary to prevent partial matches (e.g., '2' matching '12').
+            displayData = sortedData.where((epc) {
+              return RegExp(r'^' + RegExp.escape(houseNumberQuery) + r'\b', caseSensitive: false)
+                  .hasMatch(epc.address);
+            }).toList();
+
+            // If after filtering, no properties match, show a specific message.
+            if (displayData.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'No property matching house number "$houseNumberQuery" was found at this postcode.',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            }
+          } else {
+            // If no house number is provided, display all properties.
+            displayData = sortedData;
+          }
+
+          // 3. Build the list view with the final 'displayData'.
+          return ListView.builder(
+            itemCount: displayData.length,
+            itemBuilder: (context, index) {
+              final EpcModel epc = displayData[index];
+              return Card(
+                margin: const EdgeInsets.all(8.0),
+                child: ListTile(
+                  title: Text(epc.address),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Postcode: ${epc.postcode}'),
+                      Text('Current Rating: ${epc.currentEnergyRating}'),
+                      Text('Potential Rating: ${epc.potentialEnergyRating}'),
+                      Text('Property Type: ${epc.propertyType}'),
+                      Text('Built Form: ${epc.builtForm}'),
+                      Text('Main Fuel: ${epc.mainFuel}'),
+                      Text('Total Floor Area: ${epc.totalFloorArea} sq m'),
+                      Text('Lodgement Date: ${epc.lodgementDate}'),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
         },
       ),
     );
