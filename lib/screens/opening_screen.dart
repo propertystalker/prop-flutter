@@ -17,6 +17,7 @@ class OpeningScreen extends StatefulWidget {
 class _OpeningScreenState extends State<OpeningScreen> {
   final TextEditingController _postcodeController = TextEditingController();
   final TextEditingController _houseNumberController = TextEditingController();
+  final TextEditingController _flatNumberController = TextEditingController();
   final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
   final TextEditingController _limitController = TextEditingController();
@@ -49,6 +50,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
     _postcodeController.removeListener(_onSearchChanged);
     _postcodeController.dispose();
     _houseNumberController.dispose();
+    _flatNumberController.dispose();
     _latitudeController.dispose();
     _longitudeController.dispose();
     _limitController.dispose();
@@ -429,6 +431,24 @@ class _OpeningScreenState extends State<OpeningScreen> {
                           ),
                           const SizedBox(width: 8),
                           Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              controller: _flatNumberController,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                              decoration: InputDecoration(
+                                hintText: 'Flat No.',
+                                hintStyle:
+                                    TextStyle(color: Colors.white.withAlpha(179)),
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
                             flex: 5,
                             child: TextFormField(
                               focusNode: _focusNode,
@@ -563,7 +583,8 @@ class _OpeningScreenState extends State<OpeningScreen> {
                       if (_postcodeController.text.isNotEmpty) {
                         final postcode = _postcodeController.text;
                         final houseNumber = _houseNumberController.text;
-                        context.push('/price_paid?postcode=$postcode&houseNumber=$houseNumber');
+                        final flatNumber = _flatNumberController.text;
+                        context.push('/price_paid?postcode=$postcode&houseNumber=$houseNumber&flatNumber=$flatNumber');
                       } else {
                         _showErrorSnackBar('Please enter a postcode');
                       }
@@ -586,7 +607,8 @@ class _OpeningScreenState extends State<OpeningScreen> {
                     onPressed: () {
                       if (_postcodeController.text.isNotEmpty) {
                         final houseNumber = _houseNumberController.text;
-                        context.push('/epc?postcode=${_postcodeController.text}&houseNumber=$houseNumber');
+                        final flatNumber = _flatNumberController.text;
+                        context.push('/epc?postcode=${_postcodeController.text}&houseNumber=$houseNumber&flatNumber=$flatNumber');
                       } else {
                         _showErrorSnackBar('Please enter a postcode');
                       }
