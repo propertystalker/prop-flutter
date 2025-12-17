@@ -1,34 +1,36 @@
 import 'package:flutter/foundation.dart';
-import 'package:myapp/models/person.dart';
+import 'package:myapp/models/user_model.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 
 class UserController with ChangeNotifier {
-  final List<Person> _users = [];
+  List<User> _users = [];
+  final SupabaseClient _supabase = Supabase.instance.client;
 
-  List<Person> get users => _users;
+  List<User> get users => _users;
 
-  void addUser(Person user) {
-    _users.add(user);
+  Future<void> getUsers() async {
+    final response = await _supabase.from('profiles').select();
+    final List<dynamic> data = response as List<dynamic>;
+    _users = data.map((e) => User.fromMap(e)).toList();
     notifyListeners();
   }
 
-  void removeUser(Person user) {
-    _users.remove(user);
-    notifyListeners();
+  Future<void> addUser(User user) async {
+    await _supabase.from('profiles').insert(user.toMap());
+    await getUsers();
   }
 
-  void updateUser(Person oldUser, Person newUser) {
-    final index = _users.indexOf(oldUser);
-    if (index != -1) {
-      _users[index] = newUser;
-      notifyListeners();
-    }
+  Future<void> removeUser(User user) async {
+    await _supabase.from('profiles').delete().match({'id': user.id});
+    await getUsers();
   }
 
-  Person? getUserByEmail(String email) {
-    try {
-      return _users.firstWhere((user) => user.email == email);
-    } catch (e) {
-      return null;
-    }
+  Future<void> updateUser(User user) async {
+    await _supabase.from('profiles').update(user.toMap()).match({'id': user.id});
+    await getUsers();
+  }
+
+  Future<void> sendPasswordReset(String email) async {
+    await _supabase.auth.resetPasswordForEmail(email);
   }
 }

@@ -3,27 +3,45 @@
 
 ## Overview
 
-This project is a Flutter web application designed to interact with the PropertyData API. It allows users to fetch and display property listings based on a given postcode, number of bedrooms, and an API key. It also provides a feature to convert latitude and longitude to a UK postcode.
+This project is a Flutter web application that provides property data insights. It features a robust user authentication system using Supabase for account creation and login. Once authenticated, users can access property information, including floor area, price history, and financial calculations for development scenarios. The application is designed to be a comprehensive tool for property analysis.
 
-## Features
+## Style and Design
 
-*   **Property Search:** Users can input their API key, a postcode, and the desired number of bedrooms to search for properties.
-*   **Property List:** The application displays the search results in a clear, scrollable list.
-*   **Property Details:** Users can tap on any property in the list to view more detailed information on a separate screen.
-*   **Postcode Conversion:** Users can manually enter latitude and longitude to get the corresponding UK postcode.
-*   **Web-Based:** The application is built for the web, ensuring it is accessible from any modern browser.
-*   **Responsive Design:** The UI is designed to be responsive and work well on different screen sizes.
+*   **Theme:** The app uses a clean and modern design with a primary color scheme based on blue.
+*   **Layout:** The layout is responsive and adapts to different screen sizes, ensuring a good user experience on both web and mobile.
+*   **Interactivity:** The application uses interactive elements like buttons, text fields, and navigation components to create an intuitive user flow.
 
-## Current Plan
+## Features Implemented
 
-### Objective: Add limit and radius fields to the postcode converter.
+### User Authentication
+*   **Supabase Integration:** The app is connected to a Supabase backend for user management and database storage.
+*   **Registration:** New users can register with their email, password, and company name. User data is stored in the `auth.users` table, and a corresponding entry is created in the `public.profiles` table.
+*   **Login:** Existing users can log in using their email and password.
+*   **Dedicated Screens:** The authentication flow is handled through dedicated `EmailLoginScreen` and `RegisterScreen` for a clear user experience.
 
-1.  **Add Input Fields**: Add "Limit" and "Radius" text fields to the `OpeningScreen` below the longitude field.
+### Property Analysis
+*   **Postcode Search:** The initial screen allows users to search for properties by postcode.
+*   **Floor Area:** Displays a list of properties with their known floor areas and habitable rooms.
+*   **Detailed Property View:** Tapping on a property opens a detailed screen with:
+    *   Property images (placeholder and user-uploadable).
+    *   Detailed address and stats.
+    *   Price paid history.
+    *   Development scenario analysis (GDV, Total Cost, Uplift).
+    *   Financial summary (ROI).
 
-### Previous Plan: Create an interactive latitude/longitude to postcode converter.
+### Backend & Database
+*   **Supabase Backend:** Utilizes Supabase for authentication and database services.
+*   **`profiles` Table:** A `profiles` table has been created to store user-specific data, such as their company name. The table is linked to the `auth.users` table.
+*   **Row Level Security (RLS):** RLS policies are in place to ensure that users can only create and manage their own profiles, providing essential data security.
 
-1.  **Add Input Fields**: Added "Latitude" and "Longitude" text fields to the `OpeningScreen`.
-2.  **Update "Get Location" Button**: The "Get Location" button now populates these fields with the device's current coordinates.
-3.  **Add "Get Postcode" Button**: Added a new button to trigger the postcode conversion.
-4.  **Implement "Get Postcode" Logic**: This button takes the values from the text fields, uses the `PostcodeService` to get the postcode, and displays the result in a pop-up dialog.
+## Project Structure
+
+*   **`lib/`**: Contains the main application code.
+    *   **`controllers/`**: Manages the application's state and business logic (e.g., `UserController`, `FinancialController`).
+    *   **`models/`**: Defines the data structures used throughout the app.
+    *   **`screens/`**: Contains the UI for each page of the application.
+    *   **`services/`**: Includes services for interacting with external APIs like Supabase and PropertyData.
+    *   **`widgets/`**: Holds reusable UI components.
+    *   **`main.dart`**: The main entry point of the application, responsible for initialization and routing.
+*   **`blueprint.md`**: This file, providing an overview and documentation of the project.
 

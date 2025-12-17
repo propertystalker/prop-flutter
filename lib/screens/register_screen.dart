@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/controllers/user_controller.dart';
-import 'package:myapp/models/person.dart';
+import 'package:myapp/services/supabase_service.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -14,6 +14,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _companyController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -21,6 +22,67 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _companyController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _register() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    // The correct public URL for your Firebase Studio workspace
+    const String redirectUrl =
+        'https://9000-firebase-propertystalk-1765278120728.cluster-ikslh4rdsnbqsvu5nw3v4dqjj2.cloudworkstations.dev';
+
+    final supabase = context.read<SupabaseService>().client;
+    final email = _emailController.text;
+    final password = _passwordController.text;
+    final company = _companyController.text;
+
+    try {
+      // Sign up the user, providing both the company metadata and the correct redirect URL.
+      // This `emailRedirectTo` parameter will override the 'localhost' default in Supabase.
+      final response = await supabase.auth.signUp(
+        email: email,
+        password: password,
+        emailRedirectTo: redirectUrl,
+        data: {'company': company},
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Success! Please check your email to confirm your account.'),
+            duration: Duration(seconds: 5),
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    } on AuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Auth Error: ${e.message}')),
+        );
+      }
+    } on PostgrestException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Database Error: ${e.message}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An unexpected error occurred: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -56,20 +118,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
               obscureText: true,
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                final userController = context.read<UserController>();
-                final newUser = Person(
-                  email: _emailController.text,
-                  company: _companyController.text,
-                  password: _passwordController.text,
-                );
-                userController.addUser(newUser);
-                Navigator.of(context)
-                    .popUntil((route) => route.isFirst);
-              },
-              child: const Text('Yes, I accept. Register me now'),
-            ),
+            if (_isLoading)
+              const CircularProgressIndicator()
+            else
+              ElevatedButton(
+                onPressed: _register,
+                child: const Text('Yes, I accept. Register me now'),
+              ),
           ],
         ),
       ),

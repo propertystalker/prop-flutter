@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/controllers/person_controller.dart';
-import 'package:myapp/controllers/user_controller.dart';
 import 'package:myapp/screens/admin_screen.dart';
 import 'package:myapp/screens/register_screen.dart';
+import 'package:myapp/services/supabase_service.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EmailLoginScreen extends StatefulWidget {
   const EmailLoginScreen({super.key});
@@ -50,20 +50,31 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {
-                final userController = context.read<UserController>();
-                final personController = context.read<PersonController>();
-                final user = userController.getUserByEmail(_emailController.text);
+              onPressed: () async {
+                final supabase = context.read<SupabaseService>().client;
+                final email = _emailController.text;
+                final password = _passwordController.text;
 
-                if (user != null && user.password == _passwordController.text) {
-                  personController.setEmail(user.email);
-                  personController.setCompany(user.company);
-                  Navigator.of(context)
-                      .popUntil((route) => route.isFirst);
-                } else {
+                try {
+                  final response = await supabase.auth.signInWithPassword(
+                    email: email,
+                    password: password,
+                  );
+
+                  if (response.user != null) {
+                    Navigator.of(context)
+                        .popUntil((route) => route.isFirst);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Login failed.'),
+                      ),
+                    );
+                  }
+                } on AuthException catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Invalid email or password'),
+                    SnackBar(
+                      content: Text(e.message),
                     ),
                   );
                 }

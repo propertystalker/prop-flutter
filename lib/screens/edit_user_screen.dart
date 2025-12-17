@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/controllers/user_controller.dart';
-import 'package:myapp/models/person.dart';
+import 'package:myapp/models/user_model.dart';
 import 'package:provider/provider.dart';
 
 class EditUserScreen extends StatefulWidget {
-  final Person user;
+  final User user;
 
   const EditUserScreen({super.key, required this.user});
 
   @override
-  State<EditUserScreen> createState() => _EditUserScreenState();
+  _EditUserScreenState createState() => _EditUserScreenState();
 }
 
 class _EditUserScreenState extends State<EditUserScreen> {
-  late final TextEditingController _emailController;
-  late final TextEditingController _companyController;
+  late TextEditingController _emailController;
+  late TextEditingController _companyController;
 
   @override
   void initState() {
@@ -40,36 +40,28 @@ class _EditUserScreenState extends State<EditUserScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
+            TextFormField(
               controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-              ),
-              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
             const SizedBox(height: 16),
-            TextField(
+            TextFormField(
               controller: _companyController,
-              decoration: const InputDecoration(
-                labelText: 'Company',
-              ),
+              decoration: const InputDecoration(labelText: 'Company'),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () {
                 final userController = context.read<UserController>();
-                final updatedUser = Person(
-                  fullName: widget.user.fullName,
+                final updatedUser = User(
+                  id: widget.user.id,
                   email: _emailController.text,
                   company: _companyController.text,
-                  mobile: widget.user.mobile,
-                  linkedin: widget.user.linkedin,
-                  password: widget.user.password,
                 );
-                userController.updateUser(widget.user, updatedUser);
-                Navigator.of(context).pop();
+                userController.updateUser(updatedUser); // Corrected this line
+                Navigator.pop(context);
               },
-              child: const Text('Save Changes'),
+              child: const Text('Save'),
             ),
           ],
         ),
