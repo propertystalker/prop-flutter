@@ -6,8 +6,8 @@ import 'package:myapp/controllers/epc_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/controllers/person_controller.dart';
 import 'package:myapp/controllers/price_paid_controller.dart';
-import 'package:myapp/controllers/user_controller.dart';
 import 'package:myapp/firebase_options.dart';
+import 'package:myapp/screens/admin_screen.dart';
 import 'package:myapp/screens/epc_screen.dart';
 import 'package:myapp/screens/opening_screen.dart';
 import 'package:myapp/screens/price_paid_screen.dart';
@@ -35,11 +35,10 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => SupabaseService()),
         ChangeNotifierProvider(create: (context) => FinancialController()),
-        ChangeNotifierProvider(create: (context) => CompanyController()),
-        ChangeNotifierProvider(create: (context) => PersonController()),
-        ChangeNotifierProvider(create: (context) => UserController()),
         ChangeNotifierProvider(create: (context) => EpcController()),
         ChangeNotifierProvider(create: (context) => PricePaidController()),
+        ChangeNotifierProvider(create: (context) => PersonController()),
+        ChangeNotifierProvider(create: (context) => CompanyController()),
       ],
       child: const MyApp(),
     ),
@@ -61,6 +60,12 @@ final GoRouter _router = GoRouter(
           },
         ),
         GoRoute(
+          path: 'admin',
+          builder: (BuildContext context, GoRouterState state) {
+            return const AdminScreen();
+          },
+        ),
+        GoRoute(
           path: 'property_floor_area',
           builder: (BuildContext context, GoRouterState state) {
             final String postcode = state.uri.queryParameters['postcode']!;
@@ -71,7 +76,7 @@ final GoRouter _router = GoRouter(
           path: 'price_paid',
           builder: (BuildContext context, GoRouterState state) {
             final String postcode = state.uri.queryParameters['postcode']!;
-            // This line ensures that if 'houseNumber' is missing from the URL,
+            // This line ensures that if if 'houseNumber' is missing from the URL,
             // a non-null empty string is passed to the screen, satisfying the
             // `required` constraint.
             final String houseNumber = state.uri.queryParameters['houseNumber'] ?? '';

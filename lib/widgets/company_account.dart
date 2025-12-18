@@ -2,9 +2,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:myapp/models/company.dart';
+import 'package:myapp/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:myapp/controllers/company_controller.dart';
 
 class CompanyAccount extends StatefulWidget {
   const CompanyAccount({super.key});
@@ -15,17 +16,18 @@ class CompanyAccount extends StatefulWidget {
 
 class _CompanyAccountState extends State<CompanyAccount> {
   final _formKey = GlobalKey<FormState>();
-  late final CompanyController _companyController;
+  late final SupabaseService _supabaseService;
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _twitterController = TextEditingController();
+  XFile? _companyLogo;
 
   @override
   void initState() {
     super.initState();
-    _companyController = Provider.of<CompanyController>(context, listen: false);
+    _supabaseService = Provider.of<SupabaseService>(context, listen: false);
     _getCompanyProfile();
   }
 
@@ -41,19 +43,21 @@ class _CompanyAccountState extends State<CompanyAccount> {
   Future<void> _getCompanyProfile() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
-      // Assuming a company profile is linked to a user
-      final data = await Supabase.instance.client
-          .from('companies')
-          .select()
-          .eq('user_id', user.id)
-          .single();
+      try {
+        // Assuming a company profile is linked to a user
+        final company = await _supabaseService.getCompany(user.id);
 
-      if (data != null) {
-        _nameController.text = data['name'] ?? '';
-        _emailController.text = data['email'] ?? '';
-        _phoneController.text = data['phone'] ?? '';
-        _twitterController.text = data['twitter'] ?? '';
-        // TODO: Load logo URL and update controller
+        if (mounted) {
+          _nameController.text = company.name;
+          _emailController.text = company.email;
+        }
+      } catch (e) {
+        // Handle error, e.g., show a snackbar
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not fetch company profile: $e')),
+          );
+        }
       }
     }
   }
@@ -63,22 +67,26 @@ class _CompanyAccountState extends State<CompanyAccount> {
       _formKey.currentState!.save();
       final user = Supabase.instance.client.auth.currentUser;
       if (user != null) {
-        final updates = {
-          'user_id': user.id,
-          'name': _nameController.text,
-          'email': _emailController.text,
-          'phone': _phoneController.text,
-          'twitter': _twitterController.text,
-          'updated_at': DateTime.now().toIso8601String(),
-        };
+        final company = Company(
+          id: user.id, // The user.id is the company's primary key
+          name: _nameController.text,
+          email: _emailController.text,
+        );
 
-        await Supabase.instance.client.from('companies').upsert(updates);
+        try {
+          await _supabaseService.updateCompany(company);
 
-        if (mounted) {
-          _companyController.setCompanyName(_nameController.text);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Company profile saved!')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Company profile saved!')),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error saving company profile: $e')),
+            );
+          }
         }
       }
     }
@@ -88,14 +96,18 @@ class _CompanyAccountState extends State<CompanyAccount> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      _companyController.setCompanyLogo(pickedFile);
+      setState(() {
+        _companyLogo = pickedFile;
+      });
       // TODO: Upload to Supabase Storage and save URL
     }
   }
 
   void _deleteImage() {
+    setState(() {
+      _companyLogo = null;
+    });
     // TODO: Delete from Supabase Storage
-    _companyController.deleteCompanyLogo();
   }
 
   @override
@@ -105,61 +117,61 @@ class _CompanyAccountState extends State<CompanyAccount> {
       color: const Color(0xFFF0F4F8), // A light grey background
       child: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Company Name'),
-            ),
-            TextFormField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Enquiry Email'),
-            ),
-            TextFormField(
-              controller: _phoneController,
-              decoration: const InputDecoration(labelText: 'Company Phone Number'),
-            ),
-            TextFormField(
-              controller: _twitterController,
-              decoration: const InputDecoration(labelText: 'Company X Page'),
-            ),
-            const SizedBox(height: 16.0),
-            Row(
-              children: [
-                const Text('Company Logo', style: TextStyle(fontSize: 16)),
-                const Spacer(),
-                if (_companyController.companyLogo != null)
-                  Row(
-                    children: [
-                      kIsWeb
-                          ? Image.network(_companyController.companyLogo!.path,
-                              width: 40, height: 40)
-                          : Image.file(File(_companyController.companyLogo!.path),
-                              width: 40, height: 40),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: _deleteImage,
-                      ),
-                    ],
-                  )
-                else
-                  TextButton.icon(
-                    icon: const Icon(Icons.add_a_photo),
-                    label: const Text('Add'),
-                    onPressed: _pickImage,
-                  ),
-              ],
-            ),
-            const SizedBox(height: 24.0),
-            Center(
-              child: ElevatedButton(
-                onPressed: _onSave,
-                child: const Text('Save'),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Company Name'),
               ),
-            ),
-          ],
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Enquiry Email'),
+              ),
+              TextFormField(
+                controller: _phoneController,
+                decoration: const InputDecoration(labelText: 'Company Phone Number'),
+              ),
+              TextFormField(
+                controller: _twitterController,
+                decoration: const InputDecoration(labelText: 'Company X Page'),
+              ),
+              const SizedBox(height: 16.0),
+              Row(
+                children: [
+                  const Text('Company Logo', style: TextStyle(fontSize: 16)),
+                  const Spacer(),
+                  if (_companyLogo != null)
+                    Row(
+                      children: [
+                        kIsWeb
+                            ? Image.network(_companyLogo!.path, width: 40, height: 40)
+                            : Image.file(File(_companyLogo!.path), width: 40, height: 40),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: _deleteImage,
+                        ),
+                      ],
+                    )
+                  else
+                    TextButton.icon(
+                      icon: const Icon(Icons.add_a_photo),
+                      label: const Text('Add'),
+                      onPressed: _pickImage,
+                    ),
+                ],
+              ),
+              const SizedBox(height: 24.0),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _onSave,
+                  child: const Text('Save'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

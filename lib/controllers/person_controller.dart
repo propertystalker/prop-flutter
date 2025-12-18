@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:myapp/models/company.dart';
 import 'package:myapp/models/person.dart';
 
 class PersonController with ChangeNotifier {
   final Person _person = Person(
+    id: '',
     fullName: '',
     email: '',
     mobile: '',
     linkedin: '',
+    company: Company(id: '', name: '', email: ''),
   );
   XFile? _avatar;
   String? _avatarUrl;
@@ -36,7 +39,7 @@ class PersonController with ChangeNotifier {
     notifyListeners();
   }
 
-  void setCompany(String company) {
+  void setCompany(Company company) {
     _person.company = company;
     notifyListeners();
   }

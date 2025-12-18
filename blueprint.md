@@ -1,54 +1,40 @@
-
-# Project Blueprint
+# Project Blueprint: Property Data Application
 
 ## Overview
 
-This project is a Flutter web application that provides property data insights. It features a robust user authentication system using Supabase for account creation and login. Once authenticated, users can access property information, including floor area, price history, and financial calculations for development scenarios. The application is designed to be a comprehensive tool for property analysis.
+This document outlines the design, features, and implementation plan for a property data application built with Flutter. The app will provide users with a platform to access and manage property information, including pricing, EPC ratings, and other relevant data.
 
-## Style and Design
+## Core Features
 
-*   **Theme:** The app uses a clean and modern design with a primary color scheme based on blue.
-*   **Layout:** The layout is responsive and adapts to different screen sizes, ensuring a good user experience on both web and mobile.
-*   **Interactivity:** The application uses interactive elements like buttons, text fields, and navigation components to create an intuitive user flow.
+- **User Authentication:** A registration and login system for users to access the application.
+- **Property Data Visualization:** Display property data, including price paid, EPC ratings, and floor area.
+- **Data Fetching:** Fetch property data from various external APIs.
+- **Database Integration:** Use Supabase to store and manage user and property data.
 
-## Features Implemented
+## Design and Aesthetics
 
-### User Authentication
-*   **Supabase Integration:** The app is connected to a Supabase backend for user management and database storage.
-*   **Registration:** New users can register with their email, password, and company name. User data is stored in the `auth.users` table, and a corresponding entry is created in the `public.profiles` table.
-*   **Login:** Existing users can log in using their email and password.
-*   **Dedicated Screens:** The authentication flow is handled through dedicated `EmailLoginScreen` and `RegisterScreen` for a clear user experience.
+- **Color Palette:** A clean and professional color scheme with a primary color of blue.
+- **Typography:** A clear and readable typography scheme.
+- **Layout:** A responsive layout that works on both mobile and web.
 
-### Profile Screen
-*   **Post-Registration Navigation:** After a new user successfully registers, they are automatically navigated to a dedicated profile screen.
-*   **User Data Display:** The profile screen fetches and displays the logged-in user's information, including their full name, email, mobile number, and LinkedIn profile.
-*   **Correct Email Display:** The email field is correctly populated from the authenticated user's session and is set to read-only to prevent accidental changes.
-*   **Avatar Management:** Users can add an avatar to their profile, which is displayed on the screen.
-*   **Data Persistence:** Profile information is saved to the `profiles` table in the Supabase database.
+## Implementation Plan
 
-### Property Analysis
-*   **Postcode Search:** The initial screen allows users to search for properties by postcode.
-*   **Floor Area:** Displays a list of properties with their known floor areas and habitable rooms.
-*   **Detailed Property View:** Tapping on a property opens a detailed screen with:
-    *   Property images (placeholder and user-uploadable).
-    *   Detailed address and stats.
-    *   Price paid history.
-    *   Development scenario analysis (GDV, Total Cost, Uplift).
-    *   Financial summary (ROI).
+1.  **Project Setup:**
+    *   Add necessary dependencies to `pubspec.yaml`: `supabase_flutter`, `go_router`, `provider`, `http`.
 
-### Backend & Database
-*   **Supabase Backend:** Utilizes Supabase for authentication and database services.
-*   **`profiles` Table:** A `profiles` table has been created to store user-specific data, such as their company name. The table is linked to the `auth.users` table.
-*   **Row Level Security (RLS):** RLS policies are in place to ensure that users can only create and manage their own profiles, providing essential data security.
+2.  **Authentication:**
+    *   Implement user registration and login functionality.
 
-## Project Structure
+3.  **Data Layer:**
+    *   Create models for `Person`, `Company`, and other data structures.
+    *   Create services to interact with Supabase and external APIs.
 
-*   **`lib/`**: Contains the main application code.
-    *   **`controllers/`**: Manages the application's state and business logic (e.g., `UserController`, `FinancialController`).
-    *   **`models/`**: Defines the data structures used throughout the app.
-    *   **`screens/`**: Contains the UI for each page of the application.
-    *   **`services/`**: Includes services for interacting with external APIs like Supabase and PropertyData.
-    *   **`widgets/`**: Holds reusable UI components.
-    *   **`main.dart`**: The main entry point of the application, responsible for initialization and routing.
-*   **`blueprint.md`**: This file, providing an overview and documentation of the project.
+4.  **Routing:**
+    *   Configure `go_router` with routes for different screens in the application.
+
+5.  **Screens and Widgets:**
+    *   **Opening Screen:** The initial screen with options to register or log in.
+    *   **Profile Screen:** A screen to display and manage user profile information.
+    *   **Admin Screen:** A screen for administrative tasks.
+    *   **Property Data Screens:** Screens to display various property data, such as EPC ratings and price paid information.
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/screens/profile_screen.dart';
 import 'package:myapp/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -30,39 +29,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _isLoading = true;
     });
 
-    const String redirectUrl =
-        'https://9000-firebase-propertystalk-1765278120728.cluster-ikslh4rdsnbqsvu5nw3v4dqjj2.cloudworkstations.dev';
-
-    final supabase = context.read<SupabaseService>().client;
+    final supabaseService = context.read<SupabaseService>();
     final email = _emailController.text;
     final password = _passwordController.text;
-    final company = _companyController.text;
+    final companyName = _companyController.text;
 
     try {
-      final AuthResponse response = await supabase.auth.signUp(
-        email: email,
-        password: password,
-        emailRedirectTo: redirectUrl,
-        data: {'company': company},
+      // The companyName is passed as user metadata during sign-up.
+      // A database trigger will now automatically create the company and profile.
+      await supabaseService.signUp(
+        email,
+        password,
+        data: {'company': companyName},
       );
 
-      // This is the crucial fix. We now check the response from Supabase.
-      // If the session is not null, it means the user is successfully logged in.
-      if (response.session != null) {
-        if (mounted) {
-          // Now it is safe to navigate to the ProfileScreen.
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const ProfileScreen()),
-          );
-        }
-      } else if (response.user != null && response.session == null) {
-        // This case handles if email confirmation is required.
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please check your email to verify your account.')),
-          );
-          Navigator.of(context).pop(); // Go back to the login screen
-        }
+      if (mounted) {
+        // After sign up, the user always needs to confirm their email.
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please check your email to verify your account.')),
+        );
+        // Pop the registration screen to go back to the previous screen.
+        Navigator.of(context).pop();
       }
     } on AuthException catch (e) {
       if (mounted) {
@@ -71,6 +58,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       }
     } on PostgrestException catch (e) {
+      // This database error should no longer occur with the trigger handling the insert.
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Database Error: ${e.message}')),

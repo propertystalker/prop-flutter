@@ -8,6 +8,7 @@
     pkgs.jdk21
     pkgs.unzip
     pkgs.openssh
+    pkgs.postgresql
   ];
   # Sets environment variables in the workspace
   env = {};
