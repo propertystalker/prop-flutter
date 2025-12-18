@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/models/company.dart';
 import 'package:myapp/models/person.dart';
+import 'package:myapp/screens/company_screen.dart';
 import 'package:myapp/services/person_service.dart';
 import 'package:myapp/services/supabase_service.dart';
 import 'package:provider/provider.dart';
@@ -145,8 +146,10 @@ class _PersonAccountState extends State<PersonAccount> {
 
         await _personService.updatePerson(person);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile saved!')),
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const CompanyScreen(),
+            ),
           );
         }
       }
