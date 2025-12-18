@@ -19,6 +19,13 @@ This project is a Flutter web application that provides property data insights. 
 *   **Login:** Existing users can log in using their email and password.
 *   **Dedicated Screens:** The authentication flow is handled through dedicated `EmailLoginScreen` and `RegisterScreen` for a clear user experience.
 
+### Profile Screen
+*   **Post-Registration Navigation:** After a new user successfully registers, they are automatically navigated to a dedicated profile screen.
+*   **User Data Display:** The profile screen fetches and displays the logged-in user's information, including their full name, email, mobile number, and LinkedIn profile.
+*   **Correct Email Display:** The email field is correctly populated from the authenticated user's session and is set to read-only to prevent accidental changes.
+*   **Avatar Management:** Users can add an avatar to their profile, which is displayed on the screen.
+*   **Data Persistence:** Profile information is saved to the `profiles` table in the Supabase database.
+
 ### Property Analysis
 *   **Postcode Search:** The initial screen allows users to search for properties by postcode.
 *   **Floor Area:** Displays a list of properties with their known floor areas and habitable rooms.

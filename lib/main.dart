@@ -11,6 +11,7 @@ import 'package:myapp/firebase_options.dart';
 import 'package:myapp/screens/epc_screen.dart';
 import 'package:myapp/screens/opening_screen.dart';
 import 'package:myapp/screens/price_paid_screen.dart';
+import 'package:myapp/screens/profile_screen.dart';
 import 'package:myapp/screens/property_floor_area_screen.dart'
     show PropertyFloorAreaScreen;
 import 'package:myapp/services/supabase_service.dart';
@@ -53,6 +54,12 @@ final GoRouter _router = GoRouter(
         return const OpeningScreen();
       },
       routes: <RouteBase>[
+        GoRoute(
+          path: 'profile',
+          builder: (BuildContext context, GoRouterState state) {
+            return const ProfileScreen();
+          },
+        ),
         GoRoute(
           path: 'property_floor_area',
           builder: (BuildContext context, GoRouterState state) {

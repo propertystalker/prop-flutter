@@ -113,17 +113,9 @@ class _PropertyFloorAreaFilterScreenState
             body: Column(
               children: [
                 if (controller.isCompanyAccountVisible)
-                  CompanyAccount(
-                    onCompanyChanged: (name) => Provider.of<CompanyController>(
-                            context,
-                            listen: false)
-                        .setCompanyName(name),
-                    onSave: controller.hideCompanyAccount,
-                  ),
+                  const CompanyAccount(),
                 if (controller.isPersonAccountVisible)
-                  PersonAccount(
-                    onSave: controller.hidePersonAccount,
-                  ),
+                  const PersonAccount(),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(

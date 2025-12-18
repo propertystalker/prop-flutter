@@ -4,15 +4,17 @@ import 'package:myapp/models/person.dart';
 
 class PersonController with ChangeNotifier {
   final Person _person = Person(
-    fullName: 'Keith Lyons',
-    email: 'emilySmith@belvoragency.com',
-    mobile: '+44 7123 456 789',
-    linkedin: 'Keith Lyons',
+    fullName: '',
+    email: '',
+    mobile: '',
+    linkedin: '',
   );
   XFile? _avatar;
+  String? _avatarUrl;
 
   Person get person => _person;
   XFile? get avatar => _avatar;
+  String? get avatarUrl => _avatarUrl;
 
   void setFullName(String name) {
     _person.fullName = name;
@@ -44,8 +46,14 @@ class PersonController with ChangeNotifier {
     notifyListeners();
   }
 
+  void setAvatarUrl(String? url) {
+    _avatarUrl = url;
+    notifyListeners();
+  }
+
   void deleteAvatar() {
     _avatar = null;
+    _avatarUrl = null;
     notifyListeners();
   }
 }

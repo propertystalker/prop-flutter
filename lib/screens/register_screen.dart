@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/screens/profile_screen.dart';
 import 'package:myapp/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -29,7 +30,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _isLoading = true;
     });
 
-    // The correct public URL for your Firebase Studio workspace
     const String redirectUrl =
         'https://9000-firebase-propertystalk-1765278120728.cluster-ikslh4rdsnbqsvu5nw3v4dqjj2.cloudworkstations.dev';
 
@@ -39,24 +39,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final company = _companyController.text;
 
     try {
-      // Sign up the user, providing both the company metadata and the correct redirect URL.
-      // This `emailRedirectTo` parameter will override the 'localhost' default in Supabase.
-      final response = await supabase.auth.signUp(
+      final AuthResponse response = await supabase.auth.signUp(
         email: email,
         password: password,
         emailRedirectTo: redirectUrl,
         data: {'company': company},
       );
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Success! Please check your email to confirm your account.'),
-            duration: Duration(seconds: 5),
-          ),
-        );
-        Navigator.of(context).pop();
+      // This is the crucial fix. We now check the response from Supabase.
+      // If the session is not null, it means the user is successfully logged in.
+      if (response.session != null) {
+        if (mounted) {
+          // Now it is safe to navigate to the ProfileScreen.
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const ProfileScreen()),
+          );
+        }
+      } else if (response.user != null && response.session == null) {
+        // This case handles if email confirmation is required.
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please check your email to verify your account.')),
+          );
+          Navigator.of(context).pop(); // Go back to the login screen
+        }
       }
     } on AuthException catch (e) {
       if (mounted) {
