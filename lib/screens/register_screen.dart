@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/screens/person_account_screen.dart';
 import 'package:myapp/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -44,12 +45,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (mounted) {
-        // After sign up, the user always needs to confirm their email.
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please check your email to verify your account.')),
+        // Since email confirmation is off, the user is logged in.
+        // Navigate to the person account screen to complete their profile.
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const PersonAccountScreen(),
+          ),
         );
-        // Pop the registration screen to go back to the previous screen.
-        Navigator.of(context).pop();
       }
     } on AuthException catch (e) {
       if (mounted) {
