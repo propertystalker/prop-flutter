@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myapp/screens/login_screen.dart';
+import 'package:myapp/screens/email_login_screen.dart';
 import 'package:myapp/services/postcode_service.dart';
 import 'package:myapp/widgets/filter_screen_bottom_nav.dart';
 import 'package:myapp/widgets/property_filter_app_bar.dart';
@@ -302,7 +302,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
         onSettingsTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            MaterialPageRoute(builder: (context) => const EmailLoginScreen()),
           );
         },
       ),

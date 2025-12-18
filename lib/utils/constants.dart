@@ -8,6 +8,9 @@ const String epcBaseUrl = 'https://epc.opendatacommunities.org/api/v1/domestic';
 const String epcEmail = 'steve@libertyapps.co.uk';
 const String epcApiKey = '3ce43250e7f8017c83fa5ce440916be1f404669f';
 
+const String superbaseUrl = 'https://csydlpuubbfusgawlfgs.supabase.co';
+const String superbaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzeWRscHV1YmJmdXNnYXdsZmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4Nzc5ODEsImV4cCI6MjA4MTQ1Mzk4MX0.B4j2PeLMatcaXZxBalY8L75wBza5RdxeGNYJkdqAUs0';
+
 const Color primaryColor = Color(0xFF317CD3);
 const Color accentColor = Color(0xFF94529C);
 const Color editablePriceColor = Color(0xFF94ABBE);

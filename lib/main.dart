@@ -13,17 +13,26 @@ import 'package:myapp/screens/opening_screen.dart';
 import 'package:myapp/screens/price_paid_screen.dart';
 import 'package:myapp/screens/property_floor_area_screen.dart'
     show PropertyFloorAreaScreen;
+import 'package:myapp/services/supabase_service.dart';
 import 'package:myapp/utils/constants.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await Supabase.initialize(
+    url: superbaseUrl,
+    anonKey: superbaseAnonKey,
+  );
+
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => SupabaseService()),
         ChangeNotifierProvider(create: (context) => FinancialController()),
         ChangeNotifierProvider(create: (context) => CompanyController()),
         ChangeNotifierProvider(create: (context) => PersonController()),
