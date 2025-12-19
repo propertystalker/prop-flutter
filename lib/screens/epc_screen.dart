@@ -36,8 +36,13 @@ int _compareAddresses(String addressA, String addressB) {
 class EpcScreen extends StatefulWidget {
   final String postcode;
   final String? houseNumber;
+  final String? flatNumber; // Added flatNumber
 
-  const EpcScreen({super.key, required this.postcode, this.houseNumber});
+  const EpcScreen(
+      {super.key,
+      required this.postcode,
+      this.houseNumber,
+      this.flatNumber}); // Added flatNumber
 
   @override
   State<EpcScreen> createState() => _EpcScreenState();
@@ -51,6 +56,30 @@ class _EpcScreenState extends State<EpcScreen> {
       Provider.of<EpcController>(context, listen: false)
           .fetchEpcData(widget.postcode);
     });
+  }
+
+  void _navigateToDetails(BuildContext context, EpcModel epc) {
+    final totalFloorArea = double.tryParse(epc.totalFloorArea) ?? 0.0;
+    final estimatedHabitableRooms = (totalFloorArea / 20).round();
+
+    final knownFloorArea = KnownFloorArea(
+      address: epc.address,
+      postcode: epc.postcode,
+      squareMeters: totalFloorArea.round(),
+      habitableRooms: estimatedHabitableRooms,
+      inspectionDate: epc.lodgementDate,
+    );
+
+    // Pop the current screen and then push the new screen to keep the navigation stack correct.
+    Navigator.of(context).pop();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => PropertyFloorAreaFilterScreen(
+          area: knownFloorArea,
+          postcode: epc.postcode,
+        ),
+      ),
+    );
   }
 
   @override
@@ -79,10 +108,11 @@ class _EpcScreenState extends State<EpcScreen> {
           if (widget.houseNumber != null &&
               widget.houseNumber!.trim().isNotEmpty) {
             final houseNumberQuery = widget.houseNumber!.trim();
+            final filterRegex = RegExp(r'\b' + RegExp.escape(houseNumberQuery) + r'\b',
+                caseSensitive: false);
+
             filteredData = sortedData.where((epc) {
-              return RegExp(r'^' + RegExp.escape(houseNumberQuery) + r'\b',
-                      caseSensitive: false)
-                  .hasMatch(epc.address);
+              return filterRegex.hasMatch(epc.address);
             }).toList();
 
             if (filteredData.isEmpty) {
@@ -118,6 +148,17 @@ class _EpcScreenState extends State<EpcScreen> {
           final displayData = latestEpcByAddress.values.toList();
           displayData.sort((a, b) => _compareAddresses(a.address, b.address));
 
+          // If there is only one result, navigate directly to the details screen.
+          if (displayData.length == 1) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) { // Ensure the widget is still in the tree
+                _navigateToDetails(context, displayData.first);
+              }
+            });
+            // Show a loading indicator while the navigation is scheduled.
+            return const Center(child: CircularProgressIndicator());
+          }
+
           return ListView.builder(
             itemCount: displayData.length,
             itemBuilder: (context, index) {
@@ -125,44 +166,22 @@ class _EpcScreenState extends State<EpcScreen> {
               return Card(
                 margin: const EdgeInsets.all(8.0),
                 child: ListTile(
-                    title: Text(epc.address),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Postcode: ${epc.postcode}'),
-                        Text('Current Rating: ${epc.currentEnergyRating}'),
-                        Text('Potential Rating: ${epc.potentialEnergyRating}'),
-                        Text('Property Type: ${epc.propertyType}'),
-                        Text('Built Form: ${epc.builtForm}'),
-                        Text('Main Fuel: ${epc.mainFuel}'),
-                        Text('Total Floor Area: ${epc.totalFloorArea} sq m'),
-                        Text('Lodgement Date: ${epc.lodgementDate}'),
-                      ],
-                    ),
-                    onTap: () {
-                      final totalFloorArea = double.tryParse(epc.totalFloorArea) ?? 0.0;
-                      // Estimate habitable rooms based on floor area (e.g., 1 room per 20 sq m)
-                      final estimatedHabitableRooms =
-                          (totalFloorArea / 20).round();
-
-                      final knownFloorArea = KnownFloorArea(
-                        address: epc.address,
-                        postcode: epc.postcode,
-                        squareMeters: totalFloorArea.round(),
-                        habitableRooms: estimatedHabitableRooms,
-                        inspectionDate: epc.lodgementDate,
-                      );
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PropertyFloorAreaFilterScreen(
-                            area: knownFloorArea,
-                            postcode: epc.postcode,
-                          ),
-                        ),
-                      );
-                    }),
+                  title: Text(epc.address),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Postcode: ${epc.postcode}'),
+                      Text('Current Rating: ${epc.currentEnergyRating}'),
+                      Text('Potential Rating: ${epc.potentialEnergyRating}'),
+                      Text('Property Type: ${epc.propertyType}'),
+                      Text('Built Form: ${epc.builtForm}'),
+                      Text('Main Fuel: ${epc.mainFuel}'),
+                      Text('Total Floor Area: ${epc.totalFloorArea} sq m'),
+                      Text('Lodgement Date: ${epc.lodgementDate}'),
+                    ],
+                  ),
+                  onTap: () => _navigateToDetails(context, epc),
+                ),
               );
             },
           );

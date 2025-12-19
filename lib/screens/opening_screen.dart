@@ -129,11 +129,12 @@ class _OpeningScreenState extends State<OpeningScreen> {
     );
   }
 
-  // This is the original search function, now correctly restored.
   void _searchByPostcode() {
     final postcode = _postcodeController.text;
     if (postcode.isNotEmpty) {
-      context.push('/address_finder?postcode=$postcode');
+      final houseNumber = _houseNumberController.text;
+      final flatNumber = _flatNumberController.text;
+      context.push('/epc?postcode=$postcode&houseNumber=$houseNumber&flatNumber=$flatNumber');
     }
   }
 
