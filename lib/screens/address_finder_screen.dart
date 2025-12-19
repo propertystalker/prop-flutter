@@ -25,10 +25,10 @@ class AddressFinderScreen extends StatelessWidget {
             } else if (controller.error != null) {
               return Center(child: Text('Error: ${controller.error}'));
             } else if (controller.floorAreaResponse == null ||
-                controller.floorAreaResponse!.knownFloorAreas.isEmpty) {
+                controller.floorAreaResponse!.knownFloorArea.isEmpty) {
               return const Center(child: Text('No floor area data found.'));
             } else {
-              final floorAreas = controller.floorAreaResponse!.knownFloorAreas;
+              final floorAreas = controller.floorAreaResponse!.knownFloorArea;
               floorAreas.sort((a, b) {
                 final houseNumberA = int.tryParse(a.address.split(' ').first.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
                 final houseNumberB = int.tryParse(b.address.split(' ').first.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
@@ -45,7 +45,7 @@ class AddressFinderScreen extends StatelessWidget {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Square Feet: ${area.squareFeet}'),
+                          Text('Square Meters: ${area.squareMeters}'),
                           Text('Habitable Rooms: ${area.habitableRooms}'),
                         ],
                       ),

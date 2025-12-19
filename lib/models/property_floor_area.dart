@@ -1,50 +1,49 @@
-
 class PropertyFloorAreaResponse {
   final String status;
-  final String postcode;
-  final String postcodeType;
-  final List<KnownFloorArea> knownFloorAreas;
+  final List<KnownFloorArea> knownFloorArea;
+  final String processTime;
 
   PropertyFloorAreaResponse({
     required this.status,
-    required this.postcode,
-    required this.postcodeType,
-    required this.knownFloorAreas,
+    required this.knownFloorArea,
+    required this.processTime,
   });
 
   factory PropertyFloorAreaResponse.fromJson(Map<String, dynamic> json) {
-    var list = json['known_floor_areas'] as List;
-    List<KnownFloorArea> areasList =
+    var list = json['known_floor_area'] as List;
+    List<KnownFloorArea> knownFloorAreaList =
         list.map((i) => KnownFloorArea.fromJson(i)).toList();
 
     return PropertyFloorAreaResponse(
       status: json['status'],
-      postcode: json['postcode'],
-      postcodeType: json['postcode_type'],
-      knownFloorAreas: areasList,
+      knownFloorArea: knownFloorAreaList,
+      processTime: json['process_time'],
     );
   }
 }
 
 class KnownFloorArea {
-  final String inspectionDate;
+  final String? inspectionDate;
   final String address;
-  final int squareFeet;
+  final int squareMeters;
   final int habitableRooms;
+  final String postcode;
 
   KnownFloorArea({
-    required this.inspectionDate,
+    this.inspectionDate,
     required this.address,
-    required this.squareFeet,
+    required this.squareMeters,
     required this.habitableRooms,
+    required this.postcode,
   });
 
   factory KnownFloorArea.fromJson(Map<String, dynamic> json) {
     return KnownFloorArea(
       inspectionDate: json['inspection_date'],
       address: json['address'],
-      squareFeet: json['square_feet'],
+      squareMeters: json['square_feet'], // The API uses 'square_feet', so we'll keep this mapping for now
       habitableRooms: json['habitable_rooms'],
+      postcode: json['postcode'],
     );
   }
 }

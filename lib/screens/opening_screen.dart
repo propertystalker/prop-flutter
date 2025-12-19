@@ -133,7 +133,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
   void _searchByPostcode() {
     final postcode = _postcodeController.text;
     if (postcode.isNotEmpty) {
-      context.push('/property_floor_area?postcode=$postcode');
+      context.push('/address_finder?postcode=$postcode');
     }
   }
 

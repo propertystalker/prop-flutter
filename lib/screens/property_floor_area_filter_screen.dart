@@ -169,7 +169,7 @@ class _PropertyFloorAreaFilterScreenState
                               const SizedBox(height: 16),
                               Consumer<PricePaidController>(
                                 builder: (context, pricePaidController, child) => PropertyStats(
-                                  squareFeet: widget.area.squareFeet,
+                                  squareMeters: widget.area.squareMeters,
                                   habitableRooms: widget.area.habitableRooms,
                                   propertyType: pricePaidController.priceHistory.isNotEmpty
                                       ? pricePaidController.priceHistory.first.propertyType

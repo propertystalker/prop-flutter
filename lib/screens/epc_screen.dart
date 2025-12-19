@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/controllers/epc_controller.dart';
 import 'package:myapp/models/epc_model.dart';
+import 'package:myapp/models/property_floor_area.dart';
+import 'package:myapp/screens/property_floor_area_filter_screen.dart';
 import 'package:provider/provider.dart';
 
 // Helper function for natural sorting of addresses
 int _compareAddresses(String addressA, String addressB) {
-  final re = RegExp(r'(\\d+)|(\\D+)');
+  final re = RegExp(r'(\d+)|(\D+)');
   final matchesA = re.allMatches(addressA);
   final matchesB = re.allMatches(addressB);
 
-  final numMatches = matchesA.length < matchesB.length ? matchesA.length : matchesB.length;
+  final numMatches =
+      matchesA.length < matchesB.length ? matchesA.length : matchesB.length;
 
   for (int i = 0; i < numMatches; i++) {
     final matchA = matchesA.elementAt(i).group(0)!;
@@ -65,19 +68,20 @@ class _EpcScreenState extends State<EpcScreen> {
             return Center(child: Text('Error: ${controller.error}'));
           }
           if (controller.epcData.isEmpty) {
-            return const Center(child: Text('No EPC data found for this postcode.'));
+            return const Center(
+                child: Text('No EPC data found for this postcode.'));
           }
 
-          // 1. Initial sort of all data by address
           final sortedData = List<EpcModel>.from(controller.epcData);
           sortedData.sort((a, b) => _compareAddresses(a.address, b.address));
 
-          // 2. Filter by house number if provided
           List<EpcModel> filteredData;
-          if (widget.houseNumber != null && widget.houseNumber!.trim().isNotEmpty) {
+          if (widget.houseNumber != null &&
+              widget.houseNumber!.trim().isNotEmpty) {
             final houseNumberQuery = widget.houseNumber!.trim();
             filteredData = sortedData.where((epc) {
-              return RegExp(r'^' + RegExp.escape(houseNumberQuery) + r'\b', caseSensitive: false)
+              return RegExp(r'^' + RegExp.escape(houseNumberQuery) + r'\b',
+                      caseSensitive: false)
                   .hasMatch(epc.address);
             }).toList();
 
@@ -96,26 +100,24 @@ class _EpcScreenState extends State<EpcScreen> {
             filteredData = sortedData;
           }
 
-          // 3. De-duplicate: Keep only the most recent EPC record for each address
           final Map<String, EpcModel> latestEpcByAddress = {};
           for (final epc in filteredData) {
-            // THE FIX: Remove ALL commas and extra whitespace to correctly group addresses.
             final normalizedAddress = epc.address
                 .replaceAll(',', '')
-                .replaceAll(RegExp(r'\\s+'), ' ')
+                .replaceAll(RegExp(r'\s+'), ' ')
                 .trim();
 
             if (!latestEpcByAddress.containsKey(normalizedAddress) ||
-                epc.lodgementDate.compareTo(latestEpcByAddress[normalizedAddress]!.lodgementDate) > 0) {
+                epc.lodgementDate.compareTo(
+                        latestEpcByAddress[normalizedAddress]!.lodgementDate) >
+                    0) {
               latestEpcByAddress[normalizedAddress] = epc;
             }
           }
 
           final displayData = latestEpcByAddress.values.toList();
-          // Re-sort the final list after de-duplication
           displayData.sort((a, b) => _compareAddresses(a.address, b.address));
 
-          // 4. Build the final list view
           return ListView.builder(
             itemCount: displayData.length,
             itemBuilder: (context, index) {
@@ -123,21 +125,44 @@ class _EpcScreenState extends State<EpcScreen> {
               return Card(
                 margin: const EdgeInsets.all(8.0),
                 child: ListTile(
-                  title: Text(epc.address),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Postcode: ${epc.postcode}'),
-                      Text('Current Rating: ${epc.currentEnergyRating}'),
-                      Text('Potential Rating: ${epc.potentialEnergyRating}'),
-                      Text('Property Type: ${epc.propertyType}'),
-                      Text('Built Form: ${epc.builtForm}'),
-                      Text('Main Fuel: ${epc.mainFuel}'),
-                      Text('Total Floor Area: ${epc.totalFloorArea} sq m'),
-                      Text('Lodgement Date: ${epc.lodgementDate}'),
-                    ],
-                  ),
-                ),
+                    title: Text(epc.address),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Postcode: ${epc.postcode}'),
+                        Text('Current Rating: ${epc.currentEnergyRating}'),
+                        Text('Potential Rating: ${epc.potentialEnergyRating}'),
+                        Text('Property Type: ${epc.propertyType}'),
+                        Text('Built Form: ${epc.builtForm}'),
+                        Text('Main Fuel: ${epc.mainFuel}'),
+                        Text('Total Floor Area: ${epc.totalFloorArea} sq m'),
+                        Text('Lodgement Date: ${epc.lodgementDate}'),
+                      ],
+                    ),
+                    onTap: () {
+                      final totalFloorArea = double.tryParse(epc.totalFloorArea) ?? 0.0;
+                      // Estimate habitable rooms based on floor area (e.g., 1 room per 20 sq m)
+                      final estimatedHabitableRooms =
+                          (totalFloorArea / 20).round();
+
+                      final knownFloorArea = KnownFloorArea(
+                        address: epc.address,
+                        postcode: epc.postcode,
+                        squareMeters: totalFloorArea.round(),
+                        habitableRooms: estimatedHabitableRooms,
+                        inspectionDate: epc.lodgementDate,
+                      );
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PropertyFloorAreaFilterScreen(
+                            area: knownFloorArea,
+                            postcode: epc.postcode,
+                          ),
+                        ),
+                      );
+                    }),
               );
             },
           );

@@ -1,58 +1,47 @@
 import 'package:flutter/material.dart';
 
 class PropertyStats extends StatelessWidget {
-  final int squareFeet;
+  final int squareMeters;
   final int habitableRooms;
   final String propertyType;
 
   const PropertyStats({
     super.key,
-    required this.squareFeet,
+    required this.squareMeters,
     required this.habitableRooms,
     required this.propertyType,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                children: [
-                  Text('Size: ', style: Theme.of(context).textTheme.titleMedium),
-                  Text(squareFeet.toString(), style: Theme.of(context).textTheme.titleMedium),
-                ],
-              ),
-            ),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                children: [
-                  Text('Bedroom: ', style: Theme.of(context).textTheme.titleMedium),
-                  Text(habitableRooms.toString(), style: Theme.of(context).textTheme.titleMedium),
-                ],
-              ),
-            ),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                children: [
-                  Text('Type: ', style: Theme.of(context).textTheme.titleMedium),
-                  Text(propertyType, style: Theme.of(context).textTheme.titleMedium),
-                ],
-              ),
-            ),
-          ],
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildStat('Type', propertyType),
+        _buildStat('Size', '$squareMeters sq m'),
+        _buildStat('Rooms', habitableRooms.toString()),
+      ],
+    );
+  }
+
+  Widget _buildStat(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+          ),
+        ),
+      ],
     );
   }
 }

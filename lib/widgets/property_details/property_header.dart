@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/controllers/property_floor_area_filter_controller.dart';
-import 'package:myapp/screens/property_floor_area_screen.dart';
 import 'package:myapp/utils/constants.dart';
 import 'package:provider/provider.dart';
 
@@ -18,15 +18,7 @@ class PropertyHeader extends StatelessWidget {
 
   void _searchByPostcode(BuildContext context, String postcode) {
     if (postcode.isNotEmpty) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => PropertyFloorAreaScreen(
-            postcode: postcode,
-            apiKey: apiKey,
-          ),
-        ),
-      );
+      context.push('/address_finder?postcode=$postcode');
     }
   }
 
