@@ -21,12 +21,12 @@ import '../widgets/report_panel.dart';
 import '../models/property_floor_area.dart';
 import 'report_sent_screen.dart';
 
-class PropertyFloorAreaFilterScreen extends StatefulWidget {
+class PropertyScreen extends StatefulWidget {
   final KnownFloorArea area;
   final String postcode;
   final String propertyType;
 
-  const PropertyFloorAreaFilterScreen({
+  const PropertyScreen({
     super.key,
     required this.area,
     required this.postcode,
@@ -34,12 +34,12 @@ class PropertyFloorAreaFilterScreen extends StatefulWidget {
   });
 
   @override
-  State<PropertyFloorAreaFilterScreen> createState() =>
-      _PropertyFloorAreaFilterScreenState();
+  State<PropertyScreen> createState() =>
+      _PropertyScreenState();
 }
 
-class _PropertyFloorAreaFilterScreenState
-    extends State<PropertyFloorAreaFilterScreen> {
+class _PropertyScreenState
+    extends State<PropertyScreen> {
   late PricePaidController _pricePaidController;
   late PropertyFloorAreaFilterController _propertyFloorAreaFilterController;
 

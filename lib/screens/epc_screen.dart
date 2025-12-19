@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/controllers/epc_controller.dart';
 import 'package:myapp/models/epc_model.dart';
 import 'package:myapp/models/property_floor_area.dart';
-import 'package:myapp/screens/property_floor_area_filter_screen.dart';
+import 'package:myapp/screens/property_screen.dart';
 import 'package:provider/provider.dart';
 
 // Helper function for natural sorting of addresses
@@ -74,7 +74,7 @@ class _EpcScreenState extends State<EpcScreen> {
     Navigator.of(context).pop();
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => PropertyFloorAreaFilterScreen(
+        builder: (context) => PropertyScreen(
           area: knownFloorArea,
           postcode: epc.postcode,
           propertyType: epc.propertyType,

@@ -5,7 +5,6 @@ import 'package:myapp/screens/epc_screen.dart';
 import 'package:myapp/screens/opening_screen.dart';
 import 'package:myapp/screens/price_paid_screen.dart';
 import 'package:myapp/screens/profile_screen.dart';
-import 'package:myapp/utils/constants.dart';
 
 final GoRouter router = GoRouter(
   routes: <RouteBase>[
