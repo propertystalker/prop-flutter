@@ -36,7 +36,7 @@ class _AdminScreenState extends State<AdminScreen> {
       return profileResponse;
     }
 
-    final companyName = user.appMetadata?['company'] as String? ?? 'No company set';
+    final companyName = user.appMetadata['company'] as String? ?? 'No company set';
 
     try {
       final createResponse = await supabase.from('profiles').insert({

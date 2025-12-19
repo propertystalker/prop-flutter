@@ -92,8 +92,7 @@ class _PropertyFloorAreaFilterScreenState
 
   @override
   Widget build(BuildContext context) {
-    final financialController =
-        Provider.of<FinancialController>(context, listen: false);
+    Provider.of<FinancialController>(context, listen: false);
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(

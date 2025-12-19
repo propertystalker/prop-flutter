@@ -45,12 +45,12 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
         final company = await supabaseService.getCompany(user.id);
         final person = await supabaseService.getPerson(user.id);
 
-        if (company == null || company.name.isEmpty) {
+        if (company.name.isEmpty) {
           // If company details are missing, navigate to company account screen.
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const CompanyAccountScreen()),
           );
-        } else if (person == null || person.fullName.isEmpty) {
+        } else if (person.fullName.isEmpty) {
           // If person details are missing, navigate to person account screen.
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const PersonAccountScreen()),

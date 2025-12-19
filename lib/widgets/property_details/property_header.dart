@@ -18,7 +18,7 @@ class PropertyHeader extends StatelessWidget {
 
   void _searchByPostcode(BuildContext context, String postcode) {
     if (postcode.isNotEmpty) {
-      context.push('/address_finder?postcode=$postcode');
+      context.go('/epc?postcode=$postcode');
     }
   }
 
