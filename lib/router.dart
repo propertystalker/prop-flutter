@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myapp/screens/address_finder_screen.dart';
 import 'package:myapp/screens/admin_screen.dart';
 import 'package:myapp/screens/epc_screen.dart';
 import 'package:myapp/screens/opening_screen.dart';
@@ -26,13 +25,6 @@ final GoRouter router = GoRouter(
           path: 'admin',
           builder: (BuildContext context, GoRouterState state) {
             return const AdminScreen();
-          },
-        ),
-        GoRoute(
-          path: 'address_finder',
-          builder: (BuildContext context, GoRouterState state) {
-            final String postcode = state.uri.queryParameters['postcode']!;
-            return AddressFinderScreen(postcode: postcode, apiKey: apiKey);
           },
         ),
         GoRoute(

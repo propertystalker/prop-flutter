@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:myapp/controllers/company_controller.dart';
 import 'package:myapp/controllers/finance_proposal_request_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/controllers/price_paid_controller.dart';
@@ -19,16 +18,20 @@ import '../widgets/filter_screen_bottom_nav.dart';
 import '../widgets/finance_panel.dart';
 import '../widgets/property_filter_app_bar.dart';
 import '../widgets/report_panel.dart';
-import '../widgets/traffic_light_indicator.dart';
 import '../models/property_floor_area.dart';
 import 'report_sent_screen.dart';
 
 class PropertyFloorAreaFilterScreen extends StatefulWidget {
   final KnownFloorArea area;
   final String postcode;
+  final String propertyType;
 
-  const PropertyFloorAreaFilterScreen(
-      {super.key, required this.area, required this.postcode});
+  const PropertyFloorAreaFilterScreen({
+    super.key,
+    required this.area,
+    required this.postcode,
+    required this.propertyType,
+  });
 
   @override
   State<PropertyFloorAreaFilterScreen> createState() =>
@@ -49,7 +52,7 @@ class _PropertyFloorAreaFilterScreenState
         postcode: widget.postcode,
         habitableRooms: widget.area.habitableRooms,
         financialController: financialController);
-        
+
     _pricePaidController.addListener(_onPriceHistoryChanged);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -167,14 +170,10 @@ class _PropertyFloorAreaFilterScreenState
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               const SizedBox(height: 16),
-                              Consumer<PricePaidController>(
-                                builder: (context, pricePaidController, child) => PropertyStats(
-                                  squareMeters: widget.area.squareMeters,
-                                  habitableRooms: widget.area.habitableRooms,
-                                  propertyType: pricePaidController.priceHistory.isNotEmpty
-                                      ? pricePaidController.priceHistory.first.propertyType
-                                      : 'N/A',
-                                ),
+                              PropertyStats(
+                                squareMeters: widget.area.squareMeters,
+                                habitableRooms: widget.area.habitableRooms,
+                                propertyType: widget.propertyType,
                               ),
                               const Divider(height: 32),
                               Consumer<FinancialController>(

@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 class Company {
   final String id; // This now represents the user_id
   final String name;

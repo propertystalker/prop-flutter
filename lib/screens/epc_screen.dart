@@ -77,6 +77,7 @@ class _EpcScreenState extends State<EpcScreen> {
         builder: (context) => PropertyFloorAreaFilterScreen(
           area: knownFloorArea,
           postcode: epc.postcode,
+          propertyType: epc.propertyType,
         ),
       ),
     );

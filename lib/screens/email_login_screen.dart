@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/models/company.dart';
-import 'package:myapp/models/person.dart';
 import 'package:myapp/screens/admin_screen.dart';
 import 'package:myapp/screens/company_account_screen.dart';
 import 'package:myapp/screens/opening_screen.dart';
