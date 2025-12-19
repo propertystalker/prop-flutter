@@ -50,9 +50,8 @@ class PostcodeService {
         }
       }
       return null;
-    } catch (e) {
-      // Handle exceptions like network errors
-      print('Error fetching postcode: $e');
+    } catch (e, s) {
+      developer.log('Error fetching postcode from coordinates', name: 'myapp.postcode', error: e, stackTrace: s, level: 1000);
       return null;
     }
   }

@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:myapp/models/company.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,12 +25,9 @@ class CompanyService {
           .single();
 
       return Company.fromMap(response);
-    } catch (e) {
-      // If no company is found, it might throw an error.
-      // Instead of letting it crash, we can return an empty or default company.
-      // This is particularly useful for the new user onboarding flow.
-      print('Error fetching company: $e');
-      return Company.empty(); // Return an empty company object
+    } catch (e, s) {
+      developer.log('Error fetching company', name: 'myapp.company_service', error: e, stackTrace: s);
+      return Company.empty();
     }
   }
 

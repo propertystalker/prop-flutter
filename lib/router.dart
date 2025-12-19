@@ -32,7 +32,6 @@ final GoRouter router = GoRouter(
             final String postcode = state.uri.queryParameters['postcode']!;
             final String houseNumber =
                 state.uri.queryParameters['houseNumber'] ?? '';
-            final String? flatNumber = state.uri.queryParameters['flatNumber'];
             return PricePaidScreen(
               postcode: postcode,
               houseNumber: houseNumber,

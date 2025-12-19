@@ -9,10 +9,10 @@ class EditUserScreen extends StatefulWidget {
   const EditUserScreen({super.key, required this.user});
 
   @override
-  _EditUserScreenState createState() => _EditUserScreenState();
+  EditUserScreenState createState() => EditUserScreenState();
 }
 
-class _EditUserScreenState extends State<EditUserScreen> {
+class EditUserScreenState extends State<EditUserScreen> {
   late TextEditingController _emailController;
   late TextEditingController _companyController;
 
@@ -58,7 +58,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                   email: _emailController.text,
                   company: _companyController.text,
                 );
-                userController.updateUser(updatedUser); // Corrected this line
+                userController.updateUser(updatedUser);
                 Navigator.pop(context);
               },
               child: const Text('Save'),

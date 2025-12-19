@@ -40,32 +40,28 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
       final response = await supabaseService.signInWithPassword(email, password);
 
       if (mounted && response.user != null) {
-        // After login, check if the user's profile is complete.
         final user = response.user!;
         try {
           final company = await supabaseService.getCompany(user.id);
           final person = await supabaseService.getPerson(user.id);
 
+          if (!mounted) return;
           if (company.name.isEmpty) {
-            // If company details are missing, navigate to company account screen.
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => const CompanyAccountScreen()),
             );
           } else if (person.fullName.isEmpty) {
-            // If person details are missing, navigate to person account screen.
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => const PersonAccountScreen()),
             );
           } else {
-            // If profile is complete, navigate to the main opening screen.
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const OpeningScreen()),
               (route) => false,
             );
           }
         } catch (e) {
-          // If getCompany or getPerson throws, it means the profile is not complete.
-          // In a real app, you might want to distinguish between the two.
+          if (!mounted) return;
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const CompanyAccountScreen()),
           );

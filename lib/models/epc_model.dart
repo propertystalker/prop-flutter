@@ -23,21 +23,21 @@ class EpcModel {
 
   factory EpcModel.fromJson(Map<String, dynamic> json) {
     // Helper to safely cast values to String
-    String _asString(dynamic value) {
+    String asString(dynamic value) {
       if (value == null) return 'N/A';
       return value.toString();
     }
 
     return EpcModel(
-      address: _asString(json['address']),
-      postcode: _asString(json['postcode']),
-      currentEnergyRating: _asString(json['current-energy-rating']),
-      potentialEnergyRating: _asString(json['potential-energy-rating']),
-      propertyType: _asString(json['property-type']),
-      builtForm: _asString(json['built-form']),
-      mainFuel: _asString(json['main-fuel']),
-      totalFloorArea: _asString(json['total-floor-area']),
-      lodgementDate: _asString(json['lodgement-date']),
+      address: asString(json['address']),
+      postcode: asString(json['postcode']),
+      currentEnergyRating: asString(json['current-energy-rating']),
+      potentialEnergyRating: asString(json['potential-energy-rating']),
+      propertyType: asString(json['property-type']),
+      builtForm: asString(json['built-form']),
+      mainFuel: asString(json['main-fuel']),
+      totalFloorArea: asString(json['total-floor-area']),
+      lodgementDate: asString(json['lodgement-date']),
     );
   }
 }

@@ -7,7 +7,7 @@ import 'dart:developer' as developer;
 class EpcService {
   final http.Client client;
 
-  EpcService({http.Client? client}) : this.client = client ?? http.Client();
+  EpcService({http.Client? client}) : client = client ?? http.Client();
 
   // The service only needs to fetch all data for a postcode.
   // The filtering will be handled by the UI (EpcScreen).

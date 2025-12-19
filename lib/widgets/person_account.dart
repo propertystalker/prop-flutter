@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -36,49 +36,53 @@ class _PersonAccountState extends State<PersonAccount> {
   @override
   void initState() {
     super.initState();
-    debugPrint("[DEBUG] PersonAccount: initState CALLED");
+    developer.log("PersonAccount: initState CALLED", name: 'myapp.person_account');
 
     final supabaseService = Provider.of<SupabaseService>(context, listen: false);
     _client = supabaseService.client;
     _personService = PersonService(_client);
 
     _authStateSubscription = _client.auth.onAuthStateChange.listen((data) {
-      debugPrint("[DEBUG] PersonAccount: onAuthStateChange TRIGGERED");
+      developer.log("PersonAccount: onAuthStateChange TRIGGERED", name: 'myapp.person_account');
       final Session? session = data.session;
       final AuthChangeEvent event = data.event;
-      debugPrint("[DEBUG] PersonAccount: AuthChangeEvent - ${event.toString()}");
-      debugPrint("[DEBUG] PersonAccount: Session is ${session != null ? 'NOT NULL' : 'NULL'}");
+      developer.log("PersonAccount: AuthChangeEvent - ${event.toString()}", name: 'myapp.person_account');
+      developer.log("PersonAccount: Session is ${session != null ? 'NOT NULL' : 'NULL'}", name: 'myapp.person_account');
 
       if (session != null) {
-        debugPrint("[DEBUG] PersonAccount: Session is active, calling _getProfile()");
-        setState(() {
-          _getProfile();
-        });
+        developer.log("PersonAccount: Session is active, calling _getProfile()", name: 'myapp.person_account');
+        if (mounted) {
+          setState(() {
+            _getProfile();
+          });
+        }
       } else {
-        debugPrint("[DEBUG] PersonAccount: Session is null, clearing fields.");
-        setState(() {
-          _fullNameController.clear();
-          _emailController.clear();
-          _mobileController.clear();
-          _linkedinController.clear();
-          _avatar = null;
-          _avatarUrl = null;
-          _company = null;
-        });
+        developer.log("PersonAccount: Session is null, clearing fields.", name: 'myapp.person_account');
+        if (mounted) {
+          setState(() {
+            _fullNameController.clear();
+            _emailController.clear();
+            _mobileController.clear();
+            _linkedinController.clear();
+            _avatar = null;
+            _avatarUrl = null;
+            _company = null;
+          });
+        }
       }
     });
 
     final initialSession = _client.auth.currentSession;
-    debugPrint("[DEBUG] PersonAccount: Initial session check is ${initialSession != null ? 'NOT NULL' : 'NULL'}");
+    developer.log("PersonAccount: Initial session check is ${initialSession != null ? 'NOT NULL' : 'NULL'}", name: 'myapp.person_account');
     if (initialSession != null) {
-      debugPrint("[DEBUG] PersonAccount: Initial session is active, calling _getProfile()");
+      developer.log("PersonAccount: Initial session is active, calling _getProfile()", name: 'myapp.person_account');
       _getProfile();
     }
   }
 
   @override
   void dispose() {
-    debugPrint("[DEBUG] PersonAccount: dispose CALLED");
+    developer.log("PersonAccount: dispose CALLED", name: 'myapp.person_account');
     _fullNameController.dispose();
     _emailController.dispose();
     _mobileController.dispose();
@@ -88,25 +92,27 @@ class _PersonAccountState extends State<PersonAccount> {
   }
 
   Future<void> _getProfile() async {
-    debugPrint("[DEBUG] PersonAccount: _getProfile CALLED");
+    developer.log("PersonAccount: _getProfile CALLED", name: 'myapp.person_account');
     if (!mounted) {
-      debugPrint("[DEBUG] PersonAccount: _getProfile CANCELED - widget is not mounted.");
+      developer.log("PersonAccount: _getProfile CANCELED - widget is not mounted.", name: 'myapp.person_account');
       return;
     }
 
     final user = _client.auth.currentUser;
     if (user != null) {
-      debugPrint("[DEBUG] PersonAccount: currentUser is NOT NULL. Email: ${user.email}");
-      setState(() {
-        _emailController.text = user.email ?? 'Error: Email is null';
-      });
+      developer.log("PersonAccount: currentUser is NOT NULL. Email: ${user.email}", name: 'myapp.person_account');
+      if (mounted) {
+        setState(() {
+          _emailController.text = user.email ?? 'Error: Email is null';
+        });
+      }
 
       try {
-        debugPrint("[DEBUG] PersonAccount: Fetching profile from Supabase for user ID: ${user.id}");
+        developer.log("PersonAccount: Fetching profile from Supabase for user ID: ${user.id}", name: 'myapp.person_account');
         final person = await _personService.getPerson(user.id);
 
         if (mounted) {
-          debugPrint("[DEBUG] PersonAccount: Profile data FOUND. Full Name: ${person.fullName}");
+          developer.log("PersonAccount: Profile data FOUND. Full Name: ${person.fullName}", name: 'myapp.person_account');
           setState(() {
             _fullNameController.text = person.fullName;
             _mobileController.text = person.mobile ?? '';
@@ -115,10 +121,10 @@ class _PersonAccountState extends State<PersonAccount> {
             _company = person.company;
           });
         } else {
-          debugPrint("[DEBUG] PersonAccount: Profile data is NULL or widget is not mounted.");
+          developer.log("PersonAccount: Profile data is NULL or widget is not mounted.", name: 'myapp.person_account');
         }
-      } catch (error) {
-        debugPrint("[DEBUG] PersonAccount: ERROR fetching profile: $error");
+      } catch (error, stackTrace) {
+        developer.log("PersonAccount: ERROR fetching profile: $error", name: 'myapp.person_account', error: error, stackTrace: stackTrace);
       }
     }
   }
@@ -154,27 +160,31 @@ class _PersonAccountState extends State<PersonAccount> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() {
-        _avatar = pickedFile;
-      });
+      if(mounted) {
+        setState(() {
+          _avatar = pickedFile;
+        });
+      }
     }
   }
 
   void _deleteImage() {
-    setState(() {
-      _avatar = null;
-      _avatarUrl = null;
-    });
+    if (mounted) {
+      setState(() {
+        _avatar = null;
+        _avatarUrl = null;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("[DEBUG] PersonAccount: build CALLED");
+    developer.log("PersonAccount: build CALLED", name: 'myapp.person_account');
     return Form(
       key: _formKey,
       child: Container(
         padding: const EdgeInsets.all(16.0),
-        color: const Color(0xFFC9B7A6),
+        color: const Color(0xFFC9B7A6), // Brown background
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -205,7 +215,7 @@ class _PersonAccountState extends State<PersonAccount> {
                       children: [
                         kIsWeb
                             ? Image.network(_avatar!.path, width: 40, height: 40)
-                            : Image.file(File(_avatar!.path), width: 40, height: 40),
+                            : Image.network(_avatar!.path, width: 40, height: 40), // Placeholder for File not available in web
                         const SizedBox(width: 8),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
