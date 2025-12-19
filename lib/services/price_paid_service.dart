@@ -4,6 +4,10 @@ import 'package:http/http.dart' as http;
 import 'package:myapp/models/price_paid_model.dart';
 
 class PricePaidService {
+  final http.Client client;
+
+  PricePaidService({http.Client? client}) : client = client ?? http.Client();
+
   Future<List<PricePaidModel>> getPricePaidData(String postcode) async {
     final Map<String, String> queryParameters = {
       '_pageSize': '200',
@@ -19,7 +23,7 @@ class PricePaidService {
 
     developer.log('Fetching data from: $uri');
 
-    final response = await http.get(uri, headers: {'Accept': 'application/json'});
+    final response = await client.get(uri, headers: {'Accept': 'application/json'});
 
     if (response.statusCode == 200) {
       developer.log('API Response: ${response.body}');

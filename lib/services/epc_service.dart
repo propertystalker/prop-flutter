@@ -5,6 +5,10 @@ import 'package:myapp/utils/constants.dart';
 import 'dart:developer' as developer;
 
 class EpcService {
+  final http.Client client;
+
+  EpcService({http.Client? client}) : this.client = client ?? http.Client();
+
   // The service only needs to fetch all data for a postcode.
   // The filtering will be handled by the UI (EpcScreen).
   Future<List<EpcModel>> getEpcData(String postcode) async {
@@ -14,7 +18,7 @@ class EpcService {
     
     developer.log('Fetching EPC data from: $url');
 
-    final response = await http.get(Uri.parse(url), headers: {
+    final response = await client.get(Uri.parse(url), headers: {
       'Accept': 'application/json',
       'Authorization': 'Basic $credentials',
     });
