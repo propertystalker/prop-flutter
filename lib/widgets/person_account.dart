@@ -21,6 +21,7 @@ class PersonAccount extends StatefulWidget {
 class _PersonAccountState extends State<PersonAccount> {
   final _formKey = GlobalKey<FormState>();
   late final PersonService _personService;
+  late final SupabaseClient _client;
   late final StreamSubscription<AuthState> _authStateSubscription;
 
   final _fullNameController = TextEditingController();
@@ -38,9 +39,10 @@ class _PersonAccountState extends State<PersonAccount> {
     debugPrint("[DEBUG] PersonAccount: initState CALLED");
 
     final supabaseService = Provider.of<SupabaseService>(context, listen: false);
-    _personService = PersonService(supabaseService.client);
+    _client = supabaseService.client;
+    _personService = PersonService(_client);
 
-    _authStateSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    _authStateSubscription = _client.auth.onAuthStateChange.listen((data) {
       debugPrint("[DEBUG] PersonAccount: onAuthStateChange TRIGGERED");
       final Session? session = data.session;
       final AuthChangeEvent event = data.event;
@@ -49,7 +51,6 @@ class _PersonAccountState extends State<PersonAccount> {
 
       if (session != null) {
         debugPrint("[DEBUG] PersonAccount: Session is active, calling _getProfile()");
-        // Using setState to ensure the UI rebuilds if the data arrives after the initial build.
         setState(() {
           _getProfile();
         });
@@ -67,11 +68,10 @@ class _PersonAccountState extends State<PersonAccount> {
       }
     });
 
-    // Initial check in case the session is already active.
-    final initialSession = Supabase.instance.client.auth.currentSession;
+    final initialSession = _client.auth.currentSession;
     debugPrint("[DEBUG] PersonAccount: Initial session check is ${initialSession != null ? 'NOT NULL' : 'NULL'}");
     if (initialSession != null) {
-       debugPrint("[DEBUG] PersonAccount: Initial session is active, calling _getProfile()");
+      debugPrint("[DEBUG] PersonAccount: Initial session is active, calling _getProfile()");
       _getProfile();
     }
   }
@@ -94,10 +94,9 @@ class _PersonAccountState extends State<PersonAccount> {
       return;
     }
 
-    final user = Supabase.instance.client.auth.currentUser;
+    final user = _client.auth.currentUser;
     if (user != null) {
       debugPrint("[DEBUG] PersonAccount: currentUser is NOT NULL. Email: ${user.email}");
-      // Use setState to ensure the text controller is updated and the UI reflects it.
       setState(() {
         _emailController.text = user.email ?? 'Error: Email is null';
       });
@@ -116,11 +115,10 @@ class _PersonAccountState extends State<PersonAccount> {
             _company = person.company;
           });
         } else {
-           debugPrint("[DEBUG] PersonAccount: Profile data is NULL or widget is not mounted.");
+          debugPrint("[DEBUG] PersonAccount: Profile data is NULL or widget is not mounted.");
         }
       } catch (error) {
         debugPrint("[DEBUG] PersonAccount: ERROR fetching profile: $error");
-        // This is expected for a new user, so we don't need to show an error.
       }
     }
   }
@@ -128,20 +126,16 @@ class _PersonAccountState extends State<PersonAccount> {
   Future<void> _onSave() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final user = Supabase.instance.client.auth.currentUser;
+      final user = _client.auth.currentUser;
       if (user != null) {
-
-        // Ensure we have a valid company object before creating the Person.
-        // If _company is null (which can happen for a new user), we create an empty one.
         final companyToSave = _company ?? Company.empty();
-
         final person = Person(
           id: user.id,
           fullName: _fullNameController.text,
           email: _emailController.text,
           mobile: _mobileController.text,
           linkedin: _linkedinController.text,
-          company: companyToSave, // Use the safe company object.
+          company: companyToSave,
         );
 
         await _personService.updatePerson(person);
@@ -163,12 +157,10 @@ class _PersonAccountState extends State<PersonAccount> {
       setState(() {
         _avatar = pickedFile;
       });
-      // TODO: Upload to Supabase Storage and save URL
     }
   }
 
   void _deleteImage() {
-    // TODO: Delete from Supabase Storage
     setState(() {
       _avatar = null;
       _avatarUrl = null;
@@ -182,7 +174,7 @@ class _PersonAccountState extends State<PersonAccount> {
       key: _formKey,
       child: Container(
         padding: const EdgeInsets.all(16.0),
-        color: const Color(0xFFC9B7A6), // Brown background
+        color: const Color(0xFFC9B7A6),
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -193,7 +185,7 @@ class _PersonAccountState extends State<PersonAccount> {
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
-                readOnly: true, // Email is from auth and should not be changed here
+                readOnly: true,
               ),
               TextFormField(
                 controller: _mobileController,
@@ -248,8 +240,7 @@ class _PersonAccountState extends State<PersonAccount> {
               const SizedBox(height: 16.0),
               InkWell(
                 onTap: () async {
-                  await Supabase.instance.client.auth.signOut();
-                  // Optionally, navigate to the login screen
+                  await _client.auth.signOut();
                 },
                 child: const Text(
                   'log out',

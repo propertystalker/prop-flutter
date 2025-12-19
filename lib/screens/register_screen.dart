@@ -36,8 +36,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final companyName = _companyController.text;
 
     try {
-      // The companyName is passed as user metadata during sign-up.
-      // A database trigger will now automatically create the company and profile.
       await supabaseService.signUp(
         email,
         password,
@@ -45,8 +43,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (mounted) {
-        // Since email confirmation is off, the user is logged in.
-        // Navigate to the person account screen to complete their profile.
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => const PersonAccountScreen(),
@@ -60,7 +56,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       }
     } on PostgrestException catch (e) {
-      // This database error should no longer occur with the trigger handling the insert.
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Database Error: ${e.message}')),
@@ -92,6 +87,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Column(
           children: [
             TextField(
+              key: const Key('email-field'),
               controller: _emailController,
               decoration: const InputDecoration(
                 labelText: 'Email',
@@ -100,6 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 16),
             TextField(
+              key: const Key('company-field'),
               controller: _companyController,
               decoration: const InputDecoration(
                 labelText: 'Company',
@@ -107,6 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 16),
             TextField(
+              key: const Key('password-field'),
               controller: _passwordController,
               decoration: const InputDecoration(
                 labelText: 'Password',

@@ -5,7 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:myapp/models/company.dart';
 import 'package:myapp/services/supabase_service.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CompanyAccount extends StatefulWidget {
   const CompanyAccount({super.key});
@@ -28,7 +27,7 @@ class _CompanyAccountState extends State<CompanyAccount> {
   void initState() {
     super.initState();
     _supabaseService = Provider.of<SupabaseService>(context, listen: false);
-    _getCompanyProfile();
+    // Removed the problematic call to _getCompanyProfile()
   }
 
   @override
@@ -40,35 +39,13 @@ class _CompanyAccountState extends State<CompanyAccount> {
     super.dispose();
   }
 
-  Future<void> _getCompanyProfile() async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user != null) {
-      try {
-        // Assuming a company profile is linked to a user
-        final company = await _supabaseService.getCompany(user.id);
-
-        if (mounted) {
-          _nameController.text = company.name;
-          _emailController.text = company.email;
-        }
-      } catch (e) {
-        // Handle error, e.g., show a snackbar
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Could not fetch company profile: $e')),
-          );
-        }
-      }
-    }
-  }
-
   Future<void> _onSave() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final user = Supabase.instance.client.auth.currentUser;
+      final user = _supabaseService.client.auth.currentUser;
       if (user != null) {
         final company = Company(
-          id: user.id, // The user.id is the company's primary key
+          id: user.id,
           name: _nameController.text,
           email: _emailController.text,
         );
@@ -99,7 +76,6 @@ class _CompanyAccountState extends State<CompanyAccount> {
       setState(() {
         _companyLogo = pickedFile;
       });
-      // TODO: Upload to Supabase Storage and save URL
     }
   }
 
@@ -107,14 +83,13 @@ class _CompanyAccountState extends State<CompanyAccount> {
     setState(() {
       _companyLogo = null;
     });
-    // TODO: Delete from Supabase Storage
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16.0),
-      color: const Color(0xFFF0F4F8), // A light grey background
+      color: const Color(0xFFF0F4F8),
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(

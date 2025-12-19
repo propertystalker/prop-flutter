@@ -6,11 +6,12 @@ import 'package:myapp/services/person_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseService with ChangeNotifier {
-  final SupabaseClient _supabaseClient = Supabase.instance.client;
+  late final SupabaseClient _supabaseClient;
   late final PersonService _personService;
   late final CompanyService _companyService;
 
-  SupabaseService() {
+  SupabaseService({SupabaseClient? client}) {
+    _supabaseClient = client ?? Supabase.instance.client;
     _personService = PersonService(_supabaseClient);
     _companyService = CompanyService(_supabaseClient);
   }

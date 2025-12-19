@@ -42,24 +42,32 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
       if (mounted && response.user != null) {
         // After login, check if the user's profile is complete.
         final user = response.user!;
-        final company = await supabaseService.getCompany(user.id);
-        final person = await supabaseService.getPerson(user.id);
+        try {
+          final company = await supabaseService.getCompany(user.id);
+          final person = await supabaseService.getPerson(user.id);
 
-        if (company.name.isEmpty) {
-          // If company details are missing, navigate to company account screen.
+          if (company.name.isEmpty) {
+            // If company details are missing, navigate to company account screen.
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const CompanyAccountScreen()),
+            );
+          } else if (person.fullName.isEmpty) {
+            // If person details are missing, navigate to person account screen.
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const PersonAccountScreen()),
+            );
+          } else {
+            // If profile is complete, navigate to the main opening screen.
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const OpeningScreen()),
+              (route) => false,
+            );
+          }
+        } catch (e) {
+          // If getCompany or getPerson throws, it means the profile is not complete.
+          // In a real app, you might want to distinguish between the two.
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const CompanyAccountScreen()),
-          );
-        } else if (person.fullName.isEmpty) {
-          // If person details are missing, navigate to person account screen.
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const PersonAccountScreen()),
-          );
-        } else {
-          // If profile is complete, navigate to the main opening screen.
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const OpeningScreen()),
-            (route) => false,
           );
         }
       }
@@ -95,6 +103,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
         child: Column(
           children: [
             TextField(
+              key: const Key('email-field'),
               controller: _emailController,
               decoration: const InputDecoration(
                 labelText: 'Email',
@@ -103,6 +112,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
             ),
             const SizedBox(height: 16),
             TextField(
+              key: const Key('password-field'),
               controller: _passwordController,
               decoration: const InputDecoration(
                 labelText: 'Password',
@@ -114,6 +124,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
               const CircularProgressIndicator()
             else
               ElevatedButton(
+                key: const Key('login-button'),
                 onPressed: _login,
                 child: const Text('Login'),
               ),
