@@ -4,15 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/controllers/financial_controller.dart';
+import 'package:myapp/controllers/gdv_controller.dart';
 import 'package:myapp/utils/constants.dart';
 
 class PropertyFloorAreaFilterController with ChangeNotifier {
   final String postcode;
   final int habitableRooms;
   final FinancialController financialController;
+  final GdvController gdvController;
 
-  PropertyFloorAreaFilterController(
-      {required this.postcode, required this.habitableRooms, required this.financialController});
+  PropertyFloorAreaFilterController({
+    required this.postcode,
+    required this.habitableRooms,
+    required this.financialController,
+    required this.gdvController,
+  });
 
   final PageController _pageController = PageController();
   PageController get pageController => _pageController;
@@ -47,7 +53,7 @@ class PropertyFloorAreaFilterController with ChangeNotifier {
   bool _isPersonAccountVisible = false;
   bool get isPersonAccountVisible => _isPersonAccountVisible;
 
-Future<void> fetchEstimatedPrice() async {
+  Future<void> fetchEstimatedPrice() async {
     final url = Uri.parse(
         'https://api.propertydata.co.uk/prices?key=$apiKey&postcode=$postcode&bedrooms=$habitableRooms');
 
@@ -57,15 +63,15 @@ Future<void> fetchEstimatedPrice() async {
         final data = jsonDecode(response.body);
         if (data['status'] == 'success' && data['data']['average'] != null) {
           final estimatedPrice = (data['data']['average'] as int).toDouble();
-          financialController.setCurrentPrice(estimatedPrice);
+          financialController.setCurrentPrice(estimatedPrice, gdvController.finalGdv);
         } else {
-          financialController.setCurrentPrice(0.0);
+          financialController.setCurrentPrice(0.0, gdvController.finalGdv);
         }
       } else {
-        financialController.setCurrentPrice(0.0);
+        financialController.setCurrentPrice(0.0, gdvController.finalGdv);
       }
     } catch (e) {
-      financialController.setCurrentPrice(0.0);
+      financialController.setCurrentPrice(0.0, gdvController.finalGdv);
     } finally {
       notifyListeners();
     }
@@ -74,7 +80,7 @@ Future<void> fetchEstimatedPrice() async {
   void updatePrice(String value) {
     final newPrice = double.tryParse(value);
     if (newPrice != null) {
-      financialController.setCurrentPrice(newPrice);
+      financialController.setCurrentPrice(newPrice, gdvController.finalGdv);
     }
     _isEditingPrice = false;
     notifyListeners();

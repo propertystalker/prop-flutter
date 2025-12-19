@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:intl/intl.dart';
+
+import '../controllers/financial_controller.dart';
 
 class DevelopmentScenarios extends StatefulWidget {
-  final double propertyValue;
   final Function(String) onScenarioChanged;
 
   const DevelopmentScenarios({
     super.key,
-    required this.propertyValue,
     required this.onScenarioChanged,
   });
 
@@ -33,10 +35,15 @@ class _DevelopmentScenariosState extends State<DevelopmentScenarios> {
     'Dormer loft with ensuite',
   ];
 
-  // Dummy data for uplift calculation - replace with actual logic
-  double _calculateUplift(String scenario) {
-    // Replace with your actual uplift calculation based on the scenario
-    return (scenario.hashCode % 100) * 1000.0;
+  @override
+  void initState() {
+    super.initState();
+    // Trigger the initial calculation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        widget.onScenarioChanged(_scenarios[_currentIndex]);
+      }
+    });
   }
 
   void _nextScenario() {
@@ -55,13 +62,16 @@ class _DevelopmentScenariosState extends State<DevelopmentScenarios> {
 
   @override
   Widget build(BuildContext context) {
+    final financialController = Provider.of<FinancialController>(context);
     final selectedScenario = _scenarios[_currentIndex];
-    final uplift = _calculateUplift(selectedScenario);
-    final gdv = widget.propertyValue + uplift;
+    
+    final currencyFormatter = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
 
     final List<_ChartData> chartData = [
-      _ChartData('Property Value', widget.propertyValue, '£${(widget.propertyValue / 1000).toStringAsFixed(0)}K'),
-      _ChartData('Uplift', uplift, '£${(uplift / 1000).toStringAsFixed(0)}K'),
+      _ChartData('Total Cost', financialController.totalCost,
+          currencyFormatter.format(financialController.totalCost)),
+      _ChartData('Uplift', financialController.uplift,
+          currencyFormatter.format(financialController.uplift)),
     ];
 
     return Column(
@@ -94,8 +104,11 @@ class _DevelopmentScenariosState extends State<DevelopmentScenarios> {
         SizedBox(
           height: 200,
           child: SfCircularChart(
-            title: ChartTitle(text: 'GDV: £${(gdv / 1000).toStringAsFixed(0)}K'),
-            legend: const Legend(isVisible: true, position: LegendPosition.bottom),
+            title: ChartTitle(
+                text:
+                    'GDV: ${currencyFormatter.format(financialController.gdv)}'),
+            legend:
+                const Legend(isVisible: true, position: LegendPosition.bottom),
             series: <CircularSeries>[
               PieSeries<_ChartData, String>(
                 dataSource: chartData,

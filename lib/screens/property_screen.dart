@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/controllers/finance_proposal_request_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
+import 'package:myapp/controllers/gdv_controller.dart';
 import 'package:myapp/controllers/price_paid_controller.dart';
 import 'package:myapp/controllers/property_floor_area_filter_controller.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/widgets/company_account.dart';
+import 'package:myapp/widgets/gdv_calculation_widget.dart';
+import 'package:myapp/widgets/gdv_range_widget.dart';
 import 'package:myapp/widgets/person_account.dart';
 import 'package:myapp/widgets/property_details/image_gallery.dart';
 import 'package:myapp/widgets/property_details/price_history.dart';
 import 'package:myapp/widgets/property_details/property_header.dart';
 import 'package:myapp/widgets/property_details/property_stats.dart';
+import 'package:myapp/widgets/uplift_analysis_widget.dart';
+import 'package:myapp/widgets/uplift_risk_overview_widget.dart';
 import 'package:provider/provider.dart';
 import '../widgets/development_scenarios.dart';
 import '../widgets/financial_summary.dart';
@@ -34,24 +39,26 @@ class PropertyScreen extends StatefulWidget {
   });
 
   @override
-  State<PropertyScreen> createState() =>
-      _PropertyScreenState();
+  State<PropertyScreen> createState() => _PropertyScreenState();
 }
 
-class _PropertyScreenState
-    extends State<PropertyScreen> {
+class _PropertyScreenState extends State<PropertyScreen> {
   late PricePaidController _pricePaidController;
   late PropertyFloorAreaFilterController _propertyFloorAreaFilterController;
+  late GdvController _gdvController;
 
   @override
   void initState() {
     super.initState();
     _pricePaidController = Provider.of<PricePaidController>(context, listen: false);
     final financialController = Provider.of<FinancialController>(context, listen: false);
+    _gdvController = Provider.of<GdvController>(context, listen: false);
+    
     _propertyFloorAreaFilterController = PropertyFloorAreaFilterController(
         postcode: widget.postcode,
         habitableRooms: widget.area.habitableRooms,
-        financialController: financialController);
+        financialController: financialController,
+        gdvController: _gdvController);
 
     _pricePaidController.addListener(_onPriceHistoryChanged);
 
@@ -72,9 +79,8 @@ class _PropertyScreenState
         final latestPrice =
             _pricePaidController.priceHistory.first.amount.toDouble();
         Provider.of<FinancialController>(context, listen: false)
-            .setCurrentPrice(latestPrice);
+            .setCurrentPrice(latestPrice, _gdvController.finalGdv);
       } else {
-        // If there's no price history, fetch an estimated price as a fallback.
         _propertyFloorAreaFilterController.fetchEstimatedPrice();
       }
     }
@@ -92,18 +98,12 @@ class _PropertyScreenState
 
   @override
   Widget build(BuildContext context) {
-    final financialController = Provider.of<FinancialController>(context, listen: false);
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(
-          value: _propertyFloorAreaFilterController,
-        ),
-        ChangeNotifierProvider(
-          create: (_) => FinanceProposalRequestController(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => SendReportRequestController(),
-        ),
+        ChangeNotifierProvider.value(value: _propertyFloorAreaFilterController),
+        ChangeNotifierProvider(create: (_) => FinanceProposalRequestController()),
+        ChangeNotifierProvider(create: (_) => SendReportRequestController()),
+        ChangeNotifierProvider.value(value: _gdvController),
       ],
       child: Consumer<PropertyFloorAreaFilterController>(
         builder: (context, controller, child) {
@@ -114,10 +114,8 @@ class _PropertyScreenState
             ),
             body: Column(
               children: [
-                if (controller.isCompanyAccountVisible)
-                  const CompanyAccount(),
-                if (controller.isPersonAccountVisible)
-                  const PersonAccount(),
+                if (controller.isCompanyAccountVisible) const CompanyAccount(),
+                if (controller.isPersonAccountVisible) const PersonAccount(),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -131,15 +129,12 @@ class _PropertyScreenState
                                 child: Container(
                                   height: 200,
                                   decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Colors.purple, width: 2),
+                                    border: Border.all(color: Colors.purple, width: 2),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
-                                  child:
-                                      Image.asset('assets/images/gemini.png'),
+                                  child: Image.asset('assets/images/gemini.png'),
                                 ),
                               ),
-                              const SizedBox(width: 16),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: GestureDetector(
@@ -147,8 +142,7 @@ class _PropertyScreenState
                                   child: Container(
                                     height: 200,
                                     decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: Colors.blue, width: 2),
+                                      border: Border.all(color: Colors.blue, width: 2),
                                       borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     child: const ImageGallery(),
@@ -175,16 +169,19 @@ class _PropertyScreenState
                                 propertyType: widget.propertyType,
                               ),
                               const Divider(height: 32),
-                              Consumer<FinancialController>(
-                                builder: (context, financialController, child) {
+                              Consumer2<FinancialController, GdvController>(
+                                builder: (context, financialController, gdvController, child) {
                                   return DevelopmentScenarios(
-                                    propertyValue: financialController.currentPrice ?? 0,
                                     onScenarioChanged: (scenario) {
-                                      financialController.calculateFinancials(scenario);
+                                      financialController.calculateFinancials(scenario, gdvController.finalGdv);
                                     },
                                   );
                                 },
                               ),
+                              const Divider(height: 32),
+                              const GdvCalculationWidget(),
+                              const Divider(height: 32),
+                              const GdvRangeWidget(),
                               const Divider(height: 32),
                               Consumer<FinancialController>(
                                 builder: (context, financialController, child) =>
@@ -196,6 +193,10 @@ class _PropertyScreenState
                                 ),
                               ),
                               const Divider(height: 32),
+                              const UpliftRiskOverviewWidget(),
+                              const Divider(height: 32),
+                              const UpliftAnalysisWidget(),
+                              const Divider(height: 32),
                               const PriceHistory(),
                             ],
                           ),
@@ -205,9 +206,7 @@ class _PropertyScreenState
                   ),
                 ),
                 if (controller.isFinancePanelVisible)
-                  FinancePanel(
-                    onSend: controller.hideFinancePanel,
-                  ),
+                  FinancePanel(onSend: controller.hideFinancePanel),
                 if (controller.isReportPanelVisible)
                   Consumer<FinancialController>(
                     builder: (context, financialController, child) => ReportPanel(
@@ -231,15 +230,9 @@ class _PropertyScreenState
               ],
             ),
             bottomNavigationBar: FilterScreenBottomNav(onTap: (index) {
-              if (index == 0) {
-                controller.toggleFinancePanelVisibility();
-              }
-              if (index == 1) {
-                controller.pickImages();
-              }
-              if (index == 2) {
-                controller.toggleReportPanelVisibility();
-              }
+              if (index == 0) controller.toggleFinancePanelVisibility();
+              if (index == 1) controller.pickImages();
+              if (index == 2) controller.toggleReportPanelVisibility();
             }),
           );
         },

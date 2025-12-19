@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/controllers/company_controller.dart';
 import 'package:myapp/controllers/epc_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
+import 'package:myapp/controllers/gdv_controller.dart';
 import 'package:myapp/controllers/person_controller.dart';
 import 'package:myapp/controllers/price_paid_controller.dart';
 import 'package:myapp/firebase_options.dart';
@@ -27,11 +28,12 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => SupabaseService()),
-        ChangeNotifierProvider(create: (context) => FinancialController()),
+        ChangeNotifierProvider(create: (context) => FinancialController(existingInternalArea: 110.0)),
         ChangeNotifierProvider(create: (context) => EpcController()),
         ChangeNotifierProvider(create: (context) => PricePaidController()),
         ChangeNotifierProvider(create: (context) => PersonController()),
         ChangeNotifierProvider(create: (context) => CompanyController()),
+        ChangeNotifierProvider(create: (context) => GdvController()),
       ],
       child: const MyApp(),
     ),
