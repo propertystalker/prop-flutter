@@ -50,16 +50,15 @@ class PricePaidController with ChangeNotifier {
       // 1. Fetch all transactions for the postcode.
       final allTransactions = await _pricePaidService.getPricePaidData(postcode);
 
-      // 2. Filter the results in-memory.
+      // 2. Filter the results in-memory using an exact match.
       if (houseNumber.isNotEmpty) {
         final searchNumber = houseNumber.toUpperCase().trim();
         _priceHistory = allTransactions.where((item) {
+          // Use an exact match on PAON (Primary Addressable Object Name)
           final paon = item.paon?.toUpperCase().trim() ?? '';
-          final saon = item.saon?.toUpperCase().trim() ?? '';
-          return paon.contains(searchNumber) || saon.contains(searchNumber);
+          return paon == searchNumber;
         }).toList();
       } else {
-        // If no house number is given, we return the whole list for the postcode.
         _priceHistory = allTransactions;
       }
       

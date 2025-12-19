@@ -167,9 +167,14 @@ class _PropertyFloorAreaFilterScreenState
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               const SizedBox(height: 16),
-                              PropertyStats(
-                                squareFeet: widget.area.squareFeet,
-                                habitableRooms: widget.area.habitableRooms,
+                              Consumer<PricePaidController>(
+                                builder: (context, pricePaidController, child) => PropertyStats(
+                                  squareFeet: widget.area.squareFeet,
+                                  habitableRooms: widget.area.habitableRooms,
+                                  propertyType: pricePaidController.priceHistory.isNotEmpty
+                                      ? pricePaidController.priceHistory.first.propertyType
+                                      : 'N/A',
+                                ),
                               ),
                               const Divider(height: 32),
                               Consumer<FinancialController>(
