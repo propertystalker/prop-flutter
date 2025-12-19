@@ -32,7 +32,11 @@ final GoRouter router = GoRouter(
             final String postcode = state.uri.queryParameters['postcode']!;
             final String houseNumber =
                 state.uri.queryParameters['houseNumber'] ?? '';
-            return PricePaidScreen(postcode: postcode, houseNumber: houseNumber);
+            final String? flatNumber = state.uri.queryParameters['flatNumber'];
+            return PricePaidScreen(
+              postcode: postcode,
+              houseNumber: houseNumber,
+            );
           },
         ),
         GoRoute(
@@ -40,7 +44,12 @@ final GoRouter router = GoRouter(
           builder: (BuildContext context, GoRouterState state) {
             final String postcode = state.uri.queryParameters['postcode']!;
             final String? houseNumber = state.uri.queryParameters['houseNumber'];
-            return EpcScreen(postcode: postcode, houseNumber: houseNumber);
+            final String? flatNumber = state.uri.queryParameters['flatNumber'];
+            return EpcScreen(
+              postcode: postcode,
+              houseNumber: houseNumber,
+              flatNumber: flatNumber,
+            );
           },
         ),
       ],

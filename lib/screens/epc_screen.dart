@@ -1,9 +1,11 @@
+
 import 'package:flutter/material.dart';
 import 'package:myapp/controllers/epc_controller.dart';
 import 'package:myapp/models/epc_model.dart';
 import 'package:myapp/models/property_floor_area.dart';
 import 'package:myapp/screens/property_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:myapp/utils/constants.dart'; // Import constants for colors
 
 // Helper function for natural sorting of addresses
 int _compareAddresses(String addressA, String addressB) {
@@ -36,13 +38,13 @@ int _compareAddresses(String addressA, String addressB) {
 class EpcScreen extends StatefulWidget {
   final String postcode;
   final String? houseNumber;
-  final String? flatNumber; // Added flatNumber
+  final String? flatNumber;
 
   const EpcScreen(
       {super.key,
       required this.postcode,
       this.houseNumber,
-      this.flatNumber}); // Added flatNumber
+      this.flatNumber});
 
   @override
   State<EpcScreen> createState() => _EpcScreenState();
@@ -70,7 +72,6 @@ class _EpcScreenState extends State<EpcScreen> {
       inspectionDate: epc.lodgementDate,
     );
 
-    // Pop the current screen and then push the new screen to keep the navigation stack correct.
     Navigator.of(context).pop();
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -83,11 +84,83 @@ class _EpcScreenState extends State<EpcScreen> {
     );
   }
 
+  // WIDGET FOR HIGHLIGHTING THE ADDRESS
+  Widget _buildHighlightedTitle(String address, String? flatNumber, String? houseNumber) {
+    final cleanFlatQuery = (flatNumber != null && flatNumber.trim().isNotEmpty) ? flatNumber.trim() : null;
+    final cleanHouseQuery = (houseNumber != null && houseNumber.trim().isNotEmpty) ? houseNumber.trim() : null;
+
+    if (cleanFlatQuery == null && cleanHouseQuery == null) {
+      return Text(address, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+    }
+
+    final Map<String, Color> searchTerms = {};
+    if (cleanFlatQuery != null) searchTerms[cleanFlatQuery] = trafficGreen;
+    if (cleanHouseQuery != null) searchTerms[cleanHouseQuery] = trafficRed;
+
+    final pattern = searchTerms.keys.map((key) => RegExp.escape(key)).join('|');
+    final regex = RegExp(pattern, caseSensitive: false);
+    
+    final List<TextSpan> spans = [];
+    int lastEnd = 0;
+
+    for (final match in regex.allMatches(address)) {
+        if (match.start > lastEnd) {
+            spans.add(TextSpan(text: address.substring(lastEnd, match.start)));
+        }
+        
+        final matchedText = match.group(0)!;
+        final color = searchTerms.entries.firstWhere((entry) => entry.key.toLowerCase() == matchedText.toLowerCase()).value;
+        
+        spans.add(
+            TextSpan(
+                text: matchedText,
+                style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w900,
+                    backgroundColor: color.withOpacity(0.2),
+                ),
+            )
+        );
+        lastEnd = match.end;
+    }
+
+    if (lastEnd < address.length) {
+        spans.add(TextSpan(text: address.substring(lastEnd)));
+    }
+
+    return RichText(
+      text: TextSpan(
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
+        ),
+        children: spans,
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
+
+    // --- BUILD THE DEBUG TITLE STRING ---
+    final List<String> titleParts = ['EPC: ${widget.postcode}'];
+    if (widget.flatNumber != null && widget.flatNumber!.isNotEmpty) {
+      titleParts.add('Flat: ${widget.flatNumber}');
+    }
+    if (widget.houseNumber != null && widget.houseNumber!.isNotEmpty) {
+      titleParts.add('House: ${widget.houseNumber}');
+    }
+    // --- END OF TITLE STRING LOGIC ---
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('EPC Data for ${widget.postcode}'),
+        // UPDATED TITLE FOR DEBUGGING
+        title: Text(
+          titleParts.join(' | '),
+          style: const TextStyle(fontSize: 14), // Smaller font to fit more text
+        ),
       ),
       body: Consumer<EpcController>(
         builder: (context, controller, child) {
@@ -105,31 +178,43 @@ class _EpcScreenState extends State<EpcScreen> {
           final sortedData = List<EpcModel>.from(controller.epcData);
           sortedData.sort((a, b) => _compareAddresses(a.address, b.address));
 
+          // --- NEW AND CORRECTED FILTERING LOGIC ---
           List<EpcModel> filteredData;
-          if (widget.houseNumber != null &&
-              widget.houseNumber!.trim().isNotEmpty) {
-            final houseNumberQuery = widget.houseNumber!.trim();
-            final filterRegex = RegExp(r'\b' + RegExp.escape(houseNumberQuery) + r'\b',
-                caseSensitive: false);
+          final houseQuery = widget.houseNumber?.trim();
+          final flatQuery = widget.flatNumber?.trim();
+          final bool hasHouseQuery = houseQuery != null && houseQuery.isNotEmpty;
+          final bool hasFlatQuery = flatQuery != null && flatQuery.isNotEmpty;
 
-            filteredData = sortedData.where((epc) {
-              return filterRegex.hasMatch(epc.address);
-            }).toList();
+          if (hasHouseQuery || hasFlatQuery) {
+              filteredData = sortedData.where((epc) {
+                  final addressLower = epc.address.toLowerCase();
+                  
+                  if (hasHouseQuery) {
+                      final houseRegex = RegExp(r'\b' + RegExp.escape(houseQuery!) + r'\b');
+                      if (!houseRegex.hasMatch(addressLower)) return false;
+                  }
+                  if (hasFlatQuery) {
+                      final flatRegex = RegExp(r'\b' + RegExp.escape(flatQuery!) + r'\b');
+                      if (!flatRegex.hasMatch(addressLower)) return false;
+                  }
+                  return true;
+              }).toList();
 
-            if (filteredData.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'No property matching house number "$houseNumberQuery" was found at this postcode.',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              );
-            }
+              if (filteredData.isEmpty) {
+                  return Center(
+                      child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                              'No property matching your criteria was found. Please check the numbers and try again.',
+                              textAlign: TextAlign.center,
+                          ),
+                      ),
+                  );
+              }
           } else {
-            filteredData = sortedData;
+              filteredData = sortedData;
           }
+          // --- END OF NEW LOGIC ---
 
           final Map<String, EpcModel> latestEpcByAddress = {};
           for (final epc in filteredData) {
@@ -149,14 +234,12 @@ class _EpcScreenState extends State<EpcScreen> {
           final displayData = latestEpcByAddress.values.toList();
           displayData.sort((a, b) => _compareAddresses(a.address, b.address));
 
-          // If there is only one result, navigate directly to the details screen.
           if (displayData.length == 1) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) { // Ensure the widget is still in the tree
+              if (mounted) {
                 _navigateToDetails(context, displayData.first);
               }
             });
-            // Show a loading indicator while the navigation is scheduled.
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -167,10 +250,12 @@ class _EpcScreenState extends State<EpcScreen> {
               return Card(
                 margin: const EdgeInsets.all(8.0),
                 child: ListTile(
-                  title: Text(epc.address),
+                  // USE THE NEW HIGHLIGHTING WIDGET HERE
+                  title: _buildHighlightedTitle(epc.address, widget.flatNumber, widget.houseNumber),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const SizedBox(height: 8),
                       Text('Postcode: ${epc.postcode}'),
                       Text('Current Rating: ${epc.currentEnergyRating}'),
                       Text('Potential Rating: ${epc.potentialEnergyRating}'),
