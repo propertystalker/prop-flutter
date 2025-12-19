@@ -1,28 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-class DevelopmentScenarios extends StatelessWidget {
-  final String selectedScenario;
-  final VoidCallback onPrevious;
-  final VoidCallback onNext;
-  final double gdv;
-  final double totalCost;
-  final double uplift;
+class DevelopmentScenarios extends StatefulWidget {
+  final double propertyValue;
+  final Function(String) onScenarioChanged;
 
   const DevelopmentScenarios({
     super.key,
-    required this.selectedScenario,
-    required this.onPrevious,
-    required this.onNext,
-    required this.gdv,
-    required this.totalCost,
-    required this.uplift,
+    required this.propertyValue,
+    required this.onScenarioChanged,
   });
 
   @override
+  _DevelopmentScenariosState createState() => _DevelopmentScenariosState();
+}
+
+class _DevelopmentScenariosState extends State<DevelopmentScenarios> {
+  int _currentIndex = 0;
+
+  final List<String> _scenarios = [
+    'Full Refurbishment',
+    'Rear single-storey extension',
+    'Rear two-storey extension',
+    'Side single-storey extension',
+    'Side two-storey extension',
+    'Porch / small front single-storey extension',
+    'Full-width front single-storey extension',
+    'Full-width front two-storey front extension',
+    'Standard single garage conversion',
+    'Basic loft conversion (Velux)',
+    'Dormer loft conversion',
+    'Dormer loft with ensuite',
+  ];
+
+  // Dummy data for uplift calculation - replace with actual logic
+  double _calculateUplift(String scenario) {
+    // Replace with your actual uplift calculation based on the scenario
+    return (scenario.hashCode % 100) * 1000.0;
+  }
+
+  void _nextScenario() {
+    setState(() {
+      _currentIndex = (_currentIndex + 1) % _scenarios.length;
+      widget.onScenarioChanged(_scenarios[_currentIndex]);
+    });
+  }
+
+  void _previousScenario() {
+    setState(() {
+      _currentIndex = (_currentIndex - 1 + _scenarios.length) % _scenarios.length;
+      widget.onScenarioChanged(_scenarios[_currentIndex]);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final selectedScenario = _scenarios[_currentIndex];
+    final uplift = _calculateUplift(selectedScenario);
+    final gdv = widget.propertyValue + uplift;
+
     final List<_ChartData> chartData = [
-      _ChartData('Total Cost', totalCost, '£${(totalCost / 1000).toStringAsFixed(0)}K'),
+      _ChartData('Property Value', widget.propertyValue, '£${(widget.propertyValue / 1000).toStringAsFixed(0)}K'),
       _ChartData('Uplift', uplift, '£${(uplift / 1000).toStringAsFixed(0)}K'),
     ];
 
@@ -37,7 +75,7 @@ class DevelopmentScenarios extends StatelessWidget {
           children: [
             IconButton(
               icon: const Icon(Icons.arrow_left),
-              onPressed: onPrevious,
+              onPressed: _previousScenario,
             ),
             Expanded(
               child: Text(
@@ -48,7 +86,7 @@ class DevelopmentScenarios extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.arrow_right),
-              onPressed: onNext,
+              onPressed: _nextScenario,
             ),
           ],
         ),

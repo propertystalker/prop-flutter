@@ -1,40 +1,35 @@
-# Project Blueprint: Property Data Application
+# Project Blueprint
 
 ## Overview
 
-This document outlines the design, features, and implementation plan for a property data application built with Flutter. The app will provide users with a platform to access and manage property information, including pricing, EPC ratings, and other relevant data.
+This document outlines the architecture, features, and design of the Flutter application. It serves as a single source of truth for the project's structure and implementation details.
 
-## Core Features
+## Style, Design, and Features
 
-- **User Authentication:** A registration and login system for users to access the application.
-- **Property Data Visualization:** Display property data, including price paid, EPC ratings, and floor area.
-- **Data Fetching:** Fetch property data from various external APIs.
-- **Database Integration:** Use Supabase to store and manage user and property data.
+### Implemented Features
 
-## Design and Aesthetics
+*   **Authentication:** User authentication is handled via Supabase, with options for email/password and magic link sign-in.
+*   **User Profiles:** Users can create and manage their profiles, including personal and company information.
+*   **Property Information:** The application provides detailed information about properties, including Energy Performance Certificates (EPC) and price paid history.
+*   **Postcode Lookup:** Users can search for postcodes and get autocomplete suggestions.
+*   **Geolocation:** The app can use the device's location to find nearby postcodes.
 
-- **Color Palette:** A clean and professional color scheme with a primary color of blue.
-- **Typography:** A clear and readable typography scheme.
-- **Layout:** A responsive layout that works on both mobile and web.
+### Design
 
-## Implementation Plan
+*   **Theme:** The app uses a Material 3 theme with a color scheme generated from a seed color.
+*   **Typography:** The app uses the `google_fonts` package for custom fonts.
+*   **Layout:** The app uses a standard `Scaffold` layout for most screens, with `ListView`s and `Card`s for displaying data.
 
-1.  **Project Setup:**
-    *   Add necessary dependencies to `pubspec.yaml`: `supabase_flutter`, `go_router`, `provider`, `http`.
+## Current Task: Create Reports Screen
 
-2.  **Authentication:**
-    *   Implement user registration and login functionality.
+### Plan
 
-3.  **Data Layer:**
-    *   Create models for `Person`, `Company`, and other data structures.
-    *   Create services to interact with Supabase and external APIs.
-
-4.  **Routing:**
-    *   Configure `go_router` with routes for different screens in the application.
-
-5.  **Screens and Widgets:**
-    *   **Opening Screen:** The initial screen with options to register or log in.
-    *   **Profile Screen:** A screen to display and manage user profile information.
-    *   **Admin Screen:** A screen for administrative tasks.
-    *   **Property Data Screens:** Screens to display various property data, such as EPC ratings and price paid information.
-
+1.  **Create `lib/screens/reports_screen.dart`:** This file will contain the new `ReportsScreen` widget.
+2.  **Implement the UI for `ReportsScreen`:**
+    *   Use a `Scaffold` with an `AppBar`.
+    *   Use a `ListView.builder` to display the 12 uplift options.
+    *   Each option will be a `ListTile` with a title and a subtitle.
+3.  **Create a data structure for the options:** A `List` of a simple class or `Map`s to hold the title and description of each uplift option.
+4.  **Add navigation:**
+    *   Modify `lib/router.dart` to add a new route for `/reports`.
+    *   Modify `lib/screens/opening_screen.dart` to add a button that navigates to the `/reports` screen.

@@ -92,7 +92,7 @@ class _PropertyScreenState
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<FinancialController>(context, listen: false);
+    final financialController = Provider.of<FinancialController>(context, listen: false);
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(
@@ -176,23 +176,14 @@ class _PropertyScreenState
                               ),
                               const Divider(height: 32),
                               Consumer<FinancialController>(
-                                builder: (context, financialController, child) =>
-                                    DevelopmentScenarios(
-                                  selectedScenario: financialController
-                                          .houseScenarios[
-                                      financialController.selectedScenarioIndex],
-                                  onPrevious: () => financialController
-                                      .previousScenario(widget.area.address
-                                          .toLowerCase()
-                                          .contains('flat')),
-                                  onNext: () => financialController.nextScenario(
-                                      widget.area.address
-                                          .toLowerCase()
-                                          .contains('flat')),
-                                  gdv: financialController.gdv,
-                                  totalCost: financialController.totalCost,
-                                  uplift: financialController.uplift,
-                                ),
+                                builder: (context, financialController, child) {
+                                  return DevelopmentScenarios(
+                                    propertyValue: financialController.currentPrice ?? 0,
+                                    onScenarioChanged: (scenario) {
+                                      financialController.calculateFinancials(scenario);
+                                    },
+                                  );
+                                },
                               ),
                               const Divider(height: 32),
                               Consumer<FinancialController>(
