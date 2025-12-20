@@ -34,9 +34,19 @@ This application is a sophisticated financial analysis and reporting tool design
 
 ## Current Task
 
-I have completed a significant refactoring and bug-fixing task. The key changes include:
+I have implemented a major enhancement to the financial modeling engine by making the uplift calculations fully dynamic.
 
-*   **Made Uplift Analysis Dynamic:**
+*   **Dynamic Uplift Rates:**
+    *   Previously, the "Uplift £/m²" values for development scenarios were hardcoded constants.
+    *   I have refactored the `GdvController` to replace these fixed rates with **dynamic calculations**.
+    *   The controller now uses "uplift factors" (e.g., `_rearExtensionUpliftFactor = 0.55`), which represent the uplift rate as a percentage of the property's base value per square meter.
+    *   A new `updateUpliftRates` method recalculates all uplift rates whenever the property's price changes.
+*   **Real-time Price Synchronization:**
+    *   The `PropertyScreen` now listens for changes to the `currentPrice` in the `FinancialController`.
+    *   When the user edits the price, this listener calls the `updateUpliftRates` method in the `GdvController`.
+    *   As a result, the entire "Uplift Analysis by Scenario" table is **immediately recalculated and updated**, providing a much more interactive and realistic financial modeling experience.
+
+*   **Made Uplift Analysis Dynamic (Area):**
     *   **Corrected a major flaw** where the "Uplift Analysis by Scenario" table used a hardcoded area for the "Full Refurbishment" scenario.
     *   The `GdvController` has been refactored to remove the fixed `_existingInternalArea` value.
     *   The `PropertyScreen` now passes the actual `totalFloorArea` from the EPC data to the controller.
@@ -53,4 +63,4 @@ I have completed a significant refactoring and bug-fixing task. The key changes 
 *   **Improved Code Structure:**
     *   The `AddressFinderController` has been deleted to simplify the controller structure.
     *   The `ImageGallery` widget has been refactored to be self-contained and manage its own state, improving reusability.
-    *   **Refactore d `PropertyHeader`:** Created a new `PropertyHeaderController` to manage the widget's state, removing its dependency on the now-deleted `PropertyFloorAreaFilterController`. This makes the `PropertyHeader` a self-contained and reusable component.
+    *   **Refactored `PropertyHeader`:** Created a new `PropertyHeaderController` to manage the widget's state, removing its dependency on the now-deleted `PropertyFloorAreaFilterController`. This makes the `PropertyHeader` a self-contained and reusable component.

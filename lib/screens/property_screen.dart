@@ -52,6 +52,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
 
     _pricePaidController.addListener(_onPriceHistoryChanged);
     _gdvController.addListener(_onGdvChanged);
+    _financialController.addListener(_onCurrentPriceChanged);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchData();
@@ -62,6 +63,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
   void dispose() {
     _pricePaidController.removeListener(_onPriceHistoryChanged);
     _gdvController.removeListener(_onGdvChanged);
+    _financialController.removeListener(_onCurrentPriceChanged);
     super.dispose();
   }
 
@@ -92,6 +94,19 @@ class _PropertyScreenState extends State<PropertyScreen> {
       _financialController.selectedScenario, 
       _gdvController.finalGdv
     );
+  }
+
+  void _onCurrentPriceChanged() {
+    if (mounted) {
+      final currentPrice = _financialController.currentPrice;
+      final totalFloorArea = double.tryParse(widget.epc.totalFloorArea) ?? 0.0;
+      if (currentPrice != null) {
+        _gdvController.updateUpliftRates(
+          currentPrice: currentPrice,
+          totalFloorArea: totalFloorArea,
+        );
+      }
+    }
   }
 
   void _fetchPriceHistory() {

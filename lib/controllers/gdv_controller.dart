@@ -29,15 +29,28 @@ class GdvController with ChangeNotifier {
   double _baseGdv = 0;
   double _optimisticGdv = 0;
 
-  // Uplift Rates (£/m²)
-  final double _refurbUpliftRate = 450;
-  final double _rearExtensionUpliftRate = 1250;
-  final double _sideExtensionUpliftRate = 1150;
-  final double _frontExtensionUpliftRate = 900;
-  final double _garageConversionUpliftRate = 800;
-  final double _loftBasicUpliftRate = 1400;
-  final double _loftDormerUpliftRate = 1650;
-  final double _loftEnsuiteUpliftRate = 1750;
+  // --- Uplift Calculation Properties ---
+  double _currentTotalFloorArea = 0;
+  
+  // --- Uplift Rate Factors (as a percentage of base £/m²) ---
+  final double _refurbUpliftFactor = 0.20;
+  final double _rearExtensionUpliftFactor = 0.55;
+  final double _sideExtensionUpliftFactor = 0.50;
+  final double _frontExtensionUpliftFactor = 0.40;
+  final double _garageConversionUpliftFactor = 0.35;
+  final double _loftBasicUpliftFactor = 0.62;
+  final double _loftDormerUpliftFactor = 0.73;
+  final double _loftEnsuiteUpliftFactor = 0.77;
+
+  // --- Dynamic Uplift Rates (£/m²) ---
+  double _refurbUpliftRate = 450;
+  double _rearExtensionUpliftRate = 1250;
+  double _sideExtensionUpliftRate = 1150;
+  double _frontExtensionUpliftRate = 900;
+  double _garageConversionUpliftRate = 800;
+  double _loftBasicUpliftRate = 1400;
+  double _loftDormerUpliftRate = 1650;
+  double _loftEnsuiteUpliftRate = 1750;
   
   Map<String, UpliftData> _scenarioUplifts = {};
 
@@ -71,6 +84,7 @@ class GdvController with ChangeNotifier {
   }
 
   Future<void> calculateGdv({required String postcode, required int habitableRooms, required double totalFloorArea}) async {
+    _currentTotalFloorArea = totalFloorArea;
     // Simple estimation logic (placeholder)
     double estimatedValuePerRoom = 80000; // A very rough estimate
     double estimatedGdv = estimatedValuePerRoom * habitableRooms;
@@ -84,7 +98,7 @@ class GdvController with ChangeNotifier {
     _gdvArea = estimatedGdv;
 
     calculateFinalGdv();
-    calculateAllScenarioUplifts(totalFloorArea);
+    updateUpliftRates(currentPrice: _finalGdv, totalFloorArea: totalFloorArea);
   }
 
   void updateGdvSources({double? sold, double? onMarket, double? area}) {
@@ -94,9 +108,27 @@ class GdvController with ChangeNotifier {
     calculateFinalGdv();
   }
 
-  void calculateAllScenarioUplifts(double existingInternalArea) {
+  void updateUpliftRates({required double currentPrice, required double totalFloorArea}) {
+    if (totalFloorArea == 0) return; // Avoid division by zero
+
+    _currentTotalFloorArea = totalFloorArea;
+    final double baseValuePerSqM = currentPrice / totalFloorArea;
+
+    _refurbUpliftRate = baseValuePerSqM * _refurbUpliftFactor;
+    _rearExtensionUpliftRate = baseValuePerSqM * _rearExtensionUpliftFactor;
+    _sideExtensionUpliftRate = baseValuePerSqM * _sideExtensionUpliftFactor;
+    _frontExtensionUpliftRate = baseValuePerSqM * _frontExtensionUpliftFactor;
+    _garageConversionUpliftRate = baseValuePerSqM * _garageConversionUpliftFactor;
+    _loftBasicUpliftRate = baseValuePerSqM * _loftBasicUpliftFactor;
+    _loftDormerUpliftRate = baseValuePerSqM * _loftDormerUpliftFactor;
+    _loftEnsuiteUpliftRate = baseValuePerSqM * _loftEnsuiteUpliftFactor;
+
+    calculateAllScenarioUplifts();
+  }
+
+  void calculateAllScenarioUplifts() {
     _scenarioUplifts = {
-      'Full Refurbishment': _createUpliftData(existingInternalArea, _refurbUpliftRate),
+      'Full Refurbishment': _createUpliftData(_currentTotalFloorArea, _refurbUpliftRate),
       'Rear single-storey extension': _createUpliftData(48, _rearExtensionUpliftRate),
       'Rear two-storey extension': _createUpliftData(96, _rearExtensionUpliftRate),
       'Side single-storey extension': _createUpliftData(18, _sideExtensionUpliftRate),
