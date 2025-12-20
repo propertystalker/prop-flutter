@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/controllers/epc_controller.dart';
 import 'package:myapp/models/epc_model.dart';
-import 'package:myapp/models/property_floor_area.dart';
 import 'package:myapp/screens/property_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/utils/constants.dart'; // Import constants for colors
@@ -61,24 +60,11 @@ class _EpcScreenState extends State<EpcScreen> {
   }
 
   void _navigateToDetails(BuildContext context, EpcModel epc) {
-    final totalFloorArea = double.tryParse(epc.totalFloorArea) ?? 0.0;
-    final estimatedHabitableRooms = (totalFloorArea / 20).round();
-
-    final knownFloorArea = KnownFloorArea(
-      address: epc.address,
-      postcode: epc.postcode,
-      squareMeters: totalFloorArea.round(),
-      habitableRooms: estimatedHabitableRooms,
-      inspectionDate: epc.lodgementDate,
-    );
-
     Navigator.of(context).pop();
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => PropertyScreen(
-          area: knownFloorArea,
-          postcode: epc.postcode,
-          propertyType: epc.propertyType,
+          epc: epc,
         ),
       ),
     );
@@ -264,6 +250,7 @@ class _EpcScreenState extends State<EpcScreen> {
                       Text('Main Fuel: ${epc.mainFuel}'),
                       Text('Total Floor Area: ${epc.totalFloorArea} sq m'),
                       Text('Lodgement Date: ${epc.lodgementDate}'),
+                      Text('Habitable Rooms: ${epc.numberHabitableRooms}'),
                     ],
                   ),
                   onTap: () => _navigateToDetails(context, epc),

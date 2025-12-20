@@ -8,6 +8,7 @@ class EpcModel {
   final String? mainFuel;
   final String totalFloorArea;
   final String lodgementDate;
+  final String numberHabitableRooms;
 
   EpcModel({
     required this.address,
@@ -19,6 +20,7 @@ class EpcModel {
     required this.mainFuel,
     required this.totalFloorArea,
     required this.lodgementDate,
+    required this.numberHabitableRooms,
   });
 
   factory EpcModel.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class EpcModel {
       mainFuel: asString(json['main-fuel']),
       totalFloorArea: asString(json['total-floor-area']),
       lodgementDate: asString(json['lodgement-date']),
+      numberHabitableRooms: asString(json['number-habitable-rooms']),
     );
   }
 }

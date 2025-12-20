@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/controllers/financial_controller.dart';
-import 'package:myapp/controllers/property_floor_area_filter_controller.dart';
+import 'package:myapp/controllers/property_header_controller.dart';
 import 'package:myapp/utils/constants.dart';
 import 'package:provider/provider.dart';
 
@@ -24,58 +24,63 @@ class PropertyHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<PropertyFloorAreaFilterController>(context);
-    final financialController = Provider.of<FinancialController>(context);
     final postcodeController = TextEditingController(text: postcode);
 
-    return Container(
-      width: double.infinity,
-      color: primaryColor,
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+    return ChangeNotifierProvider(
+      create: (_) => PropertyHeaderController(),
+      child: Consumer<PropertyHeaderController>(
+        builder: (context, controller, child) {
+          return Container(
+            width: double.infinity,
+            color: primaryColor,
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Column(
               children: [
-                Text(
-                  address,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500),
-                  textAlign: TextAlign.center,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        address,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: postcodeController,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.search, color: Colors.white),
+                            onPressed: () =>
+                                _searchByPostcode(context, postcodeController.text),
+                          ),
+                        ),
+                        onFieldSubmitted: (value) => _searchByPostcode(context, value),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 8),
-                TextFormField(
-                  controller: postcodeController,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.search, color: Colors.white),
-                      onPressed: () =>
-                          _searchByPostcode(context, postcodeController.text),
-                    ),
-                  ),
-                  onFieldSubmitted: (value) => _searchByPostcode(context, value),
-                ),
+                _buildEditablePrice(context, controller, Provider.of<FinancialController>(context)),
               ],
             ),
-          ),
-          const SizedBox(height: 8),
-          _buildEditablePrice(context, controller, financialController),
-        ],
+          );
+        },
       ),
     );
   }
 
   Widget _buildEditablePrice(BuildContext context,
-      PropertyFloorAreaFilterController controller, FinancialController financialController) {
+      PropertyHeaderController controller, FinancialController financialController) {
     final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
     final priceController = TextEditingController();
 
@@ -95,21 +100,34 @@ class PropertyHeader extends StatelessWidget {
             border: InputBorder.none,
             contentPadding: EdgeInsets.all(8.0),
           ),
-          onSubmitted: controller.updatePrice,
-          onTapOutside: (_) => controller.updatePrice(priceController.text),
+          onSubmitted: (value) {
+            final newPrice = double.tryParse(value);
+            if (newPrice != null) {
+              financialController.setCurrentPrice(newPrice, financialController.gdv);
+            }
+            controller.finishEditing();
+          },
+          onTapOutside: (_) {
+            final newPrice = double.tryParse(priceController.text);
+            if (newPrice != null) {
+              financialController.setCurrentPrice(newPrice, financialController.gdv);
+            }
+            controller.finishEditing();
+          },
         ),
       );
-    } 
+    }
 
     if (financialController.currentPrice == null) {
-        return const SizedBox(
-          height: 30,
-          width: 30,
-          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3,),
-        );
-    }
-    
-    else {
+      return const SizedBox(
+        height: 30,
+        width: 30,
+        child: CircularProgressIndicator(
+          color: Colors.white,
+          strokeWidth: 3,
+        ),
+      );
+    } else {
       return GestureDetector(
         onTap: () {
           controller.editPrice();

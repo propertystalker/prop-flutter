@@ -10,21 +10,21 @@ class UpliftData {
 
 class GdvController with ChangeNotifier {
   // GDV Components
-  double _gdvSold = 470000;
-  double _gdvOnMarket = 490000;
-  double _gdvArea = 480000;
+  double _gdvSold = 0;
+  double _gdvOnMarket = 0;
+  double _gdvArea = 0;
 
   // Weightings
-  double _weightSold = 0.50; // 50%
-  double _weightOnMarket = 0.30; // 30%
-  double _weightArea = 0.20; // 20%
+  final double _weightSold = 0.50; // 50%
+  final double _weightOnMarket = 0.30; // 30%
+  final double _weightArea = 0.20; // 20%
 
   // Final Blended GDV
   double _finalGdv = 0;
 
   // GDV Bands
-  double _downsidePct = 0.07; // 7%
-  double _upsidePct = 0.07; // 7%
+  final double _downsidePct = 0.07; // 7%
+  final double _upsidePct = 0.07; // 7%
   double _cautiousGdv = 0;
   double _baseGdv = 0;
   double _optimisticGdv = 0;
@@ -72,6 +72,27 @@ class GdvController with ChangeNotifier {
     _optimisticGdv = _finalGdv * (1 + _upsidePct);
 
     notifyListeners();
+  }
+
+  Future<void> calculateGdv({required String postcode, required int habitableRooms}) async {
+    // Simple estimation logic (placeholder)
+    // This should be replaced with a more sophisticated calculation,
+    // potentially involving a network request to a property data API.
+    double estimatedValuePerRoom = 80000; // A very rough estimate
+    double estimatedGdv = estimatedValuePerRoom * habitableRooms;
+
+    // To make it seem a bit more realistic, let's add some variation based on the postcode.
+    // This is still a placeholder.
+    final postcodeHash = postcode.hashCode;
+    final randomFactor = 1 + (postcodeHash % 10 - 5) / 100; // between 0.95 and 1.05
+    estimatedGdv *= randomFactor;
+
+
+    _gdvSold = estimatedGdv * 0.98;
+    _gdvOnMarket = estimatedGdv * 1.02;
+    _gdvArea = estimatedGdv;
+
+    calculateFinalGdv();
   }
 
   void updateGdvSources({double? sold, double? onMarket, double? area}) {

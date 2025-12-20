@@ -13,6 +13,9 @@ class FinancialController with ChangeNotifier {
   String _riskIndicator = 'Low';
   final double _existingInternalArea; // Passed in at initialization
 
+  // Selected scenario
+  String _selectedScenario = 'Full Refurbishment';
+
   // --- Data for Calculations ---
 
   // Base costs for each category
@@ -69,12 +72,14 @@ class FinancialController with ChangeNotifier {
   double get gdv => _gdv;
   double get areaGrowth => _areaGrowth;
   String get riskIndicator => _riskIndicator;
+  String get selectedScenario => _selectedScenario;
 
   // Constructor
   FinancialController({required double existingInternalArea}) : _existingInternalArea = existingInternalArea;
 
   // --- Main Calculation Method ---
   void calculateFinancials(String scenario, double gdv) {
+    _selectedScenario = scenario;
     if (_currentPrice == null) return;
     _gdv = gdv;
 
@@ -109,7 +114,7 @@ class FinancialController with ChangeNotifier {
 
   void setCurrentPrice(double price, double gdv) {
     _currentPrice = price;
-    // Recalculate with a default scenario when price is set
-    calculateFinancials('Full Refurbishment', gdv);
+    // Recalculate with the current scenario when price is set
+    calculateFinancials(_selectedScenario, gdv);
   }
 }
