@@ -29,9 +29,6 @@ class GdvController with ChangeNotifier {
   double _baseGdv = 0;
   double _optimisticGdv = 0;
 
-  // --- Uplift Calculation Properties ---
-  final double _existingInternalArea = 110; // m²
-
   // Uplift Rates (£/m²)
   final double _refurbUpliftRate = 450;
   final double _rearExtensionUpliftRate = 1250;
@@ -59,7 +56,6 @@ class GdvController with ChangeNotifier {
 
   GdvController() {
     calculateFinalGdv();
-    _calculateAllScenarioUplifts();
   }
 
   void calculateFinalGdv() {
@@ -74,25 +70,21 @@ class GdvController with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> calculateGdv({required String postcode, required int habitableRooms}) async {
+  Future<void> calculateGdv({required String postcode, required int habitableRooms, required double totalFloorArea}) async {
     // Simple estimation logic (placeholder)
-    // This should be replaced with a more sophisticated calculation,
-    // potentially involving a network request to a property data API.
     double estimatedValuePerRoom = 80000; // A very rough estimate
     double estimatedGdv = estimatedValuePerRoom * habitableRooms;
 
-    // To make it seem a bit more realistic, let's add some variation based on the postcode.
-    // This is still a placeholder.
     final postcodeHash = postcode.hashCode;
     final randomFactor = 1 + (postcodeHash % 10 - 5) / 100; // between 0.95 and 1.05
     estimatedGdv *= randomFactor;
-
 
     _gdvSold = estimatedGdv * 0.98;
     _gdvOnMarket = estimatedGdv * 1.02;
     _gdvArea = estimatedGdv;
 
     calculateFinalGdv();
+    calculateAllScenarioUplifts(totalFloorArea);
   }
 
   void updateGdvSources({double? sold, double? onMarket, double? area}) {
@@ -102,9 +94,9 @@ class GdvController with ChangeNotifier {
     calculateFinalGdv();
   }
 
-  void _calculateAllScenarioUplifts() {
+  void calculateAllScenarioUplifts(double existingInternalArea) {
     _scenarioUplifts = {
-      'Full Refurbishment': _createUpliftData(_existingInternalArea, _refurbUpliftRate),
+      'Full Refurbishment': _createUpliftData(existingInternalArea, _refurbUpliftRate),
       'Rear single-storey extension': _createUpliftData(48, _rearExtensionUpliftRate),
       'Rear two-storey extension': _createUpliftData(96, _rearExtensionUpliftRate),
       'Side single-storey extension': _createUpliftData(18, _sideExtensionUpliftRate),

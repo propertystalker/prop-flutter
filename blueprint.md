@@ -36,6 +36,11 @@ This application is a sophisticated financial analysis and reporting tool design
 
 I have completed a significant refactoring and bug-fixing task. The key changes include:
 
+*   **Made Uplift Analysis Dynamic:**
+    *   **Corrected a major flaw** where the "Uplift Analysis by Scenario" table used a hardcoded area for the "Full Refurbishment" scenario.
+    *   The `GdvController` has been refactored to remove the fixed `_existingInternalArea` value.
+    *   The `PropertyScreen` now passes the actual `totalFloorArea` from the EPC data to the controller.
+    *   This ensures the refurbishment scenario is now **dynamically and accurately calculated** based on the specific property's size.
 *   **Resolved critical errors and warnings:** 
     *   Fixed a crash caused by calling a non-existent `calculateGdv` method. I implemented this method in the `GdvController` with placeholder logic and updated the `PropertyScreen` to use it correctly.
     *   Corrected an error in the `FinancialController` by adding the `selectedScenario` property, ensuring that financial calculations are correctly performed when the GDV or other inputs change.
@@ -48,4 +53,4 @@ I have completed a significant refactoring and bug-fixing task. The key changes 
 *   **Improved Code Structure:**
     *   The `AddressFinderController` has been deleted to simplify the controller structure.
     *   The `ImageGallery` widget has been refactored to be self-contained and manage its own state, improving reusability.
-    *   **Refactored `PropertyHeader`:** Created a new `PropertyHeaderController` to manage the widget's state, removing its dependency on the now-deleted `PropertyFloorAreaFilterController`. This makes the `PropertyHeader` a self-contained and reusable component.
+    *   **Refactore d `PropertyHeader`:** Created a new `PropertyHeaderController` to manage the widget's state, removing its dependency on the now-deleted `PropertyFloorAreaFilterController`. This makes the `PropertyHeader` a self-contained and reusable component.
