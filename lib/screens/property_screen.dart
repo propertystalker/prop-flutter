@@ -235,6 +235,15 @@ class _PropertyScreenState extends State<PropertyScreen> {
                           const UpliftAnalysisWidget(),
                           const Divider(height: 32),
                           const PriceHistory(),
+                          const SizedBox(height: 16),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Home'),
+                            ),
+                          ),
                         ],
                       ),
                     ),
