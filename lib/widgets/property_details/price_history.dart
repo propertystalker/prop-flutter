@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/controllers/price_paid_controller.dart';
+import 'package:myapp/data/inflation_data.dart';
 import 'package:provider/provider.dart';
 
 class PriceHistory extends StatelessWidget {
@@ -39,7 +40,26 @@ class PriceHistory extends StatelessWidget {
         }
 
         if (controller.priceHistory.isEmpty) {
-          return const SizedBox.shrink(); // Don't show the section if there's no history
+          return const SizedBox.shrink();
+        }
+
+        final lastTransaction = controller.priceHistory.first;
+        final now = DateTime.now();
+        bool showInflation = now.year > lastTransaction.transactionDate.year;
+
+        double inflatedPrice = 0;
+        double overallInflation = 0;
+
+        if (showInflation) {
+          inflatedPrice = lastTransaction.amount.toDouble();
+          int startYear = lastTransaction.transactionDate.year;
+
+          for (int year = startYear; year < now.year; year++) {
+            if (ukHousePriceInflation.containsKey(year)) {
+              inflatedPrice *= (1 + (ukHousePriceInflation[year]! / 100));
+            }
+          }
+          overallInflation = ((inflatedPrice - lastTransaction.amount) / lastTransaction.amount) * 100;
         }
 
         return Card(
@@ -54,6 +74,18 @@ class PriceHistory extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 16),
+                if (showInflation)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: ListTile(
+                      title: Text(
+                          NumberFormat.simpleCurrency(locale: 'en_GB').format(inflatedPrice),
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                      subtitle: const Text('Estimated current value'),
+                      trailing: Text('${overallInflation.toStringAsFixed(1)}% since last sale',
+                          style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
