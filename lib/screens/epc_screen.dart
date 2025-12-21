@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/controllers/epc_controller.dart';
 import 'package:myapp/models/epc_model.dart';
-import 'package:myapp/screens/property_screen.dart';
+import 'package:myapp/screens/property/property_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/utils/constants.dart'; // Import constants for colors
 
