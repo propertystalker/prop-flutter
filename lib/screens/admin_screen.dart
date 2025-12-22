@@ -129,8 +129,8 @@ class _AdminScreenState extends State<AdminScreen> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () => context.go('/report/123'),
-                  child: const Text('View Dummy Report'),
+                  onPressed: () => context.go('/select-scenarios/123'),
+                  child: const Text('Generate a Report'),
                 ),
               ],
             ),

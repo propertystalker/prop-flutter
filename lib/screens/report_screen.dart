@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/models/report_model.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/controllers/report_controller.dart';
+import 'package:myapp/models/report_model.dart';
 
 class ReportScreen extends StatelessWidget {
   final String propertyId;
+  final List<String> selectedScenarios;
 
-  const ReportScreen({Key? key, required this.propertyId}) : super(key: key);
+  const ReportScreen({
+    Key? key,
+    required this.propertyId,
+    this.selectedScenarios = const [],
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => ReportController()..generateReport(propertyId),
+      create: (_) => ReportController()..generateReport(propertyId, scenarios: selectedScenarios),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Property Report'),
@@ -23,6 +28,15 @@ class ReportScreen extends StatelessWidget {
             }
 
             final report = controller.report!;
+
+            if (report.selectedScenarios.isEmpty) {
+              return const Center(
+                child: Text(
+                  'No scenarios were selected to generate a report.',
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -102,7 +116,7 @@ class ReportScreen extends StatelessWidget {
     );
   }
 
-  Color _getSignalColor(InvestmentSignal signal) {
+    Color _getSignalColor(InvestmentSignal signal) {
     switch (signal) {
       case InvestmentSignal.green:
         return Colors.green;

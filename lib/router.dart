@@ -6,6 +6,7 @@ import 'package:myapp/screens/opening_screen.dart';
 import 'package:myapp/screens/price_paid_screen.dart';
 import 'package:myapp/screens/profile_screen.dart';
 import 'package:myapp/screens/report_screen.dart';
+import 'package:myapp/screens/scenario_selection_screen.dart';
 
 final GoRouter router = GoRouter(
   routes: <RouteBase>[
@@ -53,10 +54,19 @@ final GoRouter router = GoRouter(
           },
         ),
         GoRoute(
+          path: 'select-scenarios/:propertyId',
+          builder: (BuildContext context, GoRouterState state) {
+            final String propertyId = state.pathParameters['propertyId']!;
+            return ScenarioSelectionScreen(propertyId: propertyId);
+          },
+        ),
+        GoRoute(
           path: 'report/:propertyId',
           builder: (BuildContext context, GoRouterState state) {
             final String propertyId = state.pathParameters['propertyId']!;
-            return ReportScreen(propertyId: propertyId);
+            final String scenarios = state.uri.queryParameters['scenarios'] ?? '';
+            final List<String> selectedScenarios = scenarios.split(',').where((s) => s.isNotEmpty).toList();
+            return ReportScreen(propertyId: propertyId, selectedScenarios: selectedScenarios,);
           },
         ),
       ],
