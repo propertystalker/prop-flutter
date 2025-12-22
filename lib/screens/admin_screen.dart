@@ -127,6 +127,11 @@ class _AdminScreenState extends State<AdminScreen> {
                   'Company: $company',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => context.go('/report/123'),
+                  child: const Text('View Dummy Report'),
+                ),
               ],
             ),
           );
