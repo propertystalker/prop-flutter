@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 const String apiKey = 'ZVUJN5EMPV';
-const String googleMapsApiKey = 'AIzaSyAWH-995ieT0FufCX62LnacYVTM830P_yY';
+const String googleMapsApiKey = 'AIzaSyCbOmTCOveIbJ-tPP_0eN8UTMmTBUtglzs';
+
 
 // EPC API
 const String epcBaseUrl = 'https://epc.opendatacommunities.org/api/v1/domestic';

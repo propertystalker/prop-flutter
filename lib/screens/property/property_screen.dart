@@ -24,6 +24,7 @@ import 'package:myapp/widgets/finance_panel.dart';
 import 'package:myapp/widgets/property_filter_app_bar.dart';
 import 'package:myapp/widgets/report_panel.dart';
 import 'package:myapp/screens/report_sent_screen.dart';
+import 'package:myapp/webview_screen.dart';
 
 class PropertyScreen extends StatefulWidget {
   final EpcModel epc;
@@ -182,7 +183,9 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                 border: Border.all(color: Colors.purple, width: 2),
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
-                              child: Image.asset('assets/images/gemini.png'),
+                              child: WebViewScreen(
+                                      latitude: widget.epc.latitude,
+                                      longitude: widget.epc.longitude),
                             ),
                           ),
                           const SizedBox(width: 16),
