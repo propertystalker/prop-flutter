@@ -90,6 +90,7 @@ class PropertyHeader extends StatelessWidget {
         color: editablePriceColor,
         width: 200,
         child: TextField(
+          key: const ValueKey('priceTextField'), // Add a key for specific targeting
           controller: priceController,
           focusNode: controller.priceFocusNode,
           keyboardType: TextInputType.number,
