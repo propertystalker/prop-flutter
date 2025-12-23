@@ -42,6 +42,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
   bool _isPersonAccountVisible = false;
   bool _isFinancePanelVisible = false;
   bool _isReportPanelVisible = false;
+  double? _lastGdv;
 
   @override
   void initState() {
@@ -49,6 +50,8 @@ class _PropertyScreenState extends State<PropertyScreen> {
     _pricePaidController = Provider.of<PricePaidController>(context, listen: false);
     _financialController = Provider.of<FinancialController>(context, listen: false);
     _gdvController = Provider.of<GdvController>(context, listen: false);
+
+    _lastGdv = _gdvController.finalGdv;
 
     _pricePaidController.addListener(_onPriceHistoryChanged);
     _gdvController.addListener(_onGdvChanged);
@@ -87,13 +90,15 @@ class _PropertyScreenState extends State<PropertyScreen> {
       }
     }
   }
-  
+
   void _onGdvChanged() {
-    // When GDV changes, we need to recalculate the financials
-    _financialController.calculateFinancials(
-      _financialController.selectedScenario, 
-      _gdvController.finalGdv
-    );
+    if (mounted && _gdvController.finalGdv != _lastGdv) {
+      _lastGdv = _gdvController.finalGdv;
+      _financialController.calculateFinancials(
+        _financialController.selectedScenario,
+        _gdvController.finalGdv,
+      );
+    }
   }
 
   void _onCurrentPriceChanged() {

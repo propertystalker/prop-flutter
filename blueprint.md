@@ -34,8 +34,17 @@ This application is a sophisticated financial analysis and reporting tool design
 
 ## Current Task
 
+*   **Critical Bug Fix: Stack Overflow Error:**
+    *   **Problem:** A severe "Stack Overflow" error was crashing the application, particularly when navigating between different properties. This was caused by an infinite loop in the state management logic. A change in the `FinancialController` would trigger an update in the `GdvController`, which in turn would trigger an update in the `FinancialController`, creating a circular dependency and an endless loop of calculations.
+    *   **Solution:** The infinite loop was broken by adding a conditional check to the `_onGdvChanged` listener in the `PropertyScreen`. A new state variable, `_lastGdv`, was introduced to track the last known Gross Development Value. The listener now only proceeds to recalculate the financials if the new `finalGdv` is different from the last known value.
+    *   **Result:** This change successfully breaks the circular dependency, resolving the Stack Overflow crash. The application is now stable, and the dynamic financial calculations continue to work as expected. The fix was validated by a full pass of the test suite.
+
+*   **Critical Bug Fix: "Used After Disposed" Error:**
+    *   **Problem:** After attempting to fix a memory leak, a more critical bug was introduced, causing the app to crash with a "A PricePaidController was used after being disposed" error. This happened because shared, app-wide controllers were being incorrectly destroyed by the `PropertyScreen` when the user navigated away.
+    *   **Correction:** The fix involved reverting the incorrect change. The `dispose` method in `_PropertyScreenState` was corrected to **only remove its listeners** from the shared controllers (`removeListener`). The incorrect calls to `controller.dispose()` were removed.
+    *   **Result:** This is the correct Flutter pattern for interacting with shared state from a `StatefulWidget`. It prevents the screen from trying to update after it's gone (fixing the original leak) without destroying the singleton controllers that the rest of the app relies on. The application is now stable, and the fix was verified by a full pass of the test suite.
+
 *   **Comprehensive Testing:**
-    *   **PropertyHeader Widget Test:** Created `test/widgets/property_header_test.dart` to verify the UI behavior of the `PropertyHeader`. This test ensures that the price text is initially displayed correctly and that tapping the edit icon successfully switches the UI to an editable `TextFormField`.
-    *   **PropertyHeaderController Unit Test:** Created `test/controllers/property_header_controller_test.dart` to test the business logic of the header's state management. This test verifies that the `isEditingPrice` flag is managed correctly and that the controller notifies its listeners upon state changes.
-    *   **FinancialController Unit Test:** Created `test/controllers/financial_controller_test.dart` to validate the core financial logic. These tests confirm that the controller initializes correctly, `setCurrentPrice` triggers the appropriate recalculations, and the main `calculateFinancials` method produces accurate results for `totalCost`, `uplift`, `roi`, and `riskIndicator` across different development scenarios.
-    *   **Iterative Correction:** The testing process involved identifying and fixing several bugs and inaccuracies in the test files themselves, leading to a robust and reliable test suite.
+    *   **PropertyHeader Widget Test:** Created `test/widgets/property_header_test.dart` to verify the UI behavior of the `PropertyHeader`.
+    *   **PropertyHeaderController Unit Test:** Created `test/controllers/property_header_controller_test.dart` to test the business logic of the header's state management.
+    *   **FinancialController Unit Test:** Created `test/controllers/financial_controller_test.dart` to validate the core financial logic.
