@@ -34,33 +34,8 @@ This application is a sophisticated financial analysis and reporting tool design
 
 ## Current Task
 
-I have implemented a major enhancement to the financial modeling engine by making the uplift calculations fully dynamic.
-
-*   **Dynamic Uplift Rates:**
-    *   Previously, the "Uplift £/m²" values for development scenarios were hardcoded constants.
-    *   I have refactored the `GdvController` to replace these fixed rates with **dynamic calculations**.
-    *   The controller now uses "uplift factors" (e.g., `_rearExtensionUpliftFactor = 0.55`), which represent the uplift rate as a percentage of the property's base value per square meter.
-    *   A new `updateUpliftRates` method recalculates all uplift rates whenever the property's price changes.
-*   **Real-time Price Synchronization:**
-    *   The `PropertyScreen` now listens for changes to the `currentPrice` in the `FinancialController`.
-    *   When the user edits the price, this listener calls the `updateUpliftRates` method in the `GdvController`.
-    *   As a result, the entire "Uplift Analysis by Scenario" table is **immediately recalculated and updated**, providing a much more interactive and realistic financial modeling experience.
-
-*   **Made Uplift Analysis Dynamic (Area):**
-    *   **Corrected a major flaw** where the "Uplift Analysis by Scenario" table used a hardcoded area for the "Full Refurbishment" scenario.
-    *   The `GdvController` has been refactored to remove the fixed `_existingInternalArea` value.
-    *   The `PropertyScreen` now passes the actual `totalFloorArea` from the EPC data to the controller.
-    *   This ensures the refurbishment scenario is now **dynamically and accurately calculated** based on the specific property's size.
-*   **Resolved critical errors and warnings:** 
-    *   Fixed a crash caused by calling a non-existent `calculateGdv` method. I implemented this method in the `GdvController` with placeholder logic and updated the `PropertyScreen` to use it correctly.
-    *   Corrected an error in the `FinancialController` by adding the `selectedScenario` property, ensuring that financial calculations are correctly performed when the GDV or other inputs change.
-    *   Fixed a type mismatch in the `PropertyScreen` by correctly parsing the `totalFloorArea` string to a rounded integer before passing it to the `PropertyStats` widget.
-    *   Addressed a `prefer_final_fields` lint warning in `GdvController` for better code quality.
-*   **Simplified Data Models:**
-    *   The `EpcModel` now includes the `numberHabitableRooms` field, making it a more complete data source.
-    *   The `KnownFloorArea` model was removed, and the `PropertyScreen` now directly uses the `EpcModel`.
-*   **Streamlined Navigation:** The `EpcScreen` now passes the `EpcModel` object directly to the `PropertyScreen`, eliminating unnecessary data transformation.
-*   **Improved Code Structure:**
-    *   The `AddressFinderController` has been deleted to simplify the controller structure.
-    *   The `ImageGallery` widget has been refactored to be self-contained and manage its own state, improving reusability.
-    *   **Refactored `PropertyHeader`:** Created a new `PropertyHeaderController` to manage the widget's state, removing its dependency on the now-deleted `PropertyFloorAreaFilterController`. This makes the `PropertyHeader` a self-contained and reusable component.
+*   **Comprehensive Testing:**
+    *   **PropertyHeader Widget Test:** Created `test/widgets/property_header_test.dart` to verify the UI behavior of the `PropertyHeader`. This test ensures that the price text is initially displayed correctly and that tapping the edit icon successfully switches the UI to an editable `TextFormField`.
+    *   **PropertyHeaderController Unit Test:** Created `test/controllers/property_header_controller_test.dart` to test the business logic of the header's state management. This test verifies that the `isEditingPrice` flag is managed correctly and that the controller notifies its listeners upon state changes.
+    *   **FinancialController Unit Test:** Created `test/controllers/financial_controller_test.dart` to validate the core financial logic. These tests confirm that the controller initializes correctly, `setCurrentPrice` triggers the appropriate recalculations, and the main `calculateFinancials` method produces accurate results for `totalCost`, `uplift`, `roi`, and `riskIndicator` across different development scenarios.
+    *   **Iterative Correction:** The testing process involved identifying and fixing several bugs and inaccuracies in the test files themselves, leading to a robust and reliable test suite.

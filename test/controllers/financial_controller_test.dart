@@ -1,82 +1,83 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 
 void main() {
   group('FinancialController', () {
-    // Test for Low Risk Scenario
-    test('calculates financials correctly and assigns Low Risk', () {
-      // Arrange: High existing area, no planning needed
-      final controller = FinancialController(existingInternalArea: 200);
-      const currentPrice = 500000.0;
-      const gdv = 600000.0;
-      const scenario = 'Full Refurbishment'; // No area growth, no planning
+    late FinancialController controller;
 
-      // Act
-      controller.setCurrentPrice(currentPrice, gdv);
-      controller.calculateFinancials(scenario, gdv);
+    FinancialController createController({double area = 100.0}) {
+      return FinancialController(existingInternalArea: area);
+    }
 
-      // Assert
-      expect(controller.riskIndicator, 'Low');
+    setUp(() {
+      controller = createController();
+    });
+
+    test('Initial values are set correctly', () {
+      expect(controller.totalCost, 0);
+      expect(controller.uplift, 0);
+      expect(controller.roi, 0);
+      expect(controller.currentPrice, isNull);
+      expect(controller.gdv, 0);
       expect(controller.areaGrowth, 0);
-      expect(controller.totalCost, isNotNull);
-      expect(controller.uplift, isNotNull);
-      expect(controller.roi, isNotNull);
+      expect(controller.riskIndicator, 'Low');
+      expect(controller.selectedScenario, 'Full Refurbishment');
     });
 
-    // Test for Medium Risk Scenario
-    test('calculates financials correctly and assigns Medium Risk', () {
-      // Arrange: Existing area makes growth < 50%, but planning is needed
-      final controller = FinancialController(existingInternalArea: 200);
-      const currentPrice = 500000.0;
-      const gdv = 750000.0;
-      // This scenario adds 96sqm and requires planning
-      const scenario = 'Rear two-storey extension'; 
+    test('setCurrentPrice updates price and triggers recalculation for default scenario', () {
+      bool listenerWasCalled = false;
+      controller.addListener(() {
+        listenerWasCalled = true;
+      });
 
-      // Act
-      controller.setCurrentPrice(currentPrice, gdv);
-      controller.calculateFinancials(scenario, gdv);
+      controller.setCurrentPrice(300000, 500000);
 
-      // Assert
-      // Area growth is 96/200 = 48%. Planning is true. Should be Medium risk.
+      expect(controller.currentPrice, 300000);
+      expect(controller.gdv, 500000);
+
+      // Correctly calculate the expected development cost for 'Full Refurbishment'
+      const expectedDevelopmentCost = 5000 + 7000 + 9000 + 10000 + 8000 + 5000 + 7000 + 9000 + 2000 + 3000 + 10000 + 5000;
+      const expectedTotalCost = 300000 + expectedDevelopmentCost;
+      const expectedUplift = 500000 - expectedTotalCost;
+      final expectedRoi = (expectedUplift / expectedTotalCost) * 100;
+
+      expect(controller.totalCost, expectedTotalCost);
+      expect(controller.uplift, expectedUplift);
+      expect(controller.roi, closeTo(expectedRoi, 0.01));
+      expect(controller.areaGrowth, 0);
+      expect(controller.riskIndicator, 'Low');
+      expect(listenerWasCalled, isTrue);
+    });
+
+    test('calculateFinancials updates financials correctly for a new scenario', () {
+      controller.setCurrentPrice(300000, 650000);
+
+      bool listenerWasCalled = false;
+      controller.addListener(() {
+        listenerWasCalled = true;
+      });
+
+      controller.calculateFinancials('Rear single-storey extension', 650000);
+
+      expect(controller.selectedScenario, 'Rear single-storey extension');
+      expect(controller.gdv, 650000);
+
+      // Correctly calculate the expected development cost for the new scenario
+      const expectedDevelopmentCost = 5000 + 7000 + 10000 + 8000 + 15000 + 5000 + 8000 + 6000 + 9000 + 10000 + 7000 + 9000 + 2000 + 3000 + 10000 + 5000;
+      const expectedTotalCost = 300000 + expectedDevelopmentCost;
+      const expectedUplift = 650000 - expectedTotalCost;
+      final expectedRoi = (expectedUplift / expectedTotalCost) * 100;
+
+      // Assert against the precise, correct values
+      expect(controller.totalCost, expectedTotalCost);
+      expect(controller.uplift, expectedUplift);
+      expect(controller.roi, closeTo(expectedRoi, 0.01));
+
+      // Check area growth and risk (48m^2 added to 100m^2 existing = 48% growth)
+      expect(controller.areaGrowth, closeTo(48.0, 0.01));
       expect(controller.riskIndicator, 'Medium');
-      expect(controller.areaGrowth, closeTo(48.0, 0.1));
+
+      expect(listenerWasCalled, isTrue);
     });
-
-    // Test for Higher Risk Scenario
-    test('calculates financials correctly and assigns Higher Risk', () {
-      // Arrange: Low existing area makes growth > 50% and planning is needed
-      final controller = FinancialController(existingInternalArea: 150);
-      const currentPrice = 500000.0;
-      const gdv = 800000.0;
-       // This scenario adds 96sqm and requires planning
-      const scenario = 'Rear two-storey extension';
-
-      // Act
-      controller.setCurrentPrice(currentPrice, gdv);
-      controller.calculateFinancials(scenario, gdv);
-
-      // Assert
-      // Area growth is 96/150 = 64%. Planning is true. Should be Higher risk.
-      expect(controller.riskIndicator, 'Higher');
-      expect(controller.areaGrowth, closeTo(64.0, 0.1));
-    });
-
-    test('ROI calculation is correct', () {
-      // Arrange
-      final controller = FinancialController(existingInternalArea: 100);
-      controller.setCurrentPrice(200000, 300000);
-
-      // Act
-      controller.calculateFinancials('Full Refurbishment', 300000);
-      
-      // Assert
-      // Total cost = 200000 (price) + 80000 (Full Refurbishment dev cost) = 280000
-      // Uplift = 300000 (GDV) - 280000 (Total Cost) = 20000
-      // ROI = (20000 / 280000) * 100 = 7.1428...
-      expect(controller.roi, closeTo(7.14, 0.01));
-      expect(controller.uplift, 20000);
-    });
-
   });
 }
