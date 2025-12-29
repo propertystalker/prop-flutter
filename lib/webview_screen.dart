@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -37,30 +36,44 @@ class _WebViewScreenState extends State<WebViewScreen> {
     if (widget.latitude != null &&
         widget.longitude != null &&
         (widget.latitude != 0.0 || widget.longitude != 0.0)) {
-      return _buildStreetViewUri(
-          '${widget.latitude},${widget.longitude}');
+      return _buildStreetViewUri('${widget.latitude},${widget.longitude}');
     }
 
-    // Otherwise, use the postcode to geocode the location
-    if (widget.postcode != null && widget.postcode!.isNotEmpty) {
+    final fullAddress = widget.address;
+    final postcode = widget.postcode;
+
+    // For best accuracy, use the full address and postcode for geocoding.
+    if (fullAddress != null &&
+        fullAddress.isNotEmpty &&
+        postcode != null &&
+        postcode.isNotEmpty) {
       try {
-        final locationString = await _geocodePostcode(widget.postcode!);
+        final addressToGeocode = '$fullAddress, $postcode';
+        final locationString = await _geocodeAddress(addressToGeocode);
         return _buildStreetViewUri(locationString);
       } catch (e) {
-        // If geocoding fails, rethrow the error to be caught by the FutureBuilder
         rethrow;
       }
     }
 
-    // If no valid location data is available, throw an error
+    // Fallback to just the postcode if the full address is not available.
+    if (postcode != null && postcode.isNotEmpty) {
+      try {
+        final locationString = await _geocodeAddress(postcode);
+        return _buildStreetViewUri(locationString);
+      } catch (e) {
+        rethrow;
+      }
+    }
+
+    // If no valid location data is available, throw an error.
     throw Exception('No valid location data provided.');
   }
 
-  /// Converts a postcode into a "lat,lon" string using the Google Geocoding API.
-  Future<String> _geocodePostcode(String postcode) async {
-    final geocodeUri =
-        Uri.https('maps.googleapis.com', '/maps/api/geocode/json', {
-      'address': postcode,
+  /// Converts an address string into a "lat,lon" string using the Google Geocoding API.
+  Future<String> _geocodeAddress(String address) async {
+    final geocodeUri = Uri.https('maps.googleapis.com', '/maps/api/geocode/json', {
+      'address': address,
       'key': googleMapsApiKey,
     });
 
@@ -74,7 +87,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
         final lng = location['lng'];
         return '$lat,$lng';
       } else {
-        throw Exception('Geocoding failed: ${data['status']}');
+        throw Exception('Geocoding failed: ${data['status']} - ${data['error_message']}');
       }
     } else {
       throw Exception('Failed to connect to Geocoding API.');
