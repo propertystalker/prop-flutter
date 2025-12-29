@@ -5,11 +5,12 @@ import 'package:myapp/utils/pdf_generator.dart';
 import 'package:provider/provider.dart';
 import '../utils/constants.dart';
 
-class ReportPanel extends StatelessWidget {
+class ReportPanel extends StatefulWidget {
   final VoidCallback onSend;
   final String address;
   final String price;
   final List<XFile> images;
+  final String? streetViewUrl;
   final double gdv;
   final double totalCost;
   final double uplift;
@@ -20,10 +21,46 @@ class ReportPanel extends StatelessWidget {
     required this.address,
     required this.price,
     required this.images,
+    this.streetViewUrl,
     required this.gdv,
     required this.totalCost,
     required this.uplift,
   });
+
+  @override
+  State<ReportPanel> createState() => _ReportPanelState();
+}
+
+class _ReportPanelState extends State<ReportPanel> {
+  bool _isSending = false;
+
+  Future<void> _generateAndSendPdf() async {
+    setState(() {
+      _isSending = true;
+    });
+
+    try {
+      await PdfGenerator.generateAndOpenPdf(
+        widget.address,
+        widget.price,
+        widget.images,
+        widget.streetViewUrl,
+        widget.gdv,
+        widget.totalCost,
+        widget.uplift,
+      );
+      widget.onSend();
+    } catch (e) {
+      print("Error generating or sending PDF: $e");
+      // Optionally show an error to the user
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSending = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,18 +125,14 @@ class ReportPanel extends StatelessWidget {
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
               ),
-              onPressed: () {
-                PdfGenerator.generateAndOpenPdf(
-                  address,
-                  price,
-                  images,
-                  gdv,
-                  totalCost,
-                  uplift,
-                );
-                onSend();
-              },
-              child: const Text('Send'),
+              onPressed: _isSending ? null : _generateAndSendPdf,
+              child: _isSending
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text('Send'),
             ),
           ),
         ],

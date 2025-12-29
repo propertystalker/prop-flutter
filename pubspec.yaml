@@ -33,6 +33,7 @@ dependencies:
   firebase_core: ^4.3.0
   webview_flutter: ^4.13.0
   webview_flutter_web: ^0.2.3+4
+  screenshot: ^3.0.0
 
 dev_dependencies:
   flutter_test:

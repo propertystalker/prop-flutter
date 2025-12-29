@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -10,6 +11,7 @@ class PdfGenerator {
     String address,
     String price,
     List<XFile> images,
+    String? streetViewUrl,
     double gdv,
     double totalCost,
     double uplift,
@@ -17,6 +19,19 @@ class PdfGenerator {
     final pdf = pw.Document();
 
     final imageProviders = <pw.MemoryImage>[];
+    if (streetViewUrl != null) {
+      try {
+        final response = await http.get(Uri.parse(streetViewUrl));
+        if (response.statusCode == 200) {
+          imageProviders.add(pw.MemoryImage(response.bodyBytes));
+        } else {
+          print('Failed to load street view image: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Error fetching street view image: $e');
+      }
+    }
+
     for (final image in images) {
       final bytes = await image.readAsBytes();
       imageProviders.add(pw.MemoryImage(bytes));

@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:myapp/controllers/finance_proposal_request_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
@@ -6,6 +9,7 @@ import 'package:myapp/controllers/gdv_controller.dart';
 import 'package:myapp/controllers/price_paid_controller.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/models/epc_model.dart';
+import 'package:myapp/utils/constants.dart';
 import 'package:myapp/widgets/company_account.dart';
 import 'package:myapp/widgets/gdv_calculation_widget.dart';
 import 'package:myapp/widgets/gdv_range_widget.dart';
@@ -43,7 +47,9 @@ class _PropertyScreenState extends State<PropertyScreen> {
   bool _isPersonAccountVisible = false;
   bool _isFinancePanelVisible = false;
   bool _isReportPanelVisible = false;
+  bool _isGeneratingReport = false;
   double? _lastGdv;
+  String? _streetViewUrl;
 
   @override
   void initState() {
@@ -143,10 +149,83 @@ class _PropertyScreenState extends State<PropertyScreen> {
     });
   }
 
-  void _toggleReportPanelVisibility() {
+  Future<void> _toggleReportPanelVisibility() async {
+    if (_isReportPanelVisible || _isGeneratingReport) {
+      setState(() {
+        _isReportPanelVisible = false;
+      });
+      return;
+    }
+
     setState(() {
-      _isReportPanelVisible = !_isReportPanelVisible;
+      _isGeneratingReport = true;
     });
+
+    try {
+      final locationString = await _getBestLocationString();
+      final streetViewUrl = 
+        'https://maps.googleapis.com/maps/api/streetview?size=600x400&location=$locationString&key=$googleMapsApiKey';
+      
+      setState(() {
+        _streetViewUrl = streetViewUrl;
+        _isReportPanelVisible = true;
+      });
+    } catch (e) {
+      print("Error generating street view URL: $e");
+      // Optionally, show an error message to the user
+    } finally {
+      setState(() {
+        _isGeneratingReport = false;
+      });
+    }
+  }
+
+  Future<String> _getBestLocationString() async {
+    if (widget.epc.latitude != null &&
+        widget.epc.longitude != null &&
+        (widget.epc.latitude != 0.0 || widget.epc.longitude != 0.0)) {
+      return '${widget.epc.latitude},${widget.epc.longitude}';
+    }
+
+    final fullAddress = widget.epc.address;
+    final postcode = widget.epc.postcode;
+
+    if (fullAddress.isNotEmpty && postcode.isNotEmpty) {
+      try {
+        final addressToGeocode = '$fullAddress, $postcode';
+        return await _geocodeAddress(addressToGeocode);
+      } catch (e) {
+        // Fallback to postcode if full address fails
+        print('Failed to geocode full address, falling back to postcode: $e');
+      }
+    }
+
+    if (postcode.isNotEmpty) {
+      return await _geocodeAddress(postcode);
+    }
+
+    throw Exception('No valid location data provided for Street View.');
+  }
+
+  Future<String> _geocodeAddress(String address) async {
+    final geocodeUri = Uri.https('maps.googleapis.com', '/maps/api/geocode/json', {
+      'address': address,
+      'key': googleMapsApiKey,
+    });
+
+    final response = await http.get(geocodeUri);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['status'] == 'OK' && data['results'].isNotEmpty) {
+        final location = data['results'][0]['geometry']['location'];
+        return '${location['lat']},${location['lng']}';
+      } else {
+        throw Exception('Geocoding failed: ${data['status']} - ${data['error_message']}');
+      }
+    } else {
+      throw Exception('Failed to connect to Geocoding API.');
+    }
   }
 
   @override
@@ -187,7 +266,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                 latitude: widget.epc.latitude,
                                 longitude: widget.epc.longitude,
                                 address: widget.epc.address,
-                                postcode: widget.epc.postcode, // Passed postcode
+                                postcode: widget.epc.postcode,
                               ),
                             ),
                           ),
@@ -267,8 +346,10 @@ class _PropertyScreenState extends State<PropertyScreen> {
                 ),
               ),
             ),
+            if (_isGeneratingReport)
+              const Center(child: CircularProgressIndicator()),
             if (_isFinancePanelVisible)
-              FinancePanel(onSend: _toggleFinancePanelVisibility),
+              FinancePanel(onSend: () => setState(() => _isFinancePanelVisible = false)),
             if (_isReportPanelVisible)
               Consumer<FinancialController>(
                 builder: (context, financialController, child) => ReportPanel(
@@ -276,6 +357,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
                   price: NumberFormat.compactSimpleCurrency(locale: 'en_GB')
                       .format(financialController.currentPrice ?? 0),
                   images: const [], // TODO: Pass the images from the ImageGallery
+                  streetViewUrl: _streetViewUrl,
                   gdv: financialController.gdv,
                   totalCost: financialController.totalCost,
                   uplift: financialController.uplift,
