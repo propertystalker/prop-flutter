@@ -184,8 +184,11 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               child: WebViewScreen(
-                                      latitude: widget.epc.latitude,
-                                      longitude: widget.epc.longitude),
+                                latitude: widget.epc.latitude,
+                                longitude: widget.epc.longitude,
+                                address: widget.epc.address,
+                                postcode: widget.epc.postcode, // Passed postcode
+                              ),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -196,9 +199,14 @@ class _PropertyScreenState extends State<PropertyScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    PropertyHeader(
-                      address: widget.epc.address,
-                      postcode: widget.epc.postcode,
+                    Consumer<FinancialController>(
+                      builder: (context, financialController, child) {
+                        return PropertyHeader(
+                          address: widget.epc.address,
+                          postcode: widget.epc.postcode,
+                          price: financialController.currentPrice,
+                        );
+                      },
                     ),
                     Padding(
                       padding: const EdgeInsets.all(16.0),

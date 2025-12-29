@@ -9,11 +9,13 @@ import 'package:provider/provider.dart';
 class PropertyHeader extends StatelessWidget {
   final String address;
   final String postcode;
+  final double? price;
 
   const PropertyHeader({
     super.key,
     required this.address,
     required this.postcode,
+    this.price,
   });
 
   void _searchByPostcode(BuildContext context, String postcode) {
@@ -84,8 +86,11 @@ class PropertyHeader extends StatelessWidget {
     final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
     final priceController = TextEditingController();
 
+    // Use the price from the widget if available, otherwise use the financial controller's price
+    final currentPrice = price ?? financialController.currentPrice;
+
     if (controller.isEditingPrice) {
-      priceController.text = financialController.currentPrice?.toStringAsFixed(0) ?? '';
+      priceController.text = currentPrice?.toStringAsFixed(0) ?? '';
       return Container(
         color: editablePriceColor,
         width: 200,
@@ -119,7 +124,7 @@ class PropertyHeader extends StatelessWidget {
       );
     }
 
-    if (financialController.currentPrice == null) {
+    if (currentPrice == null) {
       return const SizedBox(
         height: 30,
         width: 30,
@@ -132,7 +137,7 @@ class PropertyHeader extends StatelessWidget {
       return GestureDetector(
         onTap: () {
           controller.editPrice();
-          priceController.text = financialController.currentPrice!.toStringAsFixed(0);
+          priceController.text = currentPrice.toStringAsFixed(0);
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -141,7 +146,7 @@ class PropertyHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Text(
-            currencyFormat.format(financialController.currentPrice!),
+            currencyFormat.format(currentPrice),
             style: const TextStyle(
                 fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
           ),

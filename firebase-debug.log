@@ -116,3 +116,82 @@ For CI servers and headless environments, generate a new token with firebase log
 [error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
 [debug] [2025-12-21T07:34:39.996Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
 [debug] [2025-12-21T07:34:39.996Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2025-12-29T13:19:36.987Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:36.994Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:36.996Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-29T13:19:36.996Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2025-12-29T13:19:36.997Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[debug] [2025-12-29T13:19:37.026Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.027Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.028Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-29T13:19:37.028Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2025-12-29T13:19:37.029Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[debug] [2025-12-29T13:19:37.138Z] Checked if tokens are valid: false, expires at: 1765780002902
+[debug] [2025-12-29T13:19:37.139Z] Checked if tokens are valid: false, expires at: 1765780002902
+[debug] [2025-12-29T13:19:37.139Z] > refreshing access token with scopes: []
+[debug] [2025-12-29T13:19:37.144Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-12-29T13:19:37.144Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-12-29T13:19:37.177Z] Checked if tokens are valid: false, expires at: 1765780002902
+[debug] [2025-12-29T13:19:37.177Z] Checked if tokens are valid: false, expires at: 1765780002902
+[debug] [2025-12-29T13:19:37.177Z] > refreshing access token with scopes: []
+[debug] [2025-12-29T13:19:37.178Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-12-29T13:19:37.178Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-12-29T13:19:37.236Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-12-29T13:19:37.236Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[error] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
+
+For CI servers and headless environments, generate a new token with firebase login:ci
+[error] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
+
+For CI servers and headless environments, generate a new token with firebase login:ci
+[debug] [2025-12-29T13:19:37.237Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.238Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.239Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.239Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-29T13:19:37.240Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2025-12-29T13:19:37.240Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[debug] [2025-12-29T13:19:37.241Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.242Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-29T13:19:37.242Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2025-12-29T13:19:37.259Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.260Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.261Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.262Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.264Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.265Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.266Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-29T13:19:37.266Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2025-12-29T13:19:37.266Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-29T13:19:37.266Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2025-12-29T13:19:37.267Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[debug] [2025-12-29T13:19:37.267Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[debug] [2025-12-29T13:19:37.268Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.269Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-29T13:19:37.269Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-29T13:19:37.269Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2025-12-29T13:19:37.269Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-29T13:19:37.270Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2025-12-29T13:19:37.271Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-12-29T13:19:37.271Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[error] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
+
+For CI servers and headless environments, generate a new token with firebase login:ci
+[error] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
+
+For CI servers and headless environments, generate a new token with firebase login:ci
