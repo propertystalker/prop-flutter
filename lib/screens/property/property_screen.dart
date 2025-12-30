@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:myapp/controllers/finance_proposal_request_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/controllers/gdv_controller.dart';
+import 'package:myapp/controllers/image_gallery_controller.dart';
 import 'package:myapp/controllers/price_paid_controller.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/models/epc_model.dart';
@@ -43,6 +43,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
   late PricePaidController _pricePaidController;
   late GdvController _gdvController;
   late FinancialController _financialController;
+  late ImageGalleryController _imageGalleryController;
   bool _isCompanyAccountVisible = false;
   bool _isPersonAccountVisible = false;
   bool _isFinancePanelVisible = false;
@@ -57,6 +58,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
     _pricePaidController = Provider.of<PricePaidController>(context, listen: false);
     _financialController = Provider.of<FinancialController>(context, listen: false);
     _gdvController = Provider.of<GdvController>(context, listen: false);
+    _imageGalleryController = ImageGalleryController();
 
     _lastGdv = _gdvController.finalGdv;
 
@@ -74,6 +76,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
     _pricePaidController.removeListener(_onPriceHistoryChanged);
     _gdvController.removeListener(_onGdvChanged);
     _financialController.removeListener(_onCurrentPriceChanged);
+    _imageGalleryController.dispose();
     super.dispose();
   }
 
@@ -163,7 +166,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
 
     try {
       final locationString = await _getBestLocationString();
-      final streetViewUrl = 
+      final streetViewUrl =
         'https://maps.googleapis.com/maps/api/streetview?size=600x400&location=$locationString&key=$googleMapsApiKey';
       
       setState(() {
@@ -236,6 +239,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
         ChangeNotifierProvider(create: (_) => SendReportRequestController()),
         ChangeNotifierProvider.value(value: _gdvController),
         ChangeNotifierProvider.value(value: _financialController),
+        ChangeNotifierProvider.value(value: _imageGalleryController),
       ],
       child: Scaffold(
         appBar: PropertyFilterAppBar(
@@ -351,12 +355,12 @@ class _PropertyScreenState extends State<PropertyScreen> {
             if (_isFinancePanelVisible)
               FinancePanel(onSend: () => setState(() => _isFinancePanelVisible = false)),
             if (_isReportPanelVisible)
-              Consumer<FinancialController>(
-                builder: (context, financialController, child) => ReportPanel(
+              Consumer2<FinancialController, ImageGalleryController>(
+                builder: (context, financialController, imageGalleryController, child) => ReportPanel(
                   address: widget.epc.address,
                   price: NumberFormat.compactSimpleCurrency(locale: 'en_GB')
                       .format(financialController.currentPrice ?? 0),
-                  images: const [], // TODO: Pass the images from the ImageGallery
+                  images: imageGalleryController.images,
                   streetViewUrl: _streetViewUrl,
                   gdv: financialController.gdv,
                   totalCost: financialController.totalCost,

@@ -1,8 +1,9 @@
-
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:myapp/controllers/image_gallery_controller.dart';
+import 'package:provider/provider.dart';
 
 class ImageGallery extends StatefulWidget {
   const ImageGallery({super.key});
@@ -12,8 +13,6 @@ class ImageGallery extends StatefulWidget {
 }
 
 class _ImageGalleryState extends State<ImageGallery> {
-  final ImagePicker _picker = ImagePicker();
-  List<XFile> _images = [];
   int _currentImageIndex = 0;
   late PageController _pageController;
 
@@ -29,24 +28,6 @@ class _ImageGalleryState extends State<ImageGallery> {
     super.dispose();
   }
 
-  Future<void> _pickImages() async {
-    final List<XFile> pickedFiles = await _picker.pickMultiImage();
-    if (pickedFiles.isNotEmpty) {
-      setState(() {
-        _images.addAll(pickedFiles);
-      });
-    }
-  }
-
-  void _removeImage(int index) {
-    setState(() {
-      _images.removeAt(index);
-      if (_currentImageIndex >= _images.length && _images.isNotEmpty) {
-        _currentImageIndex = _images.length - 1;
-      }
-    });
-  }
-
   void _onPageChanged(int index) {
     setState(() {
       _currentImageIndex = index;
@@ -55,25 +36,27 @@ class _ImageGalleryState extends State<ImageGallery> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Provider.of<ImageGalleryController>(context);
+
     return GestureDetector(
-      onTap: _pickImages,
+      onTap: () => controller.pickImages(),
       child: Container(
         height: 200,
         decoration: BoxDecoration(
           border: Border.all(color: Colors.blue, width: 2),
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: _images.isEmpty
+        child: controller.images.isEmpty
             ? const Center(child: Text('Your photos will appear here'))
             : Stack(
                 fit: StackFit.expand,
                 children: [
                   PageView.builder(
                     controller: _pageController,
-                    itemCount: _images.length,
+                    itemCount: controller.images.length,
                     onPageChanged: _onPageChanged,
                     itemBuilder: (context, index) {
-                      final image = _images[index];
+                      final image = controller.images[index];
                       return ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
                         child: kIsWeb
@@ -87,54 +70,61 @@ class _ImageGalleryState extends State<ImageGallery> {
                     left: 8,
                     child: IconButton(
                       icon: const Icon(Icons.remove_circle, color: Colors.white),
-                      onPressed: () => _removeImage(_currentImageIndex),
+                      onPressed: () {
+                        controller.removeImage(_currentImageIndex);
+                        if (_currentImageIndex >= controller.images.length && controller.images.isNotEmpty) {
+                          _currentImageIndex = controller.images.length - 1;
+                        }
+                      },
                     ),
                   ),
-                  Positioned(
-                    bottom: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withAlpha(153),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Text(
-                        '${_currentImageIndex + 1} / ${_images.length}',
-                        style: const TextStyle(color: Colors.white, fontSize: 14),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                          onPressed: () {
-                            if (_currentImageIndex > 0) {
-                              _pageController.previousPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              );
-                            }
-                          },
+                  if (controller.images.isNotEmpty)
+                    Positioned(
+                      bottom: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withAlpha(153),
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
-                          onPressed: () {
-                            if (_currentImageIndex < _images.length - 1) {
-                              _pageController.nextPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              );
-                            }
-                          },
+                        child: Text(
+                          '${_currentImageIndex + 1} / ${controller.images.length}',
+                          style: const TextStyle(color: Colors.white, fontSize: 14),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  if (controller.images.length > 1)
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                            onPressed: () {
+                              if (_currentImageIndex > 0) {
+                                _pageController.previousPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+                            onPressed: () {
+                              if (_currentImageIndex < controller.images.length - 1) {
+                                _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
       ),
