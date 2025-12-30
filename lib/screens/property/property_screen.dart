@@ -1,5 +1,7 @@
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:myapp/controllers/finance_proposal_request_controller.dart';
@@ -18,6 +20,7 @@ import 'package:myapp/screens/property/widgets/image_gallery.dart';
 import 'package:myapp/screens/property/widgets/price_history.dart';
 import 'package:myapp/screens/property/widgets/property_header.dart';
 import 'package:myapp/screens/property/widgets/property_stats.dart';
+import 'package:myapp/widgets/scenario_selection_panel.dart';
 import 'package:myapp/widgets/uplift_analysis_widget.dart';
 import 'package:myapp/widgets/uplift_risk_overview_widget.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +30,6 @@ import 'package:myapp/widgets/filter_screen_bottom_nav.dart';
 import 'package:myapp/widgets/finance_panel.dart';
 import 'package:myapp/widgets/property_filter_app_bar.dart';
 import 'package:myapp/widgets/report_panel.dart';
-import 'package:myapp/screens/report_sent_screen.dart';
 import 'package:myapp/webview_screen.dart';
 
 class PropertyScreen extends StatefulWidget {
@@ -47,10 +49,11 @@ class _PropertyScreenState extends State<PropertyScreen> {
   bool _isCompanyAccountVisible = false;
   bool _isPersonAccountVisible = false;
   bool _isFinancePanelVisible = false;
-  bool _isReportPanelVisible = false;
+  bool _isScenarioSelectionVisible = false;
   bool _isGeneratingReport = false;
   double? _lastGdv;
   String? _streetViewUrl;
+  List<String> _selectedScenarioIds = [];
 
   @override
   void initState() {
@@ -152,10 +155,10 @@ class _PropertyScreenState extends State<PropertyScreen> {
     });
   }
 
-  Future<void> _toggleReportPanelVisibility() async {
-    if (_isReportPanelVisible || _isGeneratingReport) {
+  Future<void> _toggleScenarioSelectionVisibility() async {
+    if (_isScenarioSelectionVisible || _isGeneratingReport) {
       setState(() {
-        _isReportPanelVisible = false;
+        _isScenarioSelectionVisible = false;
       });
       return;
     }
@@ -167,11 +170,11 @@ class _PropertyScreenState extends State<PropertyScreen> {
     try {
       final locationString = await _getBestLocationString();
       final streetViewUrl =
-        'https://maps.googleapis.com/maps/api/streetview?size=600x400&location=$locationString&key=$googleMapsApiKey';
-      
+          'https://maps.googleapis.com/maps/api/streetview?size=600x400&location=$locationString&key=$googleMapsApiKey';
+
       setState(() {
         _streetViewUrl = streetViewUrl;
-        _isReportPanelVisible = true;
+        _isScenarioSelectionVisible = true;
       });
     } catch (e) {
       print("Error generating street view URL: $e");
@@ -251,135 +254,160 @@ class _PropertyScreenState extends State<PropertyScreen> {
             if (_isCompanyAccountVisible) const CompanyAccount(),
             if (_isPersonAccountVisible) const PersonAccount(),
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 200,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.purple, width: 2),
-                                borderRadius: BorderRadius.circular(8.0),
+              child: Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: 200,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.purple, width: 2),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: WebViewScreen(
+                                    latitude: widget.epc.latitude,
+                                    longitude: widget.epc.longitude,
+                                    address: widget.epc.address,
+                                    postcode: widget.epc.postcode,
+                                  ),
+                                ),
                               ),
-                              child: WebViewScreen(
-                                latitude: widget.epc.latitude,
-                                longitude: widget.epc.longitude,
-                                address: widget.epc.address,
-                                postcode: widget.epc.postcode,
+                              const SizedBox(width: 16),
+                              const Expanded(
+                                child: ImageGallery(),
                               ),
-                            ),
+                            ],
                           ),
-                          const SizedBox(width: 16),
-                          const Expanded(
-                            child: ImageGallery(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Consumer<FinancialController>(
-                      builder: (context, financialController, child) {
-                        return PropertyHeader(
-                          address: widget.epc.address,
-                          postcode: widget.epc.postcode,
-                          price: financialController.currentPrice,
-                        );
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const SizedBox(height: 16),
-                          PropertyStats(
-                            squareMeters: (double.tryParse(widget.epc.totalFloorArea) ?? 0.0).round(),
-                            habitableRooms:
-                                int.tryParse(widget.epc.numberHabitableRooms) ?? 0,
-                            propertyType: widget.epc.propertyType,
-                          ),
-                          const Divider(height: 32),
-                          Consumer2<FinancialController, GdvController>(
-                            builder: (context, financialController, gdvController, child) {
-                              return DevelopmentScenarios(
-                                onScenarioChanged: (scenario) {
-                                  financialController.calculateFinancials(
-                                      scenario, gdvController.finalGdv);
+                        ),
+                        const SizedBox(height: 16),
+                        Consumer<FinancialController>(
+                          builder: (context, financialController, child) {
+                            return PropertyHeader(
+                              address: widget.epc.address,
+                              postcode: widget.epc.postcode,
+                              price: financialController.currentPrice,
+                            );
+                          },
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 16),
+                              PropertyStats(
+                                squareMeters: (double.tryParse(widget.epc.totalFloorArea) ?? 0.0).round(),
+                                habitableRooms: int.tryParse(widget.epc.numberHabitableRooms) ?? 0,
+                                propertyType: widget.epc.propertyType,
+                              ),
+                              const Divider(height: 32),
+                              Consumer2<FinancialController, GdvController>(
+                                builder: (context, financialController, gdvController, child) {
+                                  return DevelopmentScenarios(
+                                    onScenarioChanged: (scenario) {
+                                      financialController.calculateFinancials(
+                                          scenario, gdvController.finalGdv);
+                                    },
+                                  );
                                 },
-                              );
-                            },
+                              ),
+                              const Divider(height: 32),
+                              const GdvCalculationWidget(),
+                              const Divider(height: 32),
+                              const GdvRangeWidget(),
+                              const Divider(height: 32),
+                              Consumer<FinancialController>(
+                                builder: (context, financialController, child) =>
+                                    FinancialSummary(
+                                  gdv: financialController.gdv,
+                                  totalCost: financialController.totalCost,
+                                  uplift: financialController.uplift,
+                                  roi: financialController.roi,
+                                ),
+                              ),
+                              const Divider(height: 32),
+                              const UpliftRiskOverviewWidget(),
+                              const Divider(height: 32),
+                              const UpliftAnalysisWidget(),
+                              const Divider(height: 32),
+                              const PriceHistory(),
+                              const SizedBox(height: 16),
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Home'),
+                                ),
+                              ),
+                            ],
                           ),
-                          const Divider(height: 32),
-                          const GdvCalculationWidget(),
-                          const Divider(height: 32),
-                          const GdvRangeWidget(),
-                          const Divider(height: 32),
-                          Consumer<FinancialController>(
-                            builder: (context, financialController, child) =>
-                                FinancialSummary(
-                              gdv: financialController.gdv,
-                              totalCost: financialController.totalCost,
-                              uplift: financialController.uplift,
-                              roi: financialController.roi,
-                            ),
-                          ),
-                          const Divider(height: 32),
-                          const UpliftRiskOverviewWidget(),
-                          const Divider(height: 32),
-                          const UpliftAnalysisWidget(),
-                          const Divider(height: 32),
-                          const PriceHistory(),
-                          const SizedBox(height: 16),
-                          Center(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
+                        ),
+                        // Make sure there's enough space for the bottom panels
+                        SizedBox(height: _isScenarioSelectionVisible ? 400 : 0),
+                      ],
+                    ),
+                  ),
+                  if (_isGeneratingReport)
+                    const Center(child: CircularProgressIndicator()),
+                  if (_isScenarioSelectionVisible)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        color: Colors.black.withOpacity(0.7),
+                        child: Column(
+                          children: [
+                            ScenarioSelectionPanel(
+                              onSelectionChanged: (selectedIds) {
+                                setState(() {
+                                  _selectedScenarioIds = selectedIds;
+                                });
                               },
-                              child: const Text('Home'),
                             ),
-                          ),
-                        ],
+                            Consumer2<FinancialController, ImageGalleryController>(
+                              builder: (context, financialController, imageGalleryController, child) => ReportPanel(
+                                address: widget.epc.address,
+                                price: NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(financialController.currentPrice ?? 0),
+                                images: imageGalleryController.images,
+                                streetViewUrl: _streetViewUrl,
+                                gdv: financialController.gdv,
+                                totalCost: financialController.totalCost,
+                                uplift: financialController.uplift,
+                                onSend: () {
+                                  _toggleScenarioSelectionVisibility();
+                                  final propertyId = "${widget.epc.address}, ${widget.epc.postcode}";
+                                  context.go("/report/$propertyId?scenarios=${_selectedScenarioIds.join(',')}");
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ],
-                ),
+                  if (_isFinancePanelVisible)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: FinancePanel(onSend: () => setState(() => _isFinancePanelVisible = false)),
+                    ),
+                ],
               ),
             ),
-            if (_isGeneratingReport)
-              const Center(child: CircularProgressIndicator()),
-            if (_isFinancePanelVisible)
-              FinancePanel(onSend: () => setState(() => _isFinancePanelVisible = false)),
-            if (_isReportPanelVisible)
-              Consumer2<FinancialController, ImageGalleryController>(
-                builder: (context, financialController, imageGalleryController, child) => ReportPanel(
-                  address: widget.epc.address,
-                  price: NumberFormat.compactSimpleCurrency(locale: 'en_GB')
-                      .format(financialController.currentPrice ?? 0),
-                  images: imageGalleryController.images,
-                  streetViewUrl: _streetViewUrl,
-                  gdv: financialController.gdv,
-                  totalCost: financialController.totalCost,
-                  uplift: financialController.uplift,
-                  onSend: () {
-                    _toggleReportPanelVisibility();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ReportSentScreen()),
-                    );
-                  },
-                ),
-              ),
           ],
         ),
         bottomNavigationBar: FilterScreenBottomNav(onTap: (index) {
           if (index == 0) _toggleFinancePanelVisibility();
-          if (index == 2) _toggleReportPanelVisibility();
+          if (index == 2) _toggleScenarioSelectionVisibility();
         }),
       ),
     );
