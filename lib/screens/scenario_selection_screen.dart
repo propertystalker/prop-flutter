@@ -7,10 +7,10 @@ import 'package:myapp/widgets/report_panel.dart';
 class ScenarioSelectionScreen extends StatefulWidget {
   final String propertyId;
 
-  const ScenarioSelectionScreen({Key? key, required this.propertyId}) : super(key: key);
+  const ScenarioSelectionScreen({super.key, required this.propertyId});
 
   @override
-  _ScenarioSelectionScreenState createState() => _ScenarioSelectionScreenState();
+  State<ScenarioSelectionScreen> createState() => _ScenarioSelectionScreenState();
 }
 
 class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
@@ -106,7 +106,7 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
                           padding: const EdgeInsets.symmetric(
                               vertical: 8, horizontal: 16),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
+                            color: const Color.fromRGBO(0, 0, 0, 0.5),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(

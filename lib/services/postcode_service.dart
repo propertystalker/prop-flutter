@@ -11,14 +11,14 @@ class PostcodeService {
     }
 
     final url = Uri.parse('$_baseUrl/$postcode/autocomplete');
-    developer.log('Postcodes.io Request URL: $url', name: 'myapp.postcode');
+    // developer.log('Postcodes.io Request URL: $url', name: 'myapp.postcode');
 
     try {
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        developer.log('Postcodes.io Response: ${response.body}', name: 'myapp.postcode');
+        // developer.log('Postcodes.io Response: ${response.body}', name: 'myapp.postcode');
         if (data['status'] == 200 && data['result'] != null) {
           final List<dynamic> results = data['result'];
           return results.cast<String>().toList();

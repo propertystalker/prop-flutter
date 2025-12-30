@@ -51,7 +51,7 @@ class _ReportPanelState extends State<ReportPanel> {
       );
       widget.onSend();
     } catch (e) {
-      print("Error generating or sending PDF: $e");
+      debugPrint("Error generating or sending PDF: $e");
       // Optionally show an error to the user
     } finally {
       if (mounted) {

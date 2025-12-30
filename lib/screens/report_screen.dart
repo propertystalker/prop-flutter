@@ -12,13 +12,13 @@ class ReportScreen extends StatelessWidget {
   final double uplift;
 
   const ReportScreen({
-    Key? key,
+    super.key,
     required this.propertyId,
     this.selectedScenarios = const [],
     required this.gdv,
     required this.totalCost,
     required this.uplift,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

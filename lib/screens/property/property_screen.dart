@@ -176,7 +176,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
         _isScenarioSelectionVisible = true;
       });
     } catch (e) {
-      print("Error generating street view URL: $e");
+      debugPrint("Error generating street view URL: $e");
       // Optionally, show an error message to the user
     } finally {
       setState(() {
@@ -186,9 +186,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
   }
 
   Future<String> _getBestLocationString() async {
-    if (widget.epc.latitude != null &&
-        widget.epc.longitude != null &&
-        (widget.epc.latitude != 0.0 || widget.epc.longitude != 0.0)) {
+    if (widget.epc.latitude != 0.0 || widget.epc.longitude != 0.0) {
       return '${widget.epc.latitude},${widget.epc.longitude}';
     }
 
@@ -201,7 +199,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
         return await _geocodeAddress(addressToGeocode);
       } catch (e) {
         // Fallback to postcode if full address fails
-        print('Failed to geocode full address, falling back to postcode: $e');
+        debugPrint('Failed to geocode full address, falling back to postcode: $e');
       }
     }
 
@@ -362,7 +360,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
                       left: 0,
                       right: 0,
                       child: Container(
-                        color: Colors.black.withOpacity(0.7),
+                        color: const Color.fromRGBO(0, 0, 0, 0.7),
                         child: Column(
                           children: [
                             ScenarioSelectionPanel(

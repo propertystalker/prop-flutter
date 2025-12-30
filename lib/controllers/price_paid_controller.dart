@@ -62,7 +62,7 @@ class PricePaidController with ChangeNotifier {
         _priceHistory = allTransactions;
       }
       
-      developer.log('Found ${_priceHistory.length} transactions for house $houseNumber at postcode $postcode.');
+      // developer.log('Found ${_priceHistory.length} transactions for house $houseNumber at postcode $postcode.');
 
       if (_priceHistory.isEmpty && houseNumber.isNotEmpty) {
         _errorMessage = 'No sales history found for house number "$houseNumber" at this postcode. It may have a different official name (e.g., "The Barn") or no recent sales.';

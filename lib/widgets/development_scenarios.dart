@@ -14,10 +14,10 @@ class DevelopmentScenarios extends StatefulWidget {
   });
 
   @override
-  _DevelopmentScenariosState createState() => _DevelopmentScenariosState();
+  DevelopmentScenariosState createState() => DevelopmentScenariosState();
 }
 
-class _DevelopmentScenariosState extends State<DevelopmentScenarios> {
+class DevelopmentScenariosState extends State<DevelopmentScenarios> {
   int _currentIndex = 0;
 
   final List<String> _scenarios = [
@@ -67,10 +67,10 @@ class _DevelopmentScenariosState extends State<DevelopmentScenarios> {
     
     final currencyFormatter = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
 
-    final List<_ChartData> chartData = [
-      _ChartData('Total Cost', financialController.totalCost,
+    final List<ChartData> chartData = [
+      ChartData('Total Cost', financialController.totalCost,
           currencyFormatter.format(financialController.totalCost)),
-      _ChartData('Uplift', financialController.uplift,
+      ChartData('Uplift', financialController.uplift,
           currencyFormatter.format(financialController.uplift)),
     ];
 
@@ -110,11 +110,11 @@ class _DevelopmentScenariosState extends State<DevelopmentScenarios> {
             legend:
                 const Legend(isVisible: true, position: LegendPosition.bottom),
             series: <CircularSeries>[
-              PieSeries<_ChartData, String>(
+              PieSeries<ChartData, String>(
                 dataSource: chartData,
-                xValueMapper: (_ChartData data, _) => data.x,
-                yValueMapper: (_ChartData data, _) => data.y,
-                dataLabelMapper: (_ChartData data, _) => data.text,
+                xValueMapper: (ChartData data, _) => data.x,
+                yValueMapper: (ChartData data, _) => data.y,
+                dataLabelMapper: (ChartData data, _) => data.text,
                 dataLabelSettings: const DataLabelSettings(isVisible: true),
               ),
             ],
@@ -125,8 +125,8 @@ class _DevelopmentScenariosState extends State<DevelopmentScenarios> {
   }
 }
 
-class _ChartData {
-  _ChartData(this.x, this.y, this.text);
+class ChartData {
+  ChartData(this.x, this.y, this.text);
   final String x;
   final double y;
   final String text;

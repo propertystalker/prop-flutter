@@ -5,10 +5,10 @@ import 'package:myapp/models/scenario_model.dart';
 class ScenarioSelectionPanel extends StatefulWidget {
   final Function(List<String> selectedScenarioIds) onSelectionChanged;
 
-  const ScenarioSelectionPanel({Key? key, required this.onSelectionChanged}) : super(key: key);
+  const ScenarioSelectionPanel({super.key, required this.onSelectionChanged});
 
   @override
-  _ScenarioSelectionPanelState createState() => _ScenarioSelectionPanelState();
+  State<ScenarioSelectionPanel> createState() => _ScenarioSelectionPanelState();
 }
 
 class _ScenarioSelectionPanelState extends State<ScenarioSelectionPanel> {

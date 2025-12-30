@@ -16,7 +16,7 @@ class EpcService {
     
     final credentials = base64Encode(utf8.encode('$epcEmail:$epcApiKey'));
     
-    developer.log('Fetching EPC data from: $url');
+    // developer.log('Fetching EPC data from: $url');
 
     final response = await client.get(Uri.parse(url), headers: {
       'Accept': 'application/json',
@@ -25,7 +25,7 @@ class EpcService {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      developer.log('EPC API Response: ${response.body}');
+      // developer.log('EPC API Response: ${response.body}');
       
       final List<dynamic> results = data['rows'];
 

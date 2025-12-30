@@ -96,7 +96,7 @@ class UpliftRiskOverviewWidget extends StatelessWidget {
           child: Chip(
             avatar: Icon(icon, color: color),
             label: Text(risk, style: const TextStyle(fontWeight: FontWeight.bold)),
-            backgroundColor: color.withOpacity(0.1),
+            backgroundColor: color.withAlpha(26),
           ),
         ),
       ],

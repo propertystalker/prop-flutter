@@ -21,12 +21,12 @@ class PricePaidService {
       queryParameters,
     );
 
-    developer.log('Fetching data from: $uri');
+    // developer.log('Fetching data from: $uri');
 
     final response = await client.get(uri, headers: {'Accept': 'application/json'});
 
     if (response.statusCode == 200) {
-      developer.log('API Response: ${response.body}');
+      // developer.log('API Response: ${response.body}');
       final data = json.decode(response.body);
       
       // Safely access the 'items' list

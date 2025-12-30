@@ -1,5 +1,5 @@
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:pdf/pdf.dart';
@@ -25,10 +25,10 @@ class PdfGenerator {
         if (response.statusCode == 200) {
           imageProviders.add(pw.MemoryImage(response.bodyBytes));
         } else {
-          print('Failed to load street view image: ${response.statusCode}');
+          debugPrint('Failed to load street view image: ${response.statusCode}');
         }
       } catch (e) {
-        print('Error fetching street view image: $e');
+        debugPrint('Error fetching street view image: $e');
       }
     }
 
@@ -90,7 +90,7 @@ class PdfGenerator {
 
     await Printing.sharePdf(
       bytes: pdfBytes,
-      filename: 'Property_Stalker_${sanitizedAddress}.pdf',
+      filename: 'Property_Stalker_$sanitizedAddress.pdf',
     );
   }
 }
