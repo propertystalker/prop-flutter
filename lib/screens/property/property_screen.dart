@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -385,7 +384,9 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                 onSend: () {
                                   _toggleScenarioSelectionVisibility();
                                   final propertyId = "${widget.epc.address}, ${widget.epc.postcode}";
-                                  context.go("/report/$propertyId?scenarios=${_selectedScenarioIds.join(',')}");
+                                  context.go(
+                                    '/report/$propertyId?scenarios=${_selectedScenarioIds.join(',')}&gdv=${financialController.gdv}&totalCost=${financialController.totalCost}&uplift=${financialController.uplift}',
+                                  );
                                 },
                               ),
                             ),

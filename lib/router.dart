@@ -66,7 +66,17 @@ final GoRouter router = GoRouter(
             final String propertyId = state.pathParameters['propertyId']!;
             final String scenarios = state.uri.queryParameters['scenarios'] ?? '';
             final List<String> selectedScenarios = scenarios.split(',').where((s) => s.isNotEmpty).toList();
-            return ReportScreen(propertyId: propertyId, selectedScenarios: selectedScenarios,);
+            final double gdv = double.tryParse(state.uri.queryParameters['gdv'] ?? '0.0') ?? 0.0;
+            final double totalCost = double.tryParse(state.uri.queryParameters['totalCost'] ?? '0.0') ?? 0.0;
+            final double uplift = double.tryParse(state.uri.queryParameters['uplift'] ?? '0.0') ?? 0.0;
+
+            return ReportScreen(
+              propertyId: propertyId,
+              selectedScenarios: selectedScenarios,
+              gdv: gdv,
+              totalCost: totalCost,
+              uplift: uplift,
+            );
           },
         ),
       ],

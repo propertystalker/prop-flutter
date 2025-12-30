@@ -6,17 +6,30 @@ import 'package:myapp/models/report_model.dart';
 class ReportScreen extends StatelessWidget {
   final String propertyId;
   final List<String> selectedScenarios;
+  final double gdv;
+  final double totalCost;
+  final double uplift;
 
   const ReportScreen({
     Key? key,
     required this.propertyId,
     this.selectedScenarios = const [],
+    required this.gdv,
+    required this.totalCost,
+    required this.uplift,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => ReportController()..generateReport(propertyId, scenarios: selectedScenarios),
+      create: (_) => ReportController()
+        ..generateReport(
+          propertyId,
+          scenarios: selectedScenarios,
+          gdv: gdv,
+          totalCost: totalCost,
+          uplift: uplift,
+        ),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Property Report'),
