@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/controllers/report_controller.dart';
 import 'package:myapp/models/report_model.dart';
@@ -60,7 +61,7 @@ class ReportScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(report.reportTitle, style: Theme.of(context).textTheme.headlineSmall),
                   const SizedBox(height: 8),
-                  Text('Generated: ${report.dateGenerated.toLocal()}'),
+                  Text('Generated: ${DateFormat.yMMMMd().format(report.dateGenerated.toLocal())}'),
                   const SizedBox(height: 24),
                   _buildDealAtAGlance(context, report),
                   // ... other report sections will go here
