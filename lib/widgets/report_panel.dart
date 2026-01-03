@@ -2,6 +2,7 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:myapp/controllers/report_session_controller.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/services/cloudinary_service.dart';
 import 'package:myapp/utils/pdf_generator.dart';
@@ -89,6 +90,10 @@ class _ReportPanelState extends State<ReportPanel> {
 
       if (reportUrl != null) {
         developer.log('Report uploaded successfully: $reportUrl', name: 'ReportPanel');
+        
+        final reportSessionController = Provider.of<ReportSessionController>(context, listen: false);
+        reportSessionController.addReport(fileName, reportUrl);
+
         // Proceed to the next screen
         widget.onSend();
       } else {

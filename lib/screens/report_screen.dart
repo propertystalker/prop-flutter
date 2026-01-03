@@ -1,7 +1,10 @@
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:myapp/controllers/report_controller.dart';
+import 'package:myapp/controllers/report_session_controller.dart';
 import 'package:myapp/models/report_model.dart';
 
 class ReportScreen extends StatelessWidget {
@@ -64,7 +67,8 @@ class ReportScreen extends StatelessWidget {
                   Text('Generated: ${DateFormat.yMMMMd().format(report.dateGenerated.toLocal())}'),
                   const SizedBox(height: 24),
                   _buildDealAtAGlance(context, report),
-                  // ... other report sections will go here
+                  const SizedBox(height: 24),
+                  _buildSessionReports(context),
                 ],
               ),
             );
@@ -127,6 +131,46 @@ class ReportScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSessionReports(BuildContext context) {
+    final sessionReports = Provider.of<ReportSessionController>(context).reports;
+
+    if (sessionReports.isEmpty) {
+      return const SizedBox.shrink(); // Don't show anything if there are no session reports
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Session Reports', style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 16),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: sessionReports.length,
+          itemBuilder: (context, index) {
+            final reportInfo = sessionReports[index];
+            return Card(
+              child: ListTile(
+                leading: const Icon(Icons.picture_as_pdf),
+                title: Text(reportInfo.fileName),
+                onTap: () async {
+                  final url = Uri.parse(reportInfo.reportUrl);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Could not open report: ${reportInfo.reportUrl}')),
+                    );
+                  }
+                },
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
