@@ -1,6 +1,9 @@
+
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
+import 'package:myapp/services/cloudinary_service.dart';
 import 'package:myapp/utils/pdf_generator.dart';
 import 'package:provider/provider.dart';
 import '../utils/constants.dart';
@@ -34,13 +37,20 @@ class ReportPanel extends StatefulWidget {
 class _ReportPanelState extends State<ReportPanel> {
   bool _isSending = false;
 
-  Future<void> _generateAndSendPdf() async {
+  Future<void> _generateAndUploadReport() async {
+    if (_isSending) return;
+
     setState(() {
       _isSending = true;
     });
 
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Generating and uploading your report...')),
+    );
+
     try {
-      await PdfGenerator.generateAndOpenPdf(
+      // 1. Generate the PDF data
+      final pdfData = await PdfGenerator.generatePdf(
         widget.address,
         widget.price,
         widget.images,
@@ -49,10 +59,39 @@ class _ReportPanelState extends State<ReportPanel> {
         widget.totalCost,
         widget.uplift,
       );
-      widget.onSend();
-    } catch (e) {
-      debugPrint("Error generating or sending PDF: $e");
-      // Optionally show an error to the user
+
+      final pdfBytes = pdfData['bytes'];
+      final fileName = pdfData['filename'];
+
+      if (pdfBytes == null || fileName == null) {
+        throw Exception('PDF generation failed to return data.');
+      }
+
+      // 2. Upload to Cloudinary
+      final cloudinaryService = CloudinaryService();
+      final reportUrl = await cloudinaryService.uploadPdf(
+        pdfBytes: pdfBytes,
+        fileName: fileName,
+        folder: 'property_reports', // Optional: specify a folder in Cloudinary
+      );
+
+      if (reportUrl != null) {
+        developer.log('Report uploaded successfully: $reportUrl', name: 'ReportPanel');
+        // TODO: Save the reportUrl to the database or use as needed
+
+        // Proceed to the next screen
+        widget.onSend();
+      } else {
+        throw Exception('Failed to upload report to Cloudinary.');
+      }
+
+    } catch (e, s) {
+      developer.log('Error during report generation/upload', error: e, stackTrace: s, name: 'ReportPanel');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -125,14 +164,14 @@ class _ReportPanelState extends State<ReportPanel> {
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
               ),
-              onPressed: _isSending ? null : _generateAndSendPdf,
+              onPressed: _isSending ? null : _generateAndUploadReport,
               child: _isSending
                   ? const SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text('Send'),
+                  : const Text('Send Report'),
             ),
           ),
         ],

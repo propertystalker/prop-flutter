@@ -34,6 +34,7 @@ dependencies:
   webview_flutter: ^4.13.0
   webview_flutter_web: ^0.2.3+4
   screenshot: ^3.0.0
+  cloudinary_public: ^0.23.1
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,5 @@
 
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -7,7 +8,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 class PdfGenerator {
-  static Future<void> generateAndOpenPdf(
+  static Future<Map<String, dynamic>> generatePdf(
     String address,
     String price,
     List<XFile> images,
@@ -17,6 +18,10 @@ class PdfGenerator {
     double uplift,
   ) async {
     final pdf = pw.Document();
+
+    // --- Font Loading ---
+    final font = await PdfGoogleFonts.notoSansRegular();
+    final boldFont = await PdfGoogleFonts.notoSansBold();
 
     final imageProviders = <pw.MemoryImage>[];
     if (streetViewUrl != null) {
@@ -37,12 +42,16 @@ class PdfGenerator {
       imageProviders.add(pw.MemoryImage(bytes));
     }
 
-    final font = await PdfGoogleFonts.notoSansRegular();
+    // --- Explicit Text Styles ---
+    final headerStyle = pw.TextStyle(font: boldFont, fontSize: 28);
+    final priceStyle = pw.TextStyle(font: font, fontSize: 24);
+    final chartTitleStyle = pw.TextStyle(font: boldFont, fontSize: 16);
+    final legendStyle = pw.TextStyle(font: font);
 
     final chart = pw.Chart(
       title: pw.Text(
         'GDV: £${(gdv / 1000).toStringAsFixed(0)}K',
-        style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+        style: chartTitleStyle, // Use explicit style
       ),
       grid: pw.PieGrid(),
       datasets: [
@@ -50,23 +59,27 @@ class PdfGenerator {
           legend: 'Uplift',
           value: uplift,
           color: PdfColors.blue,
-          legendStyle: pw.TextStyle(font: font),
+          legendStyle: legendStyle, // Use explicit style
         ),
         pw.PieDataSet(
           legend: 'Total Cost',
           value: totalCost,
           color: PdfColors.grey500,
-          legendStyle: pw.TextStyle(font: font),
+          legendStyle: legendStyle, // Use explicit style
         ),
       ],
     );
 
     pdf.addPage(
       pw.MultiPage(
-        theme: pw.ThemeData.withFont(base: font),
+        // --- Updated Theme ---
+        theme: pw.ThemeData.withFont(
+          base: font,
+          bold: boldFont,
+        ),
         build: (context) => [
-          pw.Header(text: address, level: 1),
-          pw.Text(price, style: const pw.TextStyle(fontSize: 24)),
+          pw.Header(text: address, level: 1, textStyle: headerStyle), // Use explicit style
+          pw.Text(price, style: priceStyle), // Use explicit style
           pw.SizedBox(height: 20),
           pw.SizedBox(
             height: 250,
@@ -85,12 +98,12 @@ class PdfGenerator {
 
     final Uint8List pdfBytes = await pdf.save();
 
-    // Sanitize the address to create a valid filename
     final sanitizedAddress = address.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+    final fileName = 'Property_Stalker_$sanitizedAddress.pdf';
 
-    await Printing.sharePdf(
-      bytes: pdfBytes,
-      filename: 'Property_Stalker_$sanitizedAddress.pdf',
-    );
+    return {
+      'bytes': pdfBytes,
+      'filename': fileName,
+    };
   }
 }
