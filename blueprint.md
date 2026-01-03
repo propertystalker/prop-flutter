@@ -1,41 +1,50 @@
-# Project Blueprint: Property Investment Analyzer
+# Project Blueprint
 
 ## Overview
 
-This application is a powerful tool for property investors and developers to analyze potential real estate investments in the UK. It leverages data from the Energy Performance Certificate (EPC) and Price Paid Data APIs to provide a comprehensive overview of a property's financial potential. Users can search for properties, view detailed information, and calculate key investment metrics like Gross Development Value (GDV), uplift, and Return on Investment (ROI).
+This document outlines the architecture and features of the Flutter property analysis application. The application allows users to analyze property deals, generate reports, and view planning application data.
 
-## Core Features
+## Features
 
-- **Property Search:** Users can search for properties by postcode to retrieve a list of Energy Performance Certificates (EPCs).
-- **Detailed Property View:** Selecting a property from the search results displays a detailed screen with:
-    - **Street View:** An interactive Google Street View of the property, using either latitude/longitude coordinates or the property's address for location.
-    - **Image Gallery:** A space for property photos.
-    - **Property Information:** Key details from the EPC, including address, postcode, total floor area, number of habitable rooms, and property type.
-    - **Financial Analysis:**
-        - **Development Scenarios:** Users can choose from different development scenarios (e.g., refurbishment, extension) to see how they impact the property's value.
-        - **GDV Calculation:** An estimated Gross Development Value is calculated based on property data and market trends.
-        - **Financial Summary:** A clear summary of the GDV, total costs, potential uplift, and ROI.
-        - **Uplift & Risk Analysis:** Visual overviews of the potential uplift and associated risks.
-    - **Price History:** A history of the property's sales prices from the Price Paid Data service.
-- **Theming:** The application supports both light and dark themes for a personalized user experience.
+### Core Features
 
-## Design and Style
+- **Property Search:** Users can search for properties by address.
+- **Deal Analysis:** The application calculates key financial metrics such as estimated profit and return on investment (ROI).
+- **Report Generation:** Users can generate PDF reports summarizing the property analysis.
 
-- **Layout:** The application uses a clean, modern layout with a focus on data visualization. Key information is presented in cards and clear sections.
-- **Color Scheme:** A professional color palette centered around a primary color (currently purple) with complementary colors for data visualization and user interface elements.
-- **Typography:** Clear and legible fonts are used to ensure readability of financial data and property information.
-- **Interactivity:** Interactive elements like buttons, search bars, and scenarios are designed to be intuitive and easy to use.
+### Key Data Models
 
-## Current Plan
+- **PropertyReport:** Represents a full property analysis report, including financial metrics, selected scenarios, and key constraints.
+- **PlanningApplication:** Represents a single planning application, containing details such as the address, description, status, and received date.
 
-### Objective: Finalize the Property Detail Screen and Document the Project
+### Services
 
-1.  **Resolve Street View Errors:**
-    - **DONE:** Updated the `EpcModel` to handle nullable latitude and longitude, as the EPC API doesn't always provide this data.
-    - **DONE:** Modified the `WebViewScreen` to fall back to using the property's address and postcode when coordinates are unavailable. This ensures the Street View is displayed whenever possible.
-    - **DONE:** Corrected the `WebViewScreen` to use `Uri.https` for robust URL construction, preventing "Invalid 'location' parameter" errors.
-    - **DONE:** Identified that the Google Maps API key was a placeholder. Updated `WebViewScreen` to make it clear that a valid API key is required and added a prominent placeholder for the user to insert their key.
-2.  **Enhance Property Header:**
-    - **DONE:** Updated the `PropertyHeader` widget to accept and display the property's current price, providing a more complete financial overview.
-3.  **Project Documentation:**
-    - **DONE:** Created this `blueprint.md` file to document the project's overview, features, design, and current development plan.
+- **PlanningService:** Fetches planning application data from the PlanIt API.
+- **CloudinaryService:** Uploads generated PDF reports to Cloudinary.
+
+## PDF Generation
+
+The `PdfGenerator` class is responsible for creating PDF reports. The reports include:
+
+- A summary of the deal, including a pie chart visualizing the GDV, uplift, and total cost.
+- A dedicated page for planning applications, listing all relevant applications for the property's postcode.
+
+## Error Handling and Logging
+
+The application uses the `dart:developer` library for structured logging, allowing for effective debugging and monitoring. Errors are handled gracefully, with informative messages displayed to the user.
+
+## Recent Changes
+
+- **Added Planning Application to PDF:** The PDF report now includes a new page that displays a list of planning applications related to the property. This was achieved by:
+    - Updating the `PropertyReport` model to include a list of `PlanningApplication` objects.
+    - Modifying the `ReportController` to fetch planning applications using the `PlanningService`.
+    - Updating the `PdfGenerator` to create a new page for planning applications.
+- **Bug Fixes:** Addressed several bugs and warnings, including:
+    - Corrected field names in the `PlanningApplication` model.
+    - Fixed null-aware operators in the `PdfGenerator`.
+    - Resolved unused variable and `use_build_context_synchronously` warnings.
+    - Corrected a `not_enough_positional_arguments` error in the `ReportPanel`.
+    - Addressed warnings in the `PlanAppWidget`.
+- **Corrected PDF Generation Flow:** Fixed a bug where planning application data was not being included in the PDF generated from the "Send Report" button. The `ReportPanel` now fetches the planning applications before generating the PDF.
+- **Refactored Data Flow for Planning Applications:** To improve efficiency and ensure data consistency, the planning application data is now fetched only once in the `PropertyScreen`. This data is then passed down to both the `PlanAppWidget` for display and the `ReportPanel` for PDF generation, eliminating redundant API calls.
+- **Resolved Compilation Error:** Fixed a `missing_required_argument` error in the `ScenarioSelectionScreen` by providing the required `planningApplications` parameter to the `ReportPanel` widget.

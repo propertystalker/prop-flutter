@@ -1,3 +1,5 @@
+import 'package:myapp/models/planning_application.dart';
+
 enum InvestmentSignal { green, amber, red }
 
 enum GdvConfidence { high, medium, low }
@@ -14,6 +16,7 @@ class PropertyReport {
   final GdvConfidence gdvConfidence;
   final List<String> selectedScenarios;
   final List<String> keyConstraints;
+  final List<PlanningApplication> planningApplications;
 
   PropertyReport({
     required this.propertyAddress,
@@ -27,5 +30,6 @@ class PropertyReport {
     required this.gdvConfidence,
     this.selectedScenarios = const [],
     this.keyConstraints = const [],
+    this.planningApplications = const [],
   });
 }

@@ -132,6 +132,7 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
                 gdv: 0, // Dummy data
                 totalCost: 0, // Dummy data
                 uplift: 0, // Dummy data
+                planningApplications: [], // Dummy data
               ),
             ],
           ),

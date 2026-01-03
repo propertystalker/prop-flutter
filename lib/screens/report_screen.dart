@@ -6,6 +6,11 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:myapp/controllers/report_controller.dart';
 import 'package:myapp/controllers/report_session_controller.dart';
 import 'package:myapp/models/report_model.dart';
+import 'package:myapp/utils/pdf_generator.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
+
 
 class ReportScreen extends StatelessWidget {
   final String propertyId;
@@ -37,6 +42,31 @@ class ReportScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Property Report'),
+          actions: [
+            Consumer<ReportController>(
+              builder: (context, controller, child) {
+                return IconButton(
+                  icon: const Icon(Icons.picture_as_pdf),
+                  onPressed: controller.report == null
+                      ? null
+                      : () async {
+                          final report = controller.report!;
+                          // TODO: Implement saving or sharing the PDF.
+                          /* final pdfData = await PdfGenerator.generatePdf(
+                            report.propertyAddress,
+                            '', // You might want to pass a price here
+                            [], // You might want to pass images here
+                            null, // You might want to pass a streetViewUrl here
+                            gdv,
+                            totalCost,
+                            uplift,
+                            report.planningApplications,
+                          ); */
+                        },
+                );
+              },
+            ),
+          ],
         ),
         body: Consumer<ReportController>(
           builder: (context, controller, child) {
@@ -135,7 +165,7 @@ class ReportScreen extends StatelessWidget {
   }
 
   Widget _buildSessionReports(BuildContext context) {
-    final sessionReports = Provider.of<ReportSessionController>(context).reports;
+    final sessionReports = Provider.of<ReportSessionController>(context, listen: false).reports;
 
     if (sessionReports.isEmpty) {
       return const SizedBox.shrink(); // Don't show anything if there are no session reports
@@ -158,12 +188,12 @@ class ReportScreen extends StatelessWidget {
                 title: Text(reportInfo.fileName),
                 onTap: () async {
                   final url = Uri.parse(reportInfo.reportUrl);
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url);
-                  } else {
+                  if (!await launchUrl(url)) {
+                    if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Could not open report: ${reportInfo.reportUrl}')),
                     );
+                    }
                   }
                 },
               ),

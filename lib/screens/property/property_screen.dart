@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +11,8 @@ import 'package:myapp/controllers/image_gallery_controller.dart';
 import 'package:myapp/controllers/price_paid_controller.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/models/epc_model.dart';
+import 'package:myapp/models/planning_application.dart';
+import 'package:myapp/services/planning_service.dart';
 import 'package:myapp/utils/constants.dart';
 import 'package:myapp/widgets/company_account.dart';
 import 'package:myapp/widgets/gdv_calculation_widget.dart';
@@ -54,6 +57,8 @@ class _PropertyScreenState extends State<PropertyScreen> {
   double? _lastGdv;
   String? _streetViewUrl;
   List<String> _selectedScenarioIds = [];
+  List<PlanningApplication> _planningApplications = [];
+  bool _isLoadingPlanningApps = true;
 
   @override
   void initState() {
@@ -71,6 +76,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchData();
+      _fetchPlanningApplications();
     });
   }
 
@@ -90,6 +96,25 @@ class _PropertyScreenState extends State<PropertyScreen> {
       habitableRooms: int.tryParse(widget.epc.numberHabitableRooms) ?? 0,
       totalFloorArea: double.tryParse(widget.epc.totalFloorArea) ?? 0.0,
     );
+  }
+
+  Future<void> _fetchPlanningApplications() async {
+    try {
+      final apps = await PlanningService().getPlanningApplications(widget.epc.postcode);
+      if (mounted) {
+        setState(() {
+          _planningApplications = apps;
+          _isLoadingPlanningApps = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching planning applications: $e");
+      if (mounted) {
+        setState(() {
+          _isLoadingPlanningApps = false;
+        });
+      }
+    }
   }
 
   void _onPriceHistoryChanged() {
@@ -338,8 +363,10 @@ class _PropertyScreenState extends State<PropertyScreen> {
                               const PriceHistory(),
                               const Divider(height: 32),
                               SizedBox(
-                                height: 300, 
-                                child: PlanAppWidget(postcode: widget.epc.postcode)
+                                height: 300,
+                                child: _isLoadingPlanningApps
+                                    ? const Center(child: CircularProgressIndicator())
+                                    : PlanAppWidget(applications: _planningApplications),
                               ),
                               const SizedBox(height: 16),
                               Center(
@@ -385,6 +412,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                 gdv: financialController.gdv,
                                 totalCost: financialController.totalCost,
                                 uplift: financialController.uplift,
+                                planningApplications: _planningApplications,
                                 onSend: () {
                                   _toggleScenarioSelectionVisibility();
                                   final propertyId = "${widget.epc.address}, ${widget.epc.postcode}";

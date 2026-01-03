@@ -1,11 +1,10 @@
-
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:myapp/models/planning_application.dart';
 
 class PdfGenerator {
   static Future<Map<String, dynamic>> generatePdf(
@@ -16,6 +15,7 @@ class PdfGenerator {
     double gdv,
     double totalCost,
     double uplift,
+    List<PlanningApplication> planningApplications,
   ) async {
     final pdf = pw.Document();
 
@@ -90,6 +90,29 @@ class PdfGenerator {
             return pw.Padding(
               padding: const pw.EdgeInsets.only(bottom: 10),
               child: pw.Image(imageProvider),
+            );
+          }),
+          pw.NewPage(),
+          pw.Header(text: 'Planning Applications', level: 2),
+          ...planningApplications.map((app) {
+            return pw.Container(
+              margin: const pw.EdgeInsets.only(bottom: 10),
+              padding: const pw.EdgeInsets.all(10),
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: PdfColors.grey),
+                borderRadius: pw.BorderRadius.circular(5),
+              ),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(app.address, style: pw.TextStyle(font: boldFont)),
+                  pw.SizedBox(height: 5),
+                  pw.Text(app.description),
+                  pw.SizedBox(height: 5),
+                  pw.Text('Status: ${app.status}'),
+                  pw.Text('Received: ${app.receivedDate}'),
+                ],
+              ),
             );
           }),
         ],

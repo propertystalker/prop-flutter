@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/controllers/report_session_controller.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
+import 'package:myapp/models/planning_application.dart';
 import 'package:myapp/services/cloudinary_service.dart';
 import 'package:myapp/utils/pdf_generator.dart';
 import 'package:printing/printing.dart';
@@ -19,6 +20,7 @@ class ReportPanel extends StatefulWidget {
   final double gdv;
   final double totalCost;
   final double uplift;
+  final List<PlanningApplication> planningApplications; // Updated
 
   const ReportPanel({
     super.key,
@@ -30,6 +32,7 @@ class ReportPanel extends StatefulWidget {
     required this.gdv,
     required this.totalCost,
     required this.uplift,
+    required this.planningApplications, // Updated
   });
 
   @override
@@ -46,12 +49,14 @@ class _ReportPanelState extends State<ReportPanel> {
       _isSending = true;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Generating your report...')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Generating your report...')),
+      );
+    }
 
     try {
-      // 1. Generate the PDF data
+      // 1. Generate the PDF data using the passed-in applications
       final pdfData = await PdfGenerator.generatePdf(
         widget.address,
         widget.price,
@@ -60,6 +65,7 @@ class _ReportPanelState extends State<ReportPanel> {
         widget.gdv,
         widget.totalCost,
         widget.uplift,
+        widget.planningApplications, // Use the passed-in data
       );
 
       final pdfBytes = pdfData['bytes'];
@@ -75,10 +81,12 @@ class _ReportPanelState extends State<ReportPanel> {
       // 2. Save PDF locally via share dialog
       await Printing.sharePdf(bytes: pdfBytes, filename: fileName);
 
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Uploading your report...')),
-      );
+      if(mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Uploading your report...')),
+        );
+      }
 
       // 3. Upload to Cloudinary
       final cloudinaryService = CloudinaryService();
@@ -91,8 +99,10 @@ class _ReportPanelState extends State<ReportPanel> {
       if (reportUrl != null) {
         developer.log('Report uploaded successfully: $reportUrl', name: 'ReportPanel');
         
-        final reportSessionController = Provider.of<ReportSessionController>(context, listen: false);
-        reportSessionController.addReport(fileName, reportUrl);
+        if(mounted){
+          final reportSessionController = Provider.of<ReportSessionController>(context, listen: false);
+          reportSessionController.addReport(fileName, reportUrl);
+        }
 
         // Proceed to the next screen
         widget.onSend();
