@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/services/cloudinary_service.dart';
 import 'package:myapp/utils/pdf_generator.dart';
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import '../utils/constants.dart';
 
@@ -45,7 +46,7 @@ class _ReportPanelState extends State<ReportPanel> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Generating and uploading your report...')),
+      const SnackBar(content: Text('Generating your report...')),
     );
 
     try {
@@ -61,24 +62,33 @@ class _ReportPanelState extends State<ReportPanel> {
       );
 
       final pdfBytes = pdfData['bytes'];
-      final fileName = pdfData['filename'];
+      final originalFileName = pdfData['filename'];
 
-      if (pdfBytes == null || fileName == null) {
+      if (pdfBytes == null || originalFileName == null) {
         throw Exception('PDF generation failed to return data.');
       }
+      
+      final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
+      final fileName = '${originalFileName.split('.').first}_$timestamp.pdf';
 
-      // 2. Upload to Cloudinary
+      // 2. Save PDF locally via share dialog
+      await Printing.sharePdf(bytes: pdfBytes, filename: fileName);
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Uploading your report...')),
+      );
+
+      // 3. Upload to Cloudinary
       final cloudinaryService = CloudinaryService();
       final reportUrl = await cloudinaryService.uploadPdf(
         pdfBytes: pdfBytes,
         fileName: fileName,
-        folder: 'property_reports', // Optional: specify a folder in Cloudinary
+        folder: 'reports',
       );
 
       if (reportUrl != null) {
         developer.log('Report uploaded successfully: $reportUrl', name: 'ReportPanel');
-        // TODO: Save the reportUrl to the database or use as needed
-
         // Proceed to the next screen
         widget.onSend();
       } else {
