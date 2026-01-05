@@ -6,8 +6,11 @@ import 'package:intl/intl.dart';
 import '../models/planning_application.dart';
 
 class PlanningService {
+  final http.Client _client;
   final String _planitBaseUrl = 'https://www.planit.org.uk/api';
   final String _postcodesBaseUrl = 'https://api.postcodes.io/postcodes';
+
+  PlanningService({http.Client? client}) : _client = client ?? http.Client();
 
   Future<List<PlanningApplication>> getPlanningApplications(String postcode) async {
     final Set<String> uniqueApplicationUIDs = <String>{};
@@ -35,7 +38,7 @@ class PlanningService {
         developer.log('Fetching applications for authority: $authorityName', name: 'PlanningService');
         developer.log('Request URL: $url', name: 'PlanningService');
 
-        final response = await http.get(url);
+        final response = await _client.get(url);
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
@@ -78,7 +81,7 @@ class PlanningService {
     final url = Uri.parse('$_postcodesBaseUrl/$formattedPostcode');
     developer.log('Fetching postcode data from: $url', name: 'PlanningService');
 
-    final response = await http.get(url);
+    final response = await _client.get(url);
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
