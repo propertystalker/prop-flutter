@@ -5,6 +5,7 @@ import 'package:myapp/screens/email_login_screen.dart';
 import 'package:myapp/services/postcode_service.dart';
 import 'package:myapp/widgets/filter_screen_bottom_nav.dart';
 import 'package:myapp/widgets/property_filter_app_bar.dart';
+import 'package:searchfield/searchfield.dart';
 import '../utils/constants.dart';
 
 class OpeningScreen extends StatefulWidget {
@@ -23,31 +24,12 @@ class _OpeningScreenState extends State<OpeningScreen> {
   final TextEditingController _limitController = TextEditingController();
   final TextEditingController _radiusController = TextEditingController();
   final PostcodeService _postcodeService = PostcodeService();
-  List<String> _suggestions = [];
-  final FocusNode _focusNode = FocusNode();
-  final LayerLink _layerLink = LayerLink();
-  final GlobalKey _searchFieldKey = GlobalKey();
-  OverlayEntry? _overlayEntry;
 
   bool _isGettingLocation = false;
   bool _isGettingPostcode = false;
 
   @override
-  void initState() {
-    super.initState();
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus) {
-        _showOverlay();
-      } else {
-        _hideOverlay();
-      }
-    });
-    _postcodeController.addListener(_onSearchChanged);
-  }
-
-  @override
   void dispose() {
-    _postcodeController.removeListener(_onSearchChanged);
     _postcodeController.dispose();
     _houseNumberController.dispose();
     _flatNumberController.dispose();
@@ -55,78 +37,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
     _longitudeController.dispose();
     _limitController.dispose();
     _radiusController.dispose();
-    _focusNode.dispose();
-    _hideOverlay();
     super.dispose();
-  }
-
-  void _showOverlay() {
-    if (_overlayEntry == null) {
-      _overlayEntry = _createOverlayEntry();
-      Overlay.of(context).insert(_overlayEntry!);
-    }
-  }
-
-  void _hideOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-  }
-
-  void _onSearchChanged() async {
-    // A small delay to prevent firing requests on every keystroke
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (_postcodeController.text.isNotEmpty && _focusNode.hasFocus) {
-      final suggestions = await _postcodeService.getAutocompleteSuggestions(_postcodeController.text);
-      if (mounted) {
-        setState(() {
-          _suggestions = suggestions;
-        });
-        _overlayEntry?.markNeedsBuild();
-      }
-    } else {
-      if (mounted) {
-        setState(() {
-          _suggestions = [];
-        });
-        _overlayEntry?.markNeedsBuild();
-      }
-    }
-  }
-
-  OverlayEntry _createOverlayEntry() {
-    final RenderBox renderBox = _searchFieldKey.currentContext!.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-
-    return OverlayEntry(
-      builder: (context) => Positioned(
-        width: size.width,
-        child: CompositedTransformFollower(
-          link: _layerLink,
-          showWhenUnlinked: false,
-          offset: Offset(0.0, size.height + 5.0),
-          child: Material(
-            elevation: 4.0,
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              itemCount: _suggestions.length,
-              itemBuilder: (context, index) {
-                final suggestion = _suggestions[index];
-                return ListTile(
-                  title: Text(suggestion),
-                  onTap: () {
-                    _postcodeController.removeListener(_onSearchChanged);
-                    _postcodeController.text = suggestion;
-                    _focusNode.unfocus();
-                    _postcodeController.addListener(_onSearchChanged);
-                  },
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   void _searchByPostcode() {
@@ -408,72 +319,85 @@ class _OpeningScreenState extends State<OpeningScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: CompositedTransformTarget(
-                      key: _searchFieldKey,
-                      link: _layerLink,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: TextFormField(
-                              controller: _houseNumberController,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.center,
-                              decoration: InputDecoration(
-                                hintText: 'House No.',
-                                hintStyle:
-                                    TextStyle(color: Colors.white.withAlpha(179)),
-                                border: InputBorder.none,
-                              ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            controller: _houseNumberController,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                            decoration: InputDecoration(
+                              hintText: 'House No.',
+                              hintStyle:
+                                  TextStyle(color: Colors.white.withAlpha(179)),
+                              border: InputBorder.none,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            flex: 2,
-                            child: TextFormField(
-                              controller: _flatNumberController,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.center,
-                              decoration: InputDecoration(
-                                hintText: 'Flat No.',
-                                hintStyle:
-                                    TextStyle(color: Colors.white.withAlpha(179)),
-                                border: InputBorder.none,
-                              ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            controller: _flatNumberController,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                            decoration: InputDecoration(
+                              hintText: 'Flat No.',
+                              hintStyle:
+                                  TextStyle(color: Colors.white.withAlpha(179)),
+                              border: InputBorder.none,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            flex: 5,
-                            child: TextFormField(
-                              focusNode: _focusNode,
-                              controller: _postcodeController,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.center,
-                              decoration: InputDecoration(
-                                hintText: 'Address, Postcode, What2Words etc...',
-                                hintStyle:
-                                    TextStyle(color: Colors.white.withAlpha(179)),
-                                border: InputBorder.none,
-                                suffixIcon: IconButton(
-                                  icon: const Icon(Icons.search, color: Colors.white),
-                                  onPressed: _searchByPostcode,
-                                ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 5,
+                          child: SearchField<String>(
+                            controller: _postcodeController,
+                            suggestions: const [],
+                            searchInputDecoration: SearchInputDecoration(
+                              hintText: 'Address, Postcode, What2Words etc...',
+                              hintStyle:
+                                  TextStyle(color: Colors.white.withAlpha(179)),
+                              border: InputBorder.none,
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.search, color: Colors.white),
+                                onPressed: _searchByPostcode,
                               ),
-                              onFieldSubmitted: (_) => _searchByPostcode(),
                             ),
+                            onSearchTextChanged: (query) async {
+                              if (query.isNotEmpty) {
+                                final suggestions = await _postcodeService
+                                    .getAutocompleteSuggestions(query);
+                                return suggestions
+                                    .map((e) => SearchFieldListItem<String>(e,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(e),
+                                        )))
+                                    .toList();
+                              }
+                              return [];
+                            },
+                            onSuggestionTap: (SearchFieldListItem<String> item) {
+                              _postcodeController.text = item.searchKey;
+                              FocusScope.of(context).unfocus();
+                            },
+                            itemHeight: 50,
+                            suggestionsDecoration: SuggestionDecoration(
+                                color: Theme.of(context).cardColor,
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(8))),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
