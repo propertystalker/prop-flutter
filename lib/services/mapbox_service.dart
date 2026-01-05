@@ -5,8 +5,9 @@ import 'dart:developer' as developer;
 class MapboxService {
   final String _apiKey;
   final String _baseUrl = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
+  final http.Client _client;
 
-  MapboxService(this._apiKey);
+  MapboxService(this._apiKey, {http.Client? client}) : _client = client ?? http.Client();
 
   Future<List<Map<String, dynamic>>> getAutocompleteSuggestions(String query) async {
     if (query.isEmpty) {
@@ -17,7 +18,7 @@ class MapboxService {
     developer.log('Mapbox Request URL: $url', name: 'myapp.mapbox');
 
     try {
-      final response = await http.get(url);
+      final response = await _client.get(url);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
