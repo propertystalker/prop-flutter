@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/screens/email_login_screen.dart';
-import 'package:myapp/services/postcode_service.dart';
+import 'package:myapp/services/mapbox_service.dart';
 import 'package:myapp/widgets/filter_screen_bottom_nav.dart';
 import 'package:myapp/widgets/property_filter_app_bar.dart';
 import 'package:searchfield/searchfield.dart';
@@ -16,21 +16,21 @@ class OpeningScreen extends StatefulWidget {
 }
 
 class _OpeningScreenState extends State<OpeningScreen> {
-  final TextEditingController _postcodeController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
   final TextEditingController _houseNumberController = TextEditingController();
   final TextEditingController _flatNumberController = TextEditingController();
   final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
   final TextEditingController _limitController = TextEditingController();
   final TextEditingController _radiusController = TextEditingController();
-  final PostcodeService _postcodeService = PostcodeService();
+  final MapboxService _mapboxService = MapboxService(mapboxAccessToken);
+  String _selectedPostcode = '';
 
   bool _isGettingLocation = false;
-  bool _isGettingPostcode = false;
 
   @override
   void dispose() {
-    _postcodeController.dispose();
+    _addressController.dispose();
     _houseNumberController.dispose();
     _flatNumberController.dispose();
     _latitudeController.dispose();
@@ -41,11 +41,13 @@ class _OpeningScreenState extends State<OpeningScreen> {
   }
 
   void _searchByPostcode() {
-    final postcode = _postcodeController.text;
-    if (postcode.isNotEmpty) {
+    if (_selectedPostcode.isNotEmpty) {
       final houseNumber = _houseNumberController.text;
       final flatNumber = _flatNumberController.text;
-      context.push('/epc?postcode=$postcode&houseNumber=$houseNumber&flatNumber=$flatNumber');
+      context.push(
+          '/epc?postcode=$_selectedPostcode&houseNumber=$houseNumber&flatNumber=$flatNumber');
+    } else {
+      _showErrorSnackBar('Please select an address from the suggestions.');
     }
   }
 
@@ -84,36 +86,6 @@ class _OpeningScreenState extends State<OpeningScreen> {
     }
   }
 
-  Future<void> _getPostcode() async {
-    final lat = double.tryParse(_latitudeController.text);
-    final lon = double.tryParse(_longitudeController.text);
-
-    if (lat == null || lon == null) {
-      _showErrorSnackBar('Invalid latitude or longitude format.');
-      return;
-    }
-
-    setState(() {
-      _isGettingPostcode = true;
-    });
-
-    try {
-      final postcodes = await _postcodeService.getPostcodeFromCoordinates(lat, lon);
-
-      if (postcodes != null && postcodes.isNotEmpty) {
-        _showPostcodeDialog(postcodes);
-      } else {
-        _showErrorSnackBar('Could not find any postcodes for the given coordinates.');
-      }
-    } catch (e) {
-      _showErrorSnackBar('Error fetching postcode: $e');
-    } finally {
-      setState(() {
-        _isGettingPostcode = false;
-      });
-    }
-  }
-
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -144,39 +116,6 @@ class _OpeningScreenState extends State<OpeningScreen> {
             Geolocator.openAppSettings();
           },
         ),
-      ),
-    );
-  }
-
-  void _showPostcodeDialog(List<String> postcodes) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Found Postcodes'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: postcodes.length,
-            itemBuilder: (context, index) {
-              final postcode = postcodes[index];
-              return ListTile(
-                title: Text(postcode),
-                onTap: () {
-                  _postcodeController.text = postcode;
-                  Navigator.of(context).pop();
-                  _showSuccessSnackBar('Postcode selected: $postcode');
-                },
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
       ),
     );
   }
@@ -359,8 +298,8 @@ class _OpeningScreenState extends State<OpeningScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           flex: 5,
-                          child: SearchField<String>(
-                            controller: _postcodeController,
+                          child: SearchField<Map<String, dynamic>>(
+                            controller: _addressController,
                             suggestions: const [],
                             searchInputDecoration: SearchInputDecoration(
                               hintText: 'Address, Postcode, What2Words etc...',
@@ -373,28 +312,55 @@ class _OpeningScreenState extends State<OpeningScreen> {
                               ),
                             ),
                             onSearchTextChanged: (query) async {
-                              if (query.isNotEmpty) {
-                                final suggestions = await _postcodeService
+                              if (query.length >= 5) {
+                                final suggestions = await _mapboxService
                                     .getAutocompleteSuggestions(query);
                                 return suggestions
-                                    .map((e) => SearchFieldListItem<String>(e,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(e),
-                                        )))
+                                    .map((e) =>
+                                        SearchFieldListItem<Map<String, dynamic>>(
+                                            e['place_name'],
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(e['place_name']),
+                                            ),
+                                            item: e))
                                     .toList();
                               }
                               return [];
                             },
-                            onSuggestionTap: (SearchFieldListItem<String> item) {
-                              _postcodeController.text = item.searchKey;
+                            onSuggestionTap:
+                                (SearchFieldListItem<Map<String, dynamic>>
+                                    item) {
+                              final feature = item.item;
+                              if (feature != null) {
+                                setState(() {
+                                  _addressController.text =
+                                      feature['place_name'] ?? '';
+                                  _houseNumberController.text =
+                                      feature['address'] ?? '';
+
+                                  final postcodeContext = feature['context']
+                                      .firstWhere(
+                                          (c) => c['id']
+                                              .toString()
+                                              .startsWith('postcode'),
+                                          orElse: () => null);
+                                  if (postcodeContext != null) {
+                                    _selectedPostcode =
+                                        postcodeContext['text'] ?? '';
+                                  } else {
+                                    _selectedPostcode = '';
+                                  }
+                                });
+                              }
                               FocusScope.of(context).unfocus();
                             },
                             itemHeight: 50,
                             suggestionsDecoration: SuggestionDecoration(
                                 color: Theme.of(context).cardColor,
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(8))),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(8))),
                           ),
                         ),
                       ],
@@ -411,9 +377,15 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Text('£266k', style: TextStyle(color: accentColor, fontSize: 24)),
-                      Text('£270k', style: TextStyle(color: accentColor, fontSize: 36, fontWeight: FontWeight.bold)),
-                      Text('£307k', style: TextStyle(color: accentColor, fontSize: 24)),
+                      Text('£266k',
+                          style: TextStyle(color: accentColor, fontSize: 24)),
+                      Text('£270k',
+                          style: TextStyle(
+                              color: accentColor,
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold)),
+                      Text('£307k',
+                          style: TextStyle(color: accentColor, fontSize: 24)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -429,7 +401,8 @@ class _OpeningScreenState extends State<OpeningScreen> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
                         : const Text(
@@ -444,7 +417,8 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _latitudeController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                     decoration: const InputDecoration(
                       labelText: 'Latitude',
                       border: OutlineInputBorder(),
@@ -453,7 +427,8 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _longitudeController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                     decoration: const InputDecoration(
                       labelText: 'Longitude',
                       border: OutlineInputBorder(),
@@ -479,37 +454,12 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _isGettingPostcode ? null : _getPostcode,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: _isGettingPostcode
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            'GET POSTCODE',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
                     onPressed: () {
-                      if (_postcodeController.text.isNotEmpty) {
-                        final postcode = _postcodeController.text;
+                      if (_selectedPostcode.isNotEmpty) {
                         final houseNumber = _houseNumberController.text;
                         final flatNumber = _flatNumberController.text;
-                        context.push('/price_paid?postcode=$postcode&houseNumber=$houseNumber&flatNumber=$flatNumber');
+                        context.push(
+                            '/price_paid?postcode=$_selectedPostcode&houseNumber=$houseNumber&flatNumber=$flatNumber');
                       } else {
                         _showErrorSnackBar('Please enter a postcode');
                       }
@@ -530,10 +480,11 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      if (_postcodeController.text.isNotEmpty) {
+                      if (_selectedPostcode.isNotEmpty) {
                         final houseNumber = _houseNumberController.text;
                         final flatNumber = _flatNumberController.text;
-                        context.push('/epc?postcode=${_postcodeController.text}&houseNumber=$houseNumber&flatNumber=$flatNumber');
+                        context.push(
+                            '/epc?postcode=$_selectedPostcode&houseNumber=$houseNumber&flatNumber=$flatNumber');
                       } else {
                         _showErrorSnackBar('Please enter a postcode');
                       }

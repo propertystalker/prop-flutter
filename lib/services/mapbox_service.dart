@@ -8,7 +8,7 @@ class MapboxService {
 
   MapboxService(this._apiKey);
 
-  Future<List<String>> getAutocompleteSuggestions(String query) async {
+  Future<List<Map<String, dynamic>>> getAutocompleteSuggestions(String query) async {
     if (query.isEmpty) {
       return [];
     }
@@ -24,9 +24,7 @@ class MapboxService {
         developer.log('Mapbox Response: ${response.body}', name: 'myapp.mapbox');
         if (data['features'] != null) {
           final List<dynamic> features = data['features'];
-          final suggestions = features.map((feature) => feature['place_name'] as String).toList();
-          developer.log('Parsed Suggestions: $suggestions', name: 'myapp.mapbox');
-          return suggestions;
+          return features.cast<Map<String, dynamic>>().toList();
         }
       } else {
         developer.log('Mapbox Error: Status Code ${response.statusCode}, Body: ${response.body}', name: 'myapp.mapbox', level: 1000);
