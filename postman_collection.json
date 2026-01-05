@@ -1,4 +1,3 @@
-
 {
   "info": {
     "_postman_id": "a8c5d1b2-2e5f-4f7b-9c6d-3e8a7f6b9a2c",
@@ -17,16 +16,8 @@
             "url": {
               "raw": "https://propertydata.co.uk/api/v1/properties?key={{api_key}}&postcode={{postcode}}",
               "protocol": "https",
-              "host": [
-                "propertydata",
-                "co",
-                "uk"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "properties"
-              ],
+              "host": ["propertydata", "co", "uk"],
+              "path": ["api", "v1", "properties"],
               "query": [
                 {
                   "key": "key",
@@ -50,16 +41,8 @@
             "url": {
               "raw": "https://propertydata.co.uk/api/v1/valuation-historical?key={{api_key}}&postcode={{postcode}}&current_price=500000&historic_value_year=2015&historic_value_month=January",
               "protocol": "https",
-              "host": [
-                "propertydata",
-                "co",
-                "uk"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "valuation-historical"
-              ],
+              "host": ["propertydata", "co", "uk"],
+              "path": ["api", "v1", "valuation-historical"],
               "query": [
                 {
                   "key": "key",
@@ -79,7 +62,7 @@
                 },
                 {
                   "key": "historic_value_month",
-                  "value": "January"
+                  "value": "January" 
                 }
               ]
             },
@@ -93,6 +76,21 @@
       "name": "Postcodes.io",
       "item": [
         {
+          "name": "Lookup Postcode",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://api.postcodes.io/postcodes/{{postcode}}",
+              "protocol": "https",
+              "host": ["api", "postcodes", "io"],
+              "path": ["postcodes", "{{postcode}}"]
+            },
+            "description": "Returns details for a given postcode, including administrative information like the local authority."
+          },
+          "response": []
+        },
+        {
           "name": "Autocomplete Postcode",
           "request": {
             "method": "GET",
@@ -100,16 +98,8 @@
             "url": {
               "raw": "https://api.postcodes.io/postcodes/{{postcode_partial}}/autocomplete",
               "protocol": "https",
-              "host": [
-                "api",
-                "postcodes",
-                "io"
-              ],
-              "path": [
-                "postcodes",
-                "{{postcode_partial}}",
-                "autocomplete"
-              ]
+              "host": ["api", "postcodes", "io"],
+              "path": ["postcodes", "{{postcode_partial}}", "autocomplete"]
             },
             "description": "Returns a list of matching postcodes for a partial postcode input."
           },
@@ -123,14 +113,8 @@
             "url": {
               "raw": "https://api.postcodes.io/postcodes?lon={{longitude}}&lat={{latitude}}",
               "protocol": "https",
-              "host": [
-                "api",
-                "postcodes",
-                "io"
-              ],
-              "path": [
-                "postcodes"
-              ],
+              "host": ["api", "postcodes", "io"],
+              "path": ["postcodes"],
               "query": [
                 {
                   "key": "lon",
@@ -143,6 +127,52 @@
               ]
             },
             "description": "Finds the nearest postcodes for a given latitude and longitude."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "PlanIt API",
+      "item": [
+        {
+          "name": "Get Planning Applications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://www.planit.org.uk/api/applics/json?auth={{authority}}&start_date={{start_date}}&end_date={{end_date}}&point={{latitude}},{{longitude}}&dist=2.0&pg_sz=100",
+              "protocol": "https",
+              "host": ["www", "planit", "org", "uk"],
+              "path": ["api", "applics", "json"],
+              "query": [
+                {
+                  "key": "auth",
+                  "value": "{{authority}}"
+                },
+                {
+                  "key": "start_date",
+                  "value": "{{start_date}}"
+                },
+                {
+                  "key": "end_date",
+                  "value": "{{end_date}}"
+                },
+                {
+                  "key": "point",
+                  "value": "{{latitude}},{{longitude}}"
+                },
+                {
+                  "key": "dist",
+                  "value": "2.0"
+                },
+                {
+                  "key": "pg_sz",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Fetches planning applications for a given authority within a specified date range and distance from a point."
           },
           "response": []
         }
@@ -171,17 +201,8 @@
             "url": {
               "raw": "https://epc.opendatacommunities.org/api/v1/domestic/search?postcode={{postcode}}&size=100",
               "protocol": "https",
-              "host": [
-                "epc",
-                "opendatacommunities",
-                "org"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "domestic",
-                "search"
-              ],
+              "host": ["epc", "opendatacommunities", "org"],
+              "path": ["api", "v1", "domestic", "search"],
               "query": [
                 {
                   "key": "postcode",
@@ -210,17 +231,8 @@
             "url": {
               "raw": "https://landregistry.data.gov.uk/data/ppd/transaction-data.json?property_type=any&postcode={{postcode}}&_page=1&_limit=100",
               "protocol": "https",
-              "host": [
-                "landregistry",
-                "data",
-                "gov",
-                "uk"
-              ],
-              "path": [
-                "data",
-                "ppd",
-                "transaction-data.json"
-              ],
+              "host": ["landregistry", "data", "gov", "uk"],
+              "path": ["data", "ppd", "transaction-data.json"],
               "query": [
                 {
                   "key": "property_type",
@@ -247,43 +259,134 @@
       ]
     },
     {
-        "name": "Mapbox API",
-        "item": [
-            {
-                "name": "Get Static Map Image",
-                "request": {
-                    "method": "GET",
-                    "header": [],
-                    "url": {
-                        "raw": "https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s-home+000000({{longitude}},{{latitude}})/{{longitude}},{{latitude}},15,0/600x400?access_token={{mapbox_token}}",
-                        "protocol": "https",
-                        "host": [
-                            "api",
-                            "mapbox",
-                            "com"
-                        ],
-                        "path": [
-                            "styles",
-                            "v1",
-                            "mapbox",
-                            "streets-v11",
-                            "static",
-                            "pin-s-home+000000({{longitude}},{{latitude}})",
-                            "{{longitude}},{{latitude}},15,0",
-                            "600x400"
-                        ],
-                        "query": [
-                            {
-                                "key": "access_token",
-                                "value": "{{mapbox_token}}"
-                            }
-                        ]
-                    },
-                    "description": "Generates a static map image for a given set of coordinates."
+      "name": "Mapbox API",
+      "item": [
+        {
+          "name": "Get Static Map Image",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s-home+000000({{longitude}},{{latitude}})/{{longitude}},{{latitude}},15,0/600x400?access_token={{mapbox_token}}",
+              "protocol": "https",
+              "host": ["api", "mapbox", "com"],
+              "path": [
+                "styles",
+                "v1",
+                "mapbox",
+                "streets-v11",
+                "static",
+                "pin-s-home+000000({{longitude}},{{latitude}})",
+                "{{longitude}},{{latitude}},15,0",
+                "600x400"
+              ],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{mapbox_token}}"
+                }
+              ]
+            },
+            "description": "Generates a static map image for a given set of coordinates."
+          },
+          "response": []
+        },
+        {
+          "name": "Geocoding - Autocomplete",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://api.mapbox.com/geocoding/v5/mapbox.places/{{search_text}}.json?access_token={{mapbox_token}}",
+              "protocol": "https",
+              "host": ["api", "mapbox", "com"],
+              "path": [
+                "geocoding",
+                "v5",
+                "mapbox.places",
+                "{{search_text}}.json"
+              ],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{mapbox_token}}"
+                }
+              ]
+            },
+            "description": "Returns a list of matching places for a given search query."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Google Maps API",
+      "item": [
+        {
+          "name": "Get Street View Image",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://maps.googleapis.com/maps/api/streetview?size=600x300&location={{latitude}},{{longitude}}&key={{google_maps_key}}",
+              "protocol": "https",
+              "host": ["maps", "googleapis", "com"],
+              "path": ["maps", "api", "streetview"],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "600x300"
                 },
-                "response": []
-            }
-        ]
+                {
+                  "key": "location",
+                  "value": "{{latitude}},{{longitude}}"
+                },
+                {
+                  "key": "key",
+                  "value": "{{google_maps_key}}"
+                }
+              ]
+            },
+            "description": "Fetches a Google Street View image for a given set of coordinates."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cloudinary API",
+      "item": [
+        {
+          "name": "Upload PDF",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "/path/to/your/file.pdf"
+                },
+                {
+                  "key": "upload_preset",
+                  "value": "{{cloudinary_upload_preset}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://api.cloudinary.com/v1_1/{{cloudinary_cloud_name}}/image/upload",
+              "protocol": "https",
+              "host": ["api", "cloudinary", "com"],
+              "path": ["v1_1", "{{cloudinary_cloud_name}}", "image", "upload"]
+            },
+            "description": "Uploads a PDF file to your Cloudinary account. You need to provide your cloud name and an upload preset."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
