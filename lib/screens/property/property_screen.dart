@@ -22,7 +22,6 @@ import 'package:myapp/screens/property/widgets/image_gallery.dart';
 import 'package:myapp/screens/property/widgets/price_history.dart';
 import 'package:myapp/screens/property/widgets/property_header.dart';
 import 'package:myapp/screens/property/widgets/property_stats.dart';
-import 'package:myapp/widgets/plan_app_widget.dart';
 import 'package:myapp/widgets/scenario_selection_panel.dart';
 import 'package:myapp/widgets/uplift_analysis_widget.dart';
 import 'package:myapp/widgets/uplift_risk_overview_widget.dart';
@@ -361,13 +360,6 @@ class _PropertyScreenState extends State<PropertyScreen> {
                               const UpliftAnalysisWidget(),
                               const Divider(height: 32),
                               const PriceHistory(),
-                              const Divider(height: 32),
-                              SizedBox(
-                                height: 300,
-                                child: _isLoadingPlanningApps
-                                    ? const Center(child: CircularProgressIndicator())
-                                    : PlanAppWidget(applications: _planningApplications),
-                              ),
                               const SizedBox(height: 16),
                               Center(
                                 child: ElevatedButton(
