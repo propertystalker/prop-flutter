@@ -77,6 +77,7 @@ class PdfGenerator {
 
     pdf.addPage(
       pw.MultiPage(
+        pageFormat: PdfPageFormat.a4.landscape,
         // --- Updated Theme ---
         theme: pw.ThemeData.withFont(
           base: font,
