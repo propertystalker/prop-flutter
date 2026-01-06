@@ -268,7 +268,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
                             controller: _addressController,
                             suggestions: const [],
                             searchInputDecoration: SearchInputDecoration(
-                              hintText: 'Address, Postcode, What2Words etc...',
+                              hintText: 'Address, Postcode, etc...',
                               hintStyle:
                                   TextStyle(color: Colors.white.withAlpha(179)),
                               border: InputBorder.none,
