@@ -356,37 +356,6 @@ class _OpeningScreenState extends State<OpeningScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _isGettingLocation ? null : () => _getCurrentLocation(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: accentColor,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: _isGettingLocation
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            'GET LOCATION',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                  ),
-                  const SizedBox(height: 16),
-                   ElevatedButton(
-                    onPressed: () => context.go('/debug'),
-                    child: const Text('Debug'),
-                  ),
-                  const SizedBox(height: 16),
                   Container(
                     color: accentColor,
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -407,6 +376,11 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   buildGreyedOutField('Size:'),
                   buildGreyedOutField('Tenure:'),
                   buildGreyedOutField('Parking Spaces:'),
+                  const SizedBox(height: 16),
+                   ElevatedButton(
+                    onPressed: () => context.go('/debug'),
+                    child: const Text('Debug'),
+                  ),
                 ],
               ),
             ),
