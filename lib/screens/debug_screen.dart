@@ -8,15 +8,17 @@ import 'package:myapp/widgets/property_filter_app_bar.dart';
 import 'package:searchfield/searchfield.dart';
 import '../utils/constants.dart';
 
-class OpeningScreen extends StatefulWidget {
-  const OpeningScreen({super.key});
+class DebugScreen extends StatefulWidget {
+  const DebugScreen({super.key});
 
   @override
-  State<OpeningScreen> createState() => _OpeningScreenState();
+  State<DebugScreen> createState() => _DebugScreenState();
 }
 
-class _OpeningScreenState extends State<OpeningScreen> {
+class _DebugScreenState extends State<DebugScreen> {
   final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _houseNumberController = TextEditingController();
+  final TextEditingController _flatNumberController = TextEditingController();
   final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
   final TextEditingController _limitController = TextEditingController();
@@ -29,6 +31,8 @@ class _OpeningScreenState extends State<OpeningScreen> {
   @override
   void dispose() {
     _addressController.dispose();
+    _houseNumberController.dispose();
+    _flatNumberController.dispose();
     _latitudeController.dispose();
     _longitudeController.dispose();
     _limitController.dispose();
@@ -38,8 +42,10 @@ class _OpeningScreenState extends State<OpeningScreen> {
 
   void _searchByPostcode() {
     if (_selectedPostcode.isNotEmpty) {
+      final houseNumber = _houseNumberController.text;
+      final flatNumber = _flatNumberController.text;
       context.push(
-          '/epc?postcode=$_selectedPostcode');
+          '/epc?postcode=$_selectedPostcode&houseNumber=$houseNumber&flatNumber=$flatNumber');
     } else {
       _showErrorSnackBar('Please select an address from the suggestions.');
     }
@@ -255,6 +261,42 @@ class _OpeningScreenState extends State<OpeningScreen> {
                     child: Row(
                       children: [
                         Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            controller: _houseNumberController,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                            decoration: InputDecoration(
+                              hintText: 'House No.',
+                              hintStyle:
+                                  TextStyle(color: Colors.white.withAlpha(179)),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            controller: _flatNumberController,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                            decoration: InputDecoration(
+                              hintText: 'Flat No.',
+                              hintStyle:
+                                  TextStyle(color: Colors.white.withAlpha(179)),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
                           flex: 5,
                           child: SearchField<Map<String, dynamic>>(
                             controller: _addressController,
@@ -306,12 +348,14 @@ class _OpeningScreenState extends State<OpeningScreen> {
 
                                 setState(() {
                                   _addressController.text = placeName;
+                                  _houseNumberController.text = houseNumber;
                                   _selectedPostcode = postcode;
                                 });
 
                                 if (postcode.isNotEmpty) {
+                                  final flatNumber = _flatNumberController.text;
                                   context.push(
-                                      '/epc?postcode=$postcode&houseNumber=$houseNumber');
+                                      '/epc?postcode=$postcode&houseNumber=$houseNumber&flatNumber=$flatNumber');
                                 }
                               }
                             },
@@ -415,8 +459,10 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   ElevatedButton(
                     onPressed: () {
                       if (_selectedPostcode.isNotEmpty) {
+                        final houseNumber = _houseNumberController.text;
+                        final flatNumber = _flatNumberController.text;
                         context.push(
-                            '/price_paid?postcode=$_selectedPostcode');
+                            '/price_paid?postcode=$_selectedPostcode&houseNumber=$houseNumber&flatNumber=$flatNumber');
                       } else {
                         _showErrorSnackBar('Please enter a postcode');
                       }
@@ -438,8 +484,10 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   ElevatedButton(
                     onPressed: () {
                       if (_selectedPostcode.isNotEmpty) {
+                        final houseNumber = _houseNumberController.text;
+                        final flatNumber = _flatNumberController.text;
                         context.push(
-                            '/epc?postcode=$_selectedPostcode');
+                            '/epc?postcode=$_selectedPostcode&houseNumber=$houseNumber&flatNumber=$flatNumber');
                       } else {
                         _showErrorSnackBar('Please enter a postcode');
                       }
@@ -458,9 +506,9 @@ class _OpeningScreenState extends State<OpeningScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                   ElevatedButton(
-                    onPressed: () => context.go('/debug'),
-                    child: const Text('Debug'),
+                  ElevatedButton(
+                    onPressed: () => context.go('/'),
+                    child: const Text('Opening Screen'),
                   ),
                   const SizedBox(height: 16),
                   Container(

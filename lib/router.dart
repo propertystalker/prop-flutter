@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/screens/admin_screen.dart';
+import 'package:myapp/screens/debug_screen.dart';
 import 'package:myapp/screens/epc_screen.dart';
 import 'package:myapp/screens/opening_screen.dart';
 import 'package:myapp/screens/price_paid_screen.dart';
@@ -16,6 +17,12 @@ final GoRouter router = GoRouter(
         return const OpeningScreen();
       },
       routes: <RouteBase>[
+        GoRoute(
+          path: 'debug',
+          builder: (BuildContext context, GoRouterState state) {
+            return const DebugScreen();
+          },
+        ),
         GoRoute(
           path: 'profile',
           builder: (BuildContext context, GoRouterState state) {
