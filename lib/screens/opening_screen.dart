@@ -332,29 +332,32 @@ class _OpeningScreenState extends State<OpeningScreen> {
                             onSuggestionTap:
                                 (SearchFieldListItem<Map<String, dynamic>>
                                     item) {
+                              FocusScope.of(context).unfocus();
                               final feature = item.item;
                               if (feature != null) {
-                                setState(() {
-                                  _addressController.text =
-                                      feature['place_name'] ?? '';
-                                  _houseNumberController.text =
-                                      feature['address'] ?? '';
+                                final String placeName = feature['place_name'] ?? '';
+                                final String houseNumber = feature['address'] ?? '';
+                                String postcode = '';
 
-                                  final postcodeContext = feature['context']
-                                      .firstWhere(
-                                          (c) => c['id']
-                                              .toString()
-                                              .startsWith('postcode'),
-                                          orElse: () => null);
-                                  if (postcodeContext != null) {
-                                    _selectedPostcode =
-                                        postcodeContext['text'] ?? '';
-                                  } else {
-                                    _selectedPostcode = '';
-                                  }
+                                final postcodeContext = feature['context'].firstWhere(
+                                    (c) => c['id'].toString().startsWith('postcode'),
+                                    orElse: () => null);
+                                if (postcodeContext != null) {
+                                  postcode = postcodeContext['text'] ?? '';
+                                }
+
+                                setState(() {
+                                  _addressController.text = placeName;
+                                  _houseNumberController.text = houseNumber;
+                                  _selectedPostcode = postcode;
                                 });
+
+                                if (postcode.isNotEmpty) {
+                                  final flatNumber = _flatNumberController.text;
+                                  context.push(
+                                      '/epc?postcode=$postcode&houseNumber=$houseNumber&flatNumber=$flatNumber');
+                                }
                               }
-                              FocusScope.of(context).unfocus();
                             },
                             itemHeight: 50,
                             suggestionsDecoration: SuggestionDecoration(
