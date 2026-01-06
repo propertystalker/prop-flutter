@@ -48,22 +48,27 @@ class PdfGenerator {
     final chartTitleStyle = pw.TextStyle(font: boldFont, fontSize: 16);
     final legendStyle = pw.TextStyle(font: font);
 
+    // Sanitize financial values to prevent NaN errors
+    final sanitizedGdv = gdv.isNaN ? 0.0 : gdv;
+    final sanitizedTotalCost = totalCost.isNaN ? 0.0 : totalCost;
+    final sanitizedUplift = uplift.isNaN ? 0.0 : uplift;
+
     final chart = pw.Chart(
       title: pw.Text(
-        'GDV: £${(gdv / 1000).toStringAsFixed(0)}K',
+        'GDV: £${(sanitizedGdv / 1000).toStringAsFixed(0)}K',
         style: chartTitleStyle, // Use explicit style
       ),
       grid: pw.PieGrid(),
       datasets: [
         pw.PieDataSet(
           legend: 'Uplift',
-          value: uplift,
+          value: sanitizedUplift,
           color: PdfColors.blue,
           legendStyle: legendStyle, // Use explicit style
         ),
         pw.PieDataSet(
           legend: 'Total Cost',
-          value: totalCost,
+          value: sanitizedTotalCost,
           color: PdfColors.grey500,
           legendStyle: legendStyle, // Use explicit style
         ),
@@ -78,7 +83,16 @@ class PdfGenerator {
           bold: boldFont,
         ),
         build: (context) => [
-          pw.Header(text: address, level: 1, textStyle: headerStyle), // Use explicit style
+          pw.UrlLink(
+            destination: 'http://propertystalker.com/',
+            child: pw.Text(
+              address,
+              style: headerStyle.copyWith(
+                color: PdfColors.blue,
+                decoration: pw.TextDecoration.underline,
+              ),
+            ),
+          ),
           pw.Text(price, style: priceStyle), // Use explicit style
           pw.SizedBox(height: 20),
           pw.SizedBox(
