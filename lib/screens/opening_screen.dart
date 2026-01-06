@@ -36,16 +36,19 @@ class _OpeningScreenState extends State<OpeningScreen> {
     super.dispose();
   }
 
-  void _searchByPostcode() {
-    if (_selectedPostcode.isNotEmpty) {
-      context.push(
-          '/epc?postcode=$_selectedPostcode');
+  void _searchByPostcode() async {
+    if (_addressController.text.isEmpty) {
+      await _getCurrentLocation(searchAfter: true);
     } else {
-      _showErrorSnackBar('Please select an address from the suggestions.');
+      if (_selectedPostcode.isNotEmpty) {
+        context.push('/epc?postcode=$_selectedPostcode');
+      } else {
+        _showErrorSnackBar('Please select an address from the suggestions.');
+      }
     }
   }
 
-  Future<void> _getCurrentLocation() async {
+  Future<void> _getCurrentLocation({bool searchAfter = false}) async {
     setState(() {
       _isGettingLocation = true;
     });
@@ -70,6 +73,23 @@ class _OpeningScreenState extends State<OpeningScreen> {
         _latitudeController.text = position.latitude.toString();
         _longitudeController.text = position.longitude.toString();
       });
+
+      if (searchAfter) {
+        final reverseGeocodeResult = await _mapboxService.reverseGeocode(position.latitude, position.longitude);
+        if (reverseGeocodeResult != null) {
+          final postcodeContext = reverseGeocodeResult['context'].firstWhere(
+              (c) => c['id'].toString().startsWith('postcode'),
+              orElse: () => null);
+          if (postcodeContext != null) {
+            final postcode = postcodeContext['text'] ?? '';
+            setState(() {
+              _selectedPostcode = postcode;
+              _addressController.text = reverseGeocodeResult['place_name'] ?? '';
+            });
+            context.push('/epc?postcode=$postcode');
+          }
+        }
+      }
       _showSuccessSnackBar('Location acquired successfully!');
     } catch (e) {
       _showErrorSnackBar('Error getting location: $e');
@@ -349,7 +369,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _isGettingLocation ? null : _getCurrentLocation,
+                    onPressed: _isGettingLocation ? null : () => _getCurrentLocation(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accentColor,
                       padding: const EdgeInsets.symmetric(vertical: 12),

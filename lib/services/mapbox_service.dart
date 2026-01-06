@@ -36,4 +36,27 @@ class MapboxService {
       return [];
     }
   }
+
+  Future<Map<String, dynamic>?> reverseGeocode(double latitude, double longitude) async {
+    final url = Uri.parse('$_baseUrl/$longitude,$latitude.json?access_token=$_apiKey');
+    developer.log('Mapbox Reverse Geocode URL: $url', name: 'myapp.mapbox');
+
+    try {
+      final response = await _client.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        developer.log('Mapbox Reverse Geocode Response: ${response.body}', name: 'myapp.mapbox');
+        if (data['features'] != null && data['features'].isNotEmpty) {
+          return data['features'][0];
+        }
+      } else {
+        developer.log('Mapbox Reverse Geocode Error: Status Code ${response.statusCode}, Body: ${response.body}', name: 'myapp.mapbox', level: 1000);
+      }
+      return null;
+    } catch (e, s) {
+      developer.log('Error with reverse geocoding', name: 'myapp.mapbox', error: e, stackTrace: s, level: 1000);
+      return null;
+    }
+  }
 }
