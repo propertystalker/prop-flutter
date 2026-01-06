@@ -14,7 +14,9 @@ class MapboxService {
       return [];
     }
 
-    final url = Uri.parse('$_baseUrl/$query.json?access_token=$_apiKey');
+    final fullQuery = "united kingdom $query";
+    final encodedQuery = Uri.encodeComponent(fullQuery);
+    final url = Uri.parse('$_baseUrl/$encodedQuery.json?country=gb&access_token=$_apiKey');
     developer.log('Mapbox Request URL: $url', name: 'myapp.mapbox');
 
     try {
