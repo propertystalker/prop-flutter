@@ -1,4 +1,3 @@
-
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,7 +19,7 @@ class ReportPanel extends StatefulWidget {
   final double gdv;
   final double totalCost;
   final double uplift;
-  final List<PlanningApplication> planningApplications; // Updated
+  final List<PlanningApplication> planningApplications;
 
   const ReportPanel({
     super.key,
@@ -32,7 +31,7 @@ class ReportPanel extends StatefulWidget {
     required this.gdv,
     required this.totalCost,
     required this.uplift,
-    required this.planningApplications, // Updated
+    required this.planningApplications,
   });
 
   @override
@@ -56,7 +55,6 @@ class _ReportPanelState extends State<ReportPanel> {
     }
 
     try {
-      // 1. Generate the PDF data using the passed-in applications
       final pdfData = await PdfGenerator.generatePdf(
         widget.address,
         widget.price,
@@ -65,8 +63,12 @@ class _ReportPanelState extends State<ReportPanel> {
         widget.gdv,
         widget.totalCost,
         widget.uplift,
-        widget.planningApplications, // Use the passed-in data
+        widget.planningApplications,
       );
+
+      if (pdfData == null) {
+        throw Exception('PDF generation failed.');
+      }
 
       final pdfBytes = pdfData['bytes'];
       final originalFileName = pdfData['filename'];
@@ -78,7 +80,6 @@ class _ReportPanelState extends State<ReportPanel> {
       final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
       final fileName = '${originalFileName.split('.').first}_$timestamp.pdf';
 
-      // 2. Save PDF locally via share dialog
       await Printing.sharePdf(bytes: pdfBytes, filename: fileName);
 
       if(mounted) {
@@ -88,7 +89,6 @@ class _ReportPanelState extends State<ReportPanel> {
         );
       }
 
-      // 3. Upload to Cloudinary
       final cloudinaryService = CloudinaryService();
       final reportUrl = await cloudinaryService.uploadPdf(
         pdfBytes: pdfBytes,
@@ -104,7 +104,6 @@ class _ReportPanelState extends State<ReportPanel> {
           reportSessionController.addReport(fileName, reportUrl);
         }
 
-        // Proceed to the next screen
         widget.onSend();
       } else {
         throw Exception('Failed to upload report to Cloudinary.');
