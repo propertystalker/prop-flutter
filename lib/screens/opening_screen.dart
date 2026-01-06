@@ -17,10 +17,6 @@ class OpeningScreen extends StatefulWidget {
 
 class _OpeningScreenState extends State<OpeningScreen> {
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _latitudeController = TextEditingController();
-  final TextEditingController _longitudeController = TextEditingController();
-  final TextEditingController _limitController = TextEditingController();
-  final TextEditingController _radiusController = TextEditingController();
   final MapboxService _mapboxService = MapboxService(mapboxAccessToken);
   String _selectedPostcode = '';
 
@@ -29,10 +25,6 @@ class _OpeningScreenState extends State<OpeningScreen> {
   @override
   void dispose() {
     _addressController.dispose();
-    _latitudeController.dispose();
-    _longitudeController.dispose();
-    _limitController.dispose();
-    _radiusController.dispose();
     super.dispose();
   }
 
@@ -69,11 +61,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
       }
 
       final position = await Geolocator.getCurrentPosition();
-      setState(() {
-        _latitudeController.text = position.latitude.toString();
-        _longitudeController.text = position.longitude.toString();
-      });
-
+      
       if (searchAfter) {
         final reverseGeocodeResult = await _mapboxService.reverseGeocode(position.latitude, position.longitude);
         if (reverseGeocodeResult != null) {
@@ -392,90 +380,6 @@ class _OpeningScreenState extends State<OpeningScreen> {
                               letterSpacing: 1.5,
                             ),
                           ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _latitudeController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'Latitude',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _longitudeController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'Longitude',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _limitController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Limit',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _radiusController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Radius',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_selectedPostcode.isNotEmpty) {
-                        context.push(
-                            '/price_paid?postcode=$_selectedPostcode');
-                      } else {
-                        _showErrorSnackBar('Please enter a postcode');
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: accentColor,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: const Text(
-                      'GET PRICE',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_selectedPostcode.isNotEmpty) {
-                        context.push(
-                            '/epc?postcode=$_selectedPostcode');
-                      } else {
-                        _showErrorSnackBar('Please enter a postcode');
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: accentColor,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: const Text(
-                      'GET EPC',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
                   ),
                   const SizedBox(height: 16),
                    ElevatedButton(
