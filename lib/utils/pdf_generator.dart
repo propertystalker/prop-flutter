@@ -28,19 +28,29 @@ class PdfGenerator {
       final font = pw.Font.ttf(fontData);
       final boldFont = pw.Font.ttf(boldFontData);
 
+      // --- Fallback Image ---
+      final fallbackImageBytes = await rootBundle.load('assets/images/gemini.png');
+      final fallbackImage = pw.MemoryImage(fallbackImageBytes.buffer.asUint8List());
+
+
       final imageProviders = <pw.MemoryImage>[];
-      if (streetViewUrl != null) {
+      if (streetViewUrl != null && streetViewUrl.isNotEmpty) {
         try {
           final response = await http.get(Uri.parse(streetViewUrl));
           if (response.statusCode == 200) {
             imageProviders.add(pw.MemoryImage(response.bodyBytes));
           } else {
             debugPrint('Failed to load street view image: ${response.statusCode}');
+            imageProviders.add(fallbackImage); // Use fallback
           }
         } catch (e) {
           debugPrint('Error fetching street view image: $e');
+          imageProviders.add(fallbackImage); // Use fallback
         }
+      } else {
+        imageProviders.add(fallbackImage);
       }
+
 
       for (final image in images) {
         final bytes = await image.readAsBytes();
