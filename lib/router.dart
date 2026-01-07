@@ -8,8 +8,12 @@ import 'package:myapp/screens/price_paid_screen.dart';
 import 'package:myapp/screens/profile_screen.dart';
 import 'package:myapp/screens/report_screen.dart';
 import 'package:myapp/screens/scenario_selection_screen.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+
+final FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
 
 final GoRouter router = GoRouter(
+  observers: [observer],
   routes: <RouteBase>[
     GoRoute(
       path: '/',
