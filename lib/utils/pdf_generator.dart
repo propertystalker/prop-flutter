@@ -87,6 +87,18 @@ class PdfGenerator {
             base: font,
             bold: boldFont,
           ),
+          footer: (pw.Context context) {
+            return pw.Container(
+              alignment: pw.Alignment.centerRight,
+              margin: const pw.EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
+              child: pw.Text(
+                'Page ${context.pageNumber} of ${context.pagesCount}',
+                style: pw.Theme.of(context)
+                    .defaultTextStyle
+                    .copyWith(color: PdfColors.grey),
+              ),
+            );
+          },
           build: (context) => [
             pw.UrlLink(
               destination: 'http://propertystalker.com/',
