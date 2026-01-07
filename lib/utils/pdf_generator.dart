@@ -146,12 +146,12 @@ class PdfGenerator {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(app.address, style: pw.TextStyle(font: boldFont)),
+                    pw.Text(app.address ?? 'No address available', style: pw.TextStyle(font: boldFont)),
                     pw.SizedBox(height: 5),
-                    pw.Text(app.description),
+                    pw.Text(app.description ?? 'No description available'),
                     pw.SizedBox(height: 5),
-                    pw.Text('Status: ${app.status}'),
-                    pw.Text('Received: ${app.receivedDate}'),
+                    pw.Text('Status: ${app.status ?? 'N/A'}'),
+                    pw.Text('Received: ${app.receivedDate ?? 'N/A'}'),
                   ],
                 ),
               );
