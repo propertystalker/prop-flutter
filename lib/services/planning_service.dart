@@ -4,13 +4,17 @@ import 'package:myapp/models/planning_application.dart';
 import 'package:myapp/utils/constants.dart';
 
 class PlanningService {
+  final http.Client _client;
   final String _baseUrl = 'https://api.propertydata.co.uk/planning-applications';
 
+  // The service now takes an http.Client in its constructor.
+  PlanningService({http.Client? client}) : _client = client ?? http.Client();
+
   Future<List<PlanningApplication>> getPlanningApplications(String postcode) async {
-    // Correctly use the 'apiKey' from the constants file.
     final Uri uri = Uri.parse('$_baseUrl?key=$apiKey&postcode=$postcode&max_age=730');
 
-    final response = await http.get(uri);
+    // Use the injected client to make the HTTP request.
+    final response = await _client.get(uri);
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -24,7 +28,7 @@ class PlanningService {
             .map((json) => PlanningApplication.fromJson(json))
             .toList();
       } else {
-        return []; // Return empty list if the structure is not as expected.
+        return [];
       }
     } else {
       throw Exception('Failed to load planning applications: ${response.body}');
