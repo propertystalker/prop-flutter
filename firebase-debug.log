@@ -195,3 +195,147 @@ For CI servers and headless environments, generate a new token with firebase log
 [error] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
 
 For CI servers and headless environments, generate a new token with firebase login:ci
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:00:57.682Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:00:57.683Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2026-01-08T12:00:57.684Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:57.684Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:57.684Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:00:57.684Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2026-01-08T12:00:57.685Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:57.685Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:57.686Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo [none]
+[debug] [2026-01-08T12:00:57.702Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo [none]
+[debug] [2026-01-08T12:00:58.311Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo 200
+[debug] [2026-01-08T12:00:58.311Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo {"name":"projects/property-stalker/billingInfo","projectId":"property-stalker","billingAccountName":"billingAccounts/0114E9-6BCECD-AC53A2","billingEnabled":true}
+[debug] [2026-01-08T12:00:58.316Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.316Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.317Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.317Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.328Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.329Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.329Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.329Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.329Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-01-08T12:00:58.329Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/property-stalker
+[debug] [2026-01-08T12:00:58.331Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/cloudfunctions.googleapis.com [none]
+[debug] [2026-01-08T12:00:58.331Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/property-stalker
+[debug] [2026-01-08T12:00:58.332Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-01-08T12:00:58.332Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/property-stalker
+[debug] [2026-01-08T12:00:58.333Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseio.com [none]
+[debug] [2026-01-08T12:00:58.333Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseio.com x-goog-quota-user=projects/property-stalker
+[debug] [2026-01-08T12:00:58.375Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo 200
+[debug] [2026-01-08T12:00:58.375Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo {"name":"projects/property-stalker/billingInfo","projectId":"property-stalker","billingAccountName":"billingAccounts/0114E9-6BCECD-AC53A2","billingEnabled":true}
+[debug] [2026-01-08T12:00:58.376Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.376Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.376Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.376Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.384Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.384Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.384Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.384Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:58.384Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-01-08T12:00:58.385Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/property-stalker
+[debug] [2026-01-08T12:00:58.387Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/cloudfunctions.googleapis.com [none]
+[debug] [2026-01-08T12:00:58.387Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/property-stalker
+[debug] [2026-01-08T12:00:58.388Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-01-08T12:00:58.388Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/property-stalker
+[debug] [2026-01-08T12:00:58.389Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseio.com [none]
+[debug] [2026-01-08T12:00:58.390Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseio.com x-goog-quota-user=projects/property-stalker
+[debug] [2026-01-08T12:00:59.006Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseio.com 403
+[debug] [2026-01-08T12:00:59.006Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseio.com [omitted]
+[debug] [2026-01-08T12:00:59.009Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseio.com 403
+[debug] [2026-01-08T12:00:59.009Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseio.com [omitted]
+[debug] [2026-01-08T12:00:59.092Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/cloudfunctions.googleapis.com 200
+[debug] [2026-01-08T12:00:59.092Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/cloudfunctions.googleapis.com [omitted]
+[debug] [2026-01-08T12:00:59.110Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-01-08T12:00:59.110Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-01-08T12:00:59.114Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-01-08T12:00:59.114Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-01-08T12:00:59.117Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/cloudfunctions.googleapis.com 200
+[debug] [2026-01-08T12:00:59.117Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/cloudfunctions.googleapis.com [omitted]
+[debug] [2026-01-08T12:00:59.156Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-01-08T12:00:59.156Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-01-08T12:00:59.169Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-01-08T12:00:59.169Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/property-stalker/services/firebasedataconnect.googleapis.com [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:00:59.171Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:00:59.171Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2026-01-08T12:00:59.171Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:59.171Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:59.171Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo [none]
+[debug] [2026-01-08T12:00:59.313Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo 200
+[debug] [2026-01-08T12:00:59.313Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo {"name":"projects/property-stalker/billingInfo","projectId":"property-stalker","billingAccountName":"billingAccounts/0114E9-6BCECD-AC53A2","billingEnabled":true}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:00:59.314Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:00:59.315Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:00:59.322Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:00:59.323Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2026-01-08T12:00:59.323Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:59.323Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:59.323Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo [none]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:00:59.326Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:00:59.326Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2026-01-08T12:00:59.326Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:59.326Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:00:59.326Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo [none]
+[debug] [2026-01-08T12:00:59.495Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo 200
+[debug] [2026-01-08T12:00:59.495Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo {"name":"projects/property-stalker/billingInfo","projectId":"property-stalker","billingAccountName":"billingAccounts/0114E9-6BCECD-AC53A2","billingEnabled":true}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:00:59.497Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:00:59.497Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2026-01-08T12:00:59.503Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo 200
+[debug] [2026-01-08T12:00:59.504Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo {"name":"projects/property-stalker/billingInfo","projectId":"property-stalker","billingAccountName":"billingAccounts/0114E9-6BCECD-AC53A2","billingEnabled":true}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:00:59.505Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:00:59.505Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:01:21.673Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:01:21.673Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2026-01-08T12:01:21.674Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:01:21.674Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:01:21.674Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo [none]
+[debug] [2026-01-08T12:01:21.982Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo 200
+[debug] [2026-01-08T12:01:21.982Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo {"name":"projects/property-stalker/billingInfo","projectId":"property-stalker","billingAccountName":"billingAccounts/0114E9-6BCECD-AC53A2","billingEnabled":true}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:01:21.984Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:01:21.984Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:01:21.990Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:01:21.990Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2026-01-08T12:01:21.991Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:01:21.991Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:01:21.991Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo [none]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:01:21.994Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:01:21.994Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2026-01-08T12:01:21.994Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:01:21.994Z] Checked if tokens are valid: true, expires at: 1767875630164
+[debug] [2026-01-08T12:01:21.994Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo [none]
+[debug] [2026-01-08T12:01:22.229Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo 200
+[debug] [2026-01-08T12:01:22.229Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo {"name":"projects/property-stalker/billingInfo","projectId":"property-stalker","billingAccountName":"billingAccounts/0114E9-6BCECD-AC53A2","billingEnabled":true}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:01:22.230Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:01:22.231Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2026-01-08T12:01:22.232Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo 200
+[debug] [2026-01-08T12:01:22.232Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/property-stalker/billingInfo {"name":"projects/property-stalker/billingInfo","projectId":"property-stalker","billingAccountName":"billingAccounts/0114E9-6BCECD-AC53A2","billingEnabled":true}
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-08T12:01:22.233Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-08T12:01:22.234Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
