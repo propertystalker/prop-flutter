@@ -50,12 +50,14 @@ class _OpeningScreenState extends State<OpeningScreen> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
+          if (!mounted) return;
           _showErrorSnackBar('Location permissions are denied');
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
         _showPermissionDeniedSnackBar();
         return;
       }
@@ -64,6 +66,9 @@ class _OpeningScreenState extends State<OpeningScreen> {
       
       if (searchAfter) {
         final reverseGeocodeResult = await _mapboxService.reverseGeocode(position.latitude, position.longitude);
+
+        if (!mounted) return;
+        
         if (reverseGeocodeResult != null) {
           final postcodeContext = reverseGeocodeResult['context'].firstWhere(
               (c) => c['id'].toString().startsWith('postcode'),
@@ -78,8 +83,10 @@ class _OpeningScreenState extends State<OpeningScreen> {
           }
         }
       }
+      if (!mounted) return;
       _showSuccessSnackBar('Location acquired successfully!');
     } catch (e) {
+      if (!mounted) return;
       _showErrorSnackBar('Error getting location: $e');
     } finally {
       if (mounted) {
