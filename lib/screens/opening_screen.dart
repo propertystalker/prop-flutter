@@ -82,9 +82,11 @@ class _OpeningScreenState extends State<OpeningScreen> {
     } catch (e) {
       _showErrorSnackBar('Error getting location: $e');
     } finally {
-      setState(() {
-        _isGettingLocation = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isGettingLocation = false;
+        });
+      }
     }
   }
 
@@ -272,10 +274,22 @@ class _OpeningScreenState extends State<OpeningScreen> {
                               hintStyle:
                                   TextStyle(color: Colors.white.withAlpha(179)),
                               border: InputBorder.none,
-                              suffixIcon: IconButton(
-                                icon: const Icon(Icons.search, color: Colors.white),
-                                onPressed: _searchByPostcode,
-                              ),
+                              suffixIcon: _isGettingLocation
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                    )
+                                  : IconButton(
+                                      icon: const Icon(Icons.search, color: Colors.white),
+                                      onPressed: _searchByPostcode,
+                                    ),
                             ),
                             onSearchTextChanged: (query) async {
                               if (query.length >= 5) {

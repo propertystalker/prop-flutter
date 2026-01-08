@@ -6,11 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:myapp/controllers/report_controller.dart';
 import 'package:myapp/controllers/report_session_controller.dart';
 import 'package:myapp/models/report_model.dart';
-import 'package:myapp/utils/pdf_generator.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter/services.dart' show rootBundle;
-
 
 class ReportScreen extends StatelessWidget {
   final String propertyId;
@@ -50,7 +45,6 @@ class ReportScreen extends StatelessWidget {
                   onPressed: controller.report == null
                       ? null
                       : () async {
-                          final report = controller.report!;
                           // TODO: Implement saving or sharing the PDF.
                           /* final pdfData = await PdfGenerator.generatePdf(
                             report.propertyAddress,
