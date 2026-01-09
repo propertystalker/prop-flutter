@@ -339,3 +339,22 @@ For CI servers and headless environments, generate a new token with firebase log
 [error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
 [debug] [2026-01-08T12:01:22.233Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
 [debug] [2026-01-08T12:01:22.234Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2026-01-09T10:13:47.882Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-09T10:13:47.882Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2026-01-09T10:13:47.883Z] Checked if tokens are valid: false, expires at: 1767891548894
+[debug] [2026-01-09T10:13:47.884Z] Checked if tokens are valid: false, expires at: 1767891548894
+[debug] [2026-01-09T10:13:47.884Z] > refreshing access token with scopes: []
+[debug] [2026-01-09T10:13:47.886Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-01-09T10:13:47.886Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-09T10:13:47.905Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-01-09T10:13:47.905Z] > authorizing via signed-in user (steve@libertyapps.co.uk)
+[debug] [2026-01-09T10:13:47.905Z] Checked if tokens are valid: false, expires at: 1767891548894
+[debug] [2026-01-09T10:13:47.906Z] Checked if tokens are valid: false, expires at: 1767891548894
+[debug] [2026-01-09T10:13:47.906Z] > refreshing access token with scopes: []
+[debug] [2026-01-09T10:13:47.906Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-01-09T10:13:47.906Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-09T10:13:47.960Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400

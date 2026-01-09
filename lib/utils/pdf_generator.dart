@@ -5,6 +5,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:myapp/models/planning_application.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:myapp/controllers/gdv_controller.dart';
+import 'package:intl/intl.dart';
 
 class PdfGenerator {
   static Future<Map<String, dynamic>?> generatePdf(
@@ -16,6 +18,7 @@ class PdfGenerator {
     double totalCost,
     double uplift,
     List<PlanningApplication> planningApplications,
+    Map<String, UpliftData> scenarioUplifts,
   ) async {
     try {
       final pdf = pw.Document();
@@ -139,6 +142,52 @@ class PdfGenerator {
           ),
         );
       }
+
+      widgets.add(pw.Header(text: 'Uplift Analysis by Scenario', level: 2));
+
+      final currencyFormatter = NumberFormat.simpleCurrency(locale: 'en_GB', decimalDigits: 0);
+      final numberFormatter = NumberFormat.decimalPattern('en_GB');
+
+      final List<pw.TableRow> tableRows = [];
+      tableRows.add(
+        pw.TableRow(
+          children: [
+            pw.Text('Scenario', style: pw.TextStyle(font: boldFont)),
+            pw.Text('Area (m²)', style: pw.TextStyle(font: boldFont), textAlign: pw.TextAlign.right),
+            pw.Text('Uplift £/m²', style: pw.TextStyle(font: boldFont), textAlign: pw.TextAlign.right),
+            pw.Text('Uplift (£)', style: pw.TextStyle(font: boldFont), textAlign: pw.TextAlign.right),
+          ],
+        ),
+      );
+
+      for (var scenario in scenarioUplifts.entries) {
+        tableRows.add(
+          pw.TableRow(
+            children: [
+              pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(vertical: 4.0),
+                child: pw.Text(scenario.key, style: const pw.TextStyle(fontSize: 12)),
+              ),
+              pw.Text(numberFormatter.format(scenario.value.area), style: const pw.TextStyle(fontSize: 12), textAlign: pw.TextAlign.right),
+              pw.Text(currencyFormatter.format(scenario.value.rate), style: const pw.TextStyle(fontSize: 12), textAlign: pw.TextAlign.right),
+              pw.Text(currencyFormatter.format(scenario.value.uplift), style: const pw.TextStyle(fontSize: 12), textAlign: pw.TextAlign.right),
+            ],
+          ),
+        );
+      }
+
+      widgets.add(
+        pw.Table(
+          columnWidths: const {
+            0: pw.FlexColumnWidth(3),
+            1: pw.FlexColumnWidth(1),
+            2: pw.FlexColumnWidth(1.5),
+            3: pw.FlexColumnWidth(1.5),
+          },
+          children: tableRows,
+        ),
+      );
+
 
       pdf.addPage(
         pw.MultiPage(

@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:myapp/controllers/gdv_controller.dart';
 import 'package:myapp/controllers/report_session_controller.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/models/planning_application.dart';
@@ -55,6 +56,7 @@ class _ReportPanelState extends State<ReportPanel> {
     }
 
     try {
+      final gdvController = Provider.of<GdvController>(context, listen: false);
       final pdfData = await PdfGenerator.generatePdf(
         widget.address,
         widget.price,
@@ -64,6 +66,7 @@ class _ReportPanelState extends State<ReportPanel> {
         widget.totalCost,
         widget.uplift,
         widget.planningApplications,
+        gdvController.scenarioUplifts,
       );
 
       if (pdfData == null) {

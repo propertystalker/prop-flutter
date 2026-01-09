@@ -1,7 +1,7 @@
-
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:myapp/controllers/gdv_controller.dart';
 import 'package:myapp/models/planning_application.dart';
 import 'package:myapp/utils/pdf_generator.dart';
 
@@ -18,6 +18,7 @@ void main() {
       const gdv = 1500000.0;
       const totalCost = 1200000.0;
       const uplift = 300000.0;
+      final Map<String, UpliftData> scenarioUplifts = {};
 
       final List<PlanningApplication> planningApplications = [
         PlanningApplication(
@@ -39,6 +40,7 @@ void main() {
             totalCost,
             uplift,
             planningApplications,
+            scenarioUplifts,
           ));
 
       // 3. VERIFY: Check the output.

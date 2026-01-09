@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:myapp/controllers/report_controller.dart';
 import 'package:myapp/controllers/report_session_controller.dart';
 import 'package:myapp/models/report_model.dart';
+import 'package:myapp/utils/pdf_generator.dart';
+import 'package:myapp/controllers/gdv_controller.dart';
 
 class ReportScreen extends StatelessWidget {
   final String propertyId;
@@ -45,17 +46,18 @@ class ReportScreen extends StatelessWidget {
                   onPressed: controller.report == null
                       ? null
                       : () async {
-                          // TODO: Implement saving or sharing the PDF.
-                          /* final pdfData = await PdfGenerator.generatePdf(
-                            report.propertyAddress,
+                          final gdvController = Provider.of<GdvController>(context, listen: false);
+                          await PdfGenerator.generatePdf(
+                            controller.report!.propertyAddress,
                             '', // You might want to pass a price here
                             [], // You might want to pass images here
                             null, // You might want to pass a streetViewUrl here
                             gdv,
                             totalCost,
                             uplift,
-                            report.planningApplications,
-                          ); */
+                            controller.report!.planningApplications,
+                            gdvController.scenarioUplifts,
+                          );
                         },
                 );
               },
