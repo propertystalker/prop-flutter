@@ -171,6 +171,33 @@ class PdfGenerator {
         pw.Header(text: 'Planning Applications', level: 2),
       ];
 
+      final currencyFormatter = NumberFormat.simpleCurrency(locale: 'en_GB', decimalDigits: 0);
+      final numberFormatter = NumberFormat.decimalPattern('en_GB');
+
+      final sanitizedFinalGdv = finalGdv.isNaN ? 0.0 : finalGdv;
+      final sanitizedGdvSold = gdvSold.isNaN ? 0.0 : gdvSold;
+      final sanitizedGdvOnMarket = gdvOnMarket.isNaN ? 0.0 : gdvOnMarket;
+      final sanitizedGdvArea = gdvArea.isNaN ? 0.0 : gdvArea;
+
+      widgets.insert(
+        widgets.length - 1,
+        pw.Padding(
+          padding: const pw.EdgeInsets.only(top: 24),
+          child: _buildGdvCalculationSection(
+            font: font,
+            boldFont: boldFont,
+            currencyFormatter: currencyFormatter,
+            finalGdv: sanitizedFinalGdv,
+            gdvSold: sanitizedGdvSold,
+            gdvOnMarket: sanitizedGdvOnMarket,
+            gdvArea: sanitizedGdvArea,
+            weightSold: weightSold,
+            weightOnMarket: weightOnMarket,
+            weightArea: weightArea,
+          ),
+        ),
+      );
+
       for (var app in planningApplications) {
         widgets.add(
           pw.Container(
@@ -196,14 +223,6 @@ class PdfGenerator {
       }
 
       widgets.add(pw.Header(text: 'Uplift Analysis by Scenario', level: 2));
-
-      final currencyFormatter = NumberFormat.simpleCurrency(locale: 'en_GB', decimalDigits: 0);
-      final numberFormatter = NumberFormat.decimalPattern('en_GB');
-
-      final sanitizedFinalGdv = finalGdv.isNaN ? 0.0 : finalGdv;
-      final sanitizedGdvSold = gdvSold.isNaN ? 0.0 : gdvSold;
-      final sanitizedGdvOnMarket = gdvOnMarket.isNaN ? 0.0 : gdvOnMarket;
-      final sanitizedGdvArea = gdvArea.isNaN ? 0.0 : gdvArea;
 
       final List<pw.TableRow> tableRows = [];
       tableRows.add(
@@ -242,24 +261,6 @@ class PdfGenerator {
             3: pw.FlexColumnWidth(1.5),
           },
           children: tableRows,
-        ),
-      );
-
-      widgets.add(
-        pw.Padding(
-          padding: const pw.EdgeInsets.only(top: 24),
-          child: _buildGdvCalculationSection(
-            font: font,
-            boldFont: boldFont,
-            currencyFormatter: currencyFormatter,
-            finalGdv: sanitizedFinalGdv,
-            gdvSold: sanitizedGdvSold,
-            gdvOnMarket: sanitizedGdvOnMarket,
-            gdvArea: sanitizedGdvArea,
-            weightSold: weightSold,
-            weightOnMarket: weightOnMarket,
-            weightArea: weightArea,
-          ),
         ),
       );
 
