@@ -19,6 +19,9 @@ void main() {
       const totalCost = 1200000.0;
       const uplift = 300000.0;
       final Map<String, UpliftData> scenarioUplifts = {};
+      const roi = 25.0;
+      const areaGrowth = 10.0;
+      const riskIndicator = 'Low';
 
       final List<PlanningApplication> planningApplications = [
         PlanningApplication(
@@ -41,6 +44,9 @@ void main() {
             uplift,
             planningApplications,
             scenarioUplifts,
+            roi,
+            areaGrowth,
+            riskIndicator,
           ));
 
       // 3. VERIFY: Check the output.

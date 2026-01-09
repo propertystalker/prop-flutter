@@ -1,8 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myapp/controllers/financial_controller.dart';
+import 'package:myapp/controllers/gdv_controller.dart';
 import 'package:myapp/models/scenario_model.dart';
 import 'package:myapp/widgets/report_panel.dart';
+import 'package:provider/provider.dart';
 
 class ScenarioSelectionScreen extends StatefulWidget {
   final String propertyId;
@@ -10,7 +12,8 @@ class ScenarioSelectionScreen extends StatefulWidget {
   const ScenarioSelectionScreen({super.key, required this.propertyId});
 
   @override
-  State<ScenarioSelectionScreen> createState() => _ScenarioSelectionScreenState();
+  State<ScenarioSelectionScreen> createState() =>
+      _ScenarioSelectionScreenState();
 }
 
 class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
@@ -28,34 +31,43 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
     Scenario(id: 'LOFT_DORMER_ENSUITE', name: 'Dormer loft with ensuite'),
   ];
 
-  void _generateReport() {
-    final selectedScenarioIds = _scenarios
-        .where((s) => s.isSelected)
-        .map((s) => s.id)
-        .toList();
-    context.go("/report/${widget.propertyId}?scenarios=${selectedScenarioIds.join(',')}");
+  void _generateReport(BuildContext context) {
+    final selectedScenarioIds =
+        _scenarios.where((s) => s.isSelected).map((s) => s.id).toList();
+    
+    final gdvController = Provider.of<GdvController>(context, listen: false);
+    final financialController = Provider.of<FinancialController>(context, listen: false);
+
+    final gdv = gdvController.finalGdv;
+    final totalCost = financialController.totalCost;
+    final uplift = gdv - totalCost;
+
+    context.go(
+      '/report/${widget.propertyId}?scenarios=${selectedScenarioIds.join(',')}&gdv=$gdv&totalCost=$totalCost&uplift=$uplift',
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Splitting scenarios for two-column layout
     final halfLength = (_scenarios.length / 2).ceil();
     final firstHalf = _scenarios.sublist(0, halfLength);
     final secondHalf = _scenarios.sublist(halfLength);
 
+    // Access controllers to get live data
+    final gdvController = Provider.of<GdvController>(context);
+    final financialController = Provider.of<FinancialController>(context);
+
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/images/gemini.png"), // Placeholder
+                image: AssetImage("assets/images/gemini.png"),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          // Content Overlay
           Column(
             children: [
               AppBar(
@@ -70,7 +82,6 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
                     onPressed: () {},
                   ),
                   const CircleAvatar(
-                    // Placeholder profile pic
                     backgroundImage: NetworkImage("https://placehold.it/150"),
                   ),
                   const SizedBox(width: 16),
@@ -92,7 +103,6 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
                           ],
                         ),
                         const SizedBox(height: 20),
-                        // Placeholder for Address and Price
                         const Text(
                           "31 BEECH ROAD, CAMBRIDGE, CB1 3AZ",
                           style: TextStyle(
@@ -123,16 +133,15 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
                   ),
                 ),
               ),
-              // Report Panel at the bottom
               ReportPanel(
-                onSend: _generateReport,
-                address: "31 BEECH ROAD, CAMBRIDGE, CB1 3AZ", // Dummy data
-                price: "£373k", // Dummy data
-                images: [], // Dummy data
-                gdv: 0, // Dummy data
-                totalCost: 0, // Dummy data
-                uplift: 0, // Dummy data
-                planningApplications: [], // Dummy data
+                onSend: () => _generateReport(context),
+                address: "31 BEECH ROAD, CAMBRIDGE, CB1 3AZ",
+                price: "£373k",
+                images: const [],
+                gdv: gdvController.finalGdv,
+                totalCost: financialController.totalCost,
+                uplift: gdvController.finalGdv - financialController.totalCost,
+                planningApplications: const [],
               ),
             ],
           ),

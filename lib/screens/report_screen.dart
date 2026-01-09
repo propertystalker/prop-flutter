@@ -7,6 +7,7 @@ import 'package:myapp/controllers/report_session_controller.dart';
 import 'package:myapp/models/report_model.dart';
 import 'package:myapp/utils/pdf_generator.dart';
 import 'package:myapp/controllers/gdv_controller.dart';
+import 'package:myapp/controllers/financial_controller.dart';
 
 class ReportScreen extends StatelessWidget {
   final String propertyId;
@@ -47,6 +48,7 @@ class ReportScreen extends StatelessWidget {
                       ? null
                       : () async {
                           final gdvController = Provider.of<GdvController>(context, listen: false);
+                          final financialController = Provider.of<FinancialController>(context, listen: false);
                           await PdfGenerator.generatePdf(
                             controller.report!.propertyAddress,
                             '', // You might want to pass a price here
@@ -57,6 +59,9 @@ class ReportScreen extends StatelessWidget {
                             uplift,
                             controller.report!.planningApplications,
                             gdvController.scenarioUplifts,
+                            financialController.roi,
+                            financialController.areaGrowth,
+                            financialController.riskIndicator,
                           );
                         },
                 );

@@ -19,6 +19,9 @@ class PdfGenerator {
     double uplift,
     List<PlanningApplication> planningApplications,
     Map<String, UpliftData> scenarioUplifts,
+    double roi,
+    double areaGrowth,
+    String riskIndicator,
   ) async {
     try {
       final pdf = pw.Document();
@@ -116,6 +119,48 @@ class PdfGenerator {
             );
           }).toList(),
         ),
+        pw.Header(text: 'Uplift & Risk Overview', level: 2),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+             pw.Column(
+              children: [
+                pw.Text('Uplift (%)', style: pw.TextStyle(fontSize: 14, color: PdfColors.grey)),
+                pw.SizedBox(height: 8),
+                pw.Text('${NumberFormat('##0.0', 'en_GB').format(roi)}%', style: pw.TextStyle(fontSize: 24, font: boldFont)),
+                pw.SizedBox(height: 4),
+                pw.Text('Profit relative to total investment', style: pw.TextStyle(fontSize: 12, color: PdfColors.grey)),
+              ],
+            ),
+            pw.Column(
+              children: [
+                pw.Text('Area Growth', style: pw.TextStyle(fontSize: 14, color: PdfColors.grey)),
+                pw.SizedBox(height: 8),
+                pw.Text('${NumberFormat('##0.0', 'en_GB').format(areaGrowth)}%', style: pw.TextStyle(fontSize: 24, font: boldFont)),
+                pw.SizedBox(height: 4),
+                pw.Text('Increase in internal area', style: pw.TextStyle(fontSize: 12, color: PdfColors.grey)),
+              ],
+            ),
+            pw.Column(
+              children: [
+                pw.Text('Risk Indicator', style: pw.TextStyle(fontSize: 14, color: PdfColors.grey)),
+                pw.SizedBox(height: 8),
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: pw.BoxDecoration(
+                    color: _getRiskColor(riskIndicator),
+                    borderRadius: pw.BorderRadius.circular(16),
+                  ),
+                  child: pw.Text(
+                    riskIndicator,
+                    style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        pw.SizedBox(height: 20),
         pw.Header(text: 'Planning Applications', level: 2),
       ];
 
@@ -213,5 +258,17 @@ class PdfGenerator {
       debugPrint('Error generating PDF: $e\n$s');
       return null;
     }
+  }
+}
+
+PdfColor _getRiskColor(String risk) {
+  switch (risk) {
+    case 'Medium':
+      return PdfColors.orange;
+    case 'Higher':
+      return PdfColors.red;
+    case 'Low':
+    default:
+      return PdfColors.green;
   }
 }
