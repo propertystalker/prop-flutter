@@ -89,12 +89,16 @@ class _PropertyScreenState extends State<PropertyScreen> {
     super.dispose();
   }
 
-  void _fetchData() {
-    _fetchPriceHistory();
-    _gdvController.calculateGdv(
+  Future<void> _fetchData() async {
+    await _fetchPriceHistory();
+
+    final currentPrice = _financialController.currentPrice ?? 0.0;
+    
+    await _gdvController.calculateGdv(
       postcode: widget.epc.postcode,
       habitableRooms: int.tryParse(widget.epc.numberHabitableRooms) ?? 0,
       totalFloorArea: double.tryParse(widget.epc.totalFloorArea) ?? 0.0,
+      currentPrice: currentPrice,
     );
   }
 
@@ -152,12 +156,12 @@ class _PropertyScreenState extends State<PropertyScreen> {
     }
   }
 
-  void _fetchPriceHistory() {
+  Future<void> _fetchPriceHistory() async {
     final addressParts = widget.epc.address.split(',');
     final houseNumber = addressParts.isNotEmpty ? addressParts.first.trim() : '';
 
     if (houseNumber.isNotEmpty) {
-      _pricePaidController.fetchPricePaidHistoryForProperty(
+      await _pricePaidController.fetchPricePaidHistoryForProperty(
           widget.epc.postcode, houseNumber);
     }
   }

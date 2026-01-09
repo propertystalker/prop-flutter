@@ -83,21 +83,25 @@ class GdvController with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> calculateGdv({required String postcode, required int habitableRooms, required double totalFloorArea}) async {
+  Future<void> calculateGdv({
+    required String postcode,
+    required int habitableRooms,
+    required double totalFloorArea,
+    required double currentPrice,
+  }) async {
     _currentTotalFloorArea = totalFloorArea;
-    // Simple estimation logic (placeholder)
-    double estimatedValuePerRoom = 80000; // A very rough estimate
-    double estimatedGdv = estimatedValuePerRoom * habitableRooms;
 
-    final postcodeHash = postcode.hashCode;
-    final randomFactor = 1 + (postcodeHash % 10 - 5) / 100; // between 0.95 and 1.05
-    estimatedGdv *= randomFactor;
+    // Use currentPrice as the core of the GDV estimation, removing randomness.
+    final baseGdv = currentPrice > 0 ? currentPrice : 80000 * habitableRooms.toDouble();
 
-    _gdvSold = estimatedGdv * 0.98;
-    _gdvOnMarket = estimatedGdv * 1.02;
-    _gdvArea = estimatedGdv;
+    _gdvSold = baseGdv;
+    _gdvOnMarket = baseGdv;
+    _gdvArea = baseGdv;
 
+    // Recalculate the blended GDV and bands
     calculateFinalGdv();
+    
+    // Update uplift rates based on the new, more accurate price.
     updateUpliftRates(currentPrice: _finalGdv, totalFloorArea: totalFloorArea);
   }
 
