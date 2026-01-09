@@ -350,7 +350,7 @@ pw.Widget _buildGdvCalculationSection({
               pw.Text('Estimated Value', style: pw.TextStyle(font: boldFont)),
             ],
           ),
-          const pw.TableRow(
+          pw.TableRow(
             children: [pw.SizedBox(height: 8), pw.SizedBox(height: 8)],
           ),
           pw.TableRow(
