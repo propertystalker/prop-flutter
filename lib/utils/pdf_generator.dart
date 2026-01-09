@@ -19,6 +19,13 @@ class PdfGenerator {
     double uplift,
     List<PlanningApplication> planningApplications,
     Map<String, UpliftData> scenarioUplifts,
+    double finalGdv,
+    double gdvSold,
+    double gdvOnMarket,
+    double gdvArea,
+    double weightSold,
+    double weightOnMarket,
+    double weightArea,
     double roi,
     double areaGrowth,
     String riskIndicator,
@@ -193,6 +200,11 @@ class PdfGenerator {
       final currencyFormatter = NumberFormat.simpleCurrency(locale: 'en_GB', decimalDigits: 0);
       final numberFormatter = NumberFormat.decimalPattern('en_GB');
 
+      final sanitizedFinalGdv = finalGdv.isNaN ? 0.0 : finalGdv;
+      final sanitizedGdvSold = gdvSold.isNaN ? 0.0 : gdvSold;
+      final sanitizedGdvOnMarket = gdvOnMarket.isNaN ? 0.0 : gdvOnMarket;
+      final sanitizedGdvArea = gdvArea.isNaN ? 0.0 : gdvArea;
+
       final List<pw.TableRow> tableRows = [];
       tableRows.add(
         pw.TableRow(
@@ -233,6 +245,23 @@ class PdfGenerator {
         ),
       );
 
+      widgets.add(
+        pw.Padding(
+          padding: const pw.EdgeInsets.only(top: 24),
+          child: _buildGdvCalculationSection(
+            font: font,
+            boldFont: boldFont,
+            currencyFormatter: currencyFormatter,
+            finalGdv: sanitizedFinalGdv,
+            gdvSold: sanitizedGdvSold,
+            gdvOnMarket: sanitizedGdvOnMarket,
+            gdvArea: sanitizedGdvArea,
+            weightSold: weightSold,
+            weightOnMarket: weightOnMarket,
+            weightArea: weightArea,
+          ),
+        ),
+      );
 
       pdf.addPage(
         pw.MultiPage(
@@ -259,6 +288,123 @@ class PdfGenerator {
       return null;
     }
   }
+}
+
+pw.Widget _buildGdvCalculationSection({
+  required pw.Font font,
+  required pw.Font boldFont,
+  required NumberFormat currencyFormatter,
+  required double finalGdv,
+  required double gdvSold,
+  required double gdvOnMarket,
+  required double gdvArea,
+  required double weightSold,
+  required double weightOnMarket,
+  required double weightArea,
+}) {
+  return pw.Column(
+    crossAxisAlignment: pw.CrossAxisAlignment.start,
+    children: [
+      pw.Text(
+        'GDV Calculation (Blended)',
+        style: pw.TextStyle(font: boldFont, fontSize: 20),
+      ),
+      pw.SizedBox(height: 4),
+      pw.Text(
+        'How the final value estimate is derived',
+        style: pw.TextStyle(font: font, fontSize: 12, color: PdfColors.grey600),
+      ),
+      pw.SizedBox(height: 16),
+      pw.Center(
+        child: pw.Column(
+          children: [
+            pw.Text(
+              'Final GDV',
+              style: pw.TextStyle(font: font, fontSize: 16, color: PdfColors.grey700),
+            ),
+            pw.SizedBox(height: 6),
+            pw.Text(
+              currencyFormatter.format(finalGdv),
+              style: pw.TextStyle(font: boldFont, fontSize: 32),
+            ),
+            pw.SizedBox(height: 8),
+            pw.Text(
+              'Based on a weighted blend of sold data, live listings, and area benchmarks.',
+              textAlign: pw.TextAlign.center,
+              style: pw.TextStyle(font: font, fontSize: 11, color: PdfColors.grey600),
+            ),
+          ],
+        ),
+      ),
+      pw.SizedBox(height: 20),
+      pw.Table(
+        columnWidths: const {
+          0: pw.FlexColumnWidth(2),
+          1: pw.FlexColumnWidth(1.5),
+        },
+        children: [
+          pw.TableRow(
+            children: [
+              pw.Text('GDV Source', style: pw.TextStyle(font: boldFont)),
+              pw.Text('Estimated Value', style: pw.TextStyle(font: boldFont)),
+            ],
+          ),
+          const pw.TableRow(
+            children: [pw.SizedBox(height: 8), pw.SizedBox(height: 8)],
+          ),
+          pw.TableRow(
+            children: [
+              pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(vertical: 4.0),
+                child: pw.Text('Sold comparables', style: pw.TextStyle(font: font, fontSize: 12)),
+              ),
+              pw.Text(currencyFormatter.format(gdvSold), style: pw.TextStyle(font: font, fontSize: 12)),
+            ],
+          ),
+          pw.TableRow(
+            children: [
+              pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(vertical: 4.0),
+                child: pw.Text('Live listings', style: pw.TextStyle(font: font, fontSize: 12)),
+              ),
+              pw.Text(currencyFormatter.format(gdvOnMarket), style: pw.TextStyle(font: font, fontSize: 12)),
+            ],
+          ),
+          pw.TableRow(
+            children: [
+              pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(vertical: 4.0),
+                child: pw.Text('Area benchmark', style: pw.TextStyle(font: font, fontSize: 12)),
+              ),
+              pw.Text(currencyFormatter.format(gdvArea), style: pw.TextStyle(font: font, fontSize: 12)),
+            ],
+          ),
+        ],
+      ),
+      pw.SizedBox(height: 12),
+      pw.Center(
+        child: pw.RichText(
+          text: pw.TextSpan(
+            style: pw.TextStyle(font: font, fontSize: 11, color: PdfColors.grey600),
+            children: [
+              pw.TextSpan(text: 'Weighting applied: ', style: pw.TextStyle(font: boldFont)),
+              pw.TextSpan(text: 'Sold: ${(weightSold * 100).toStringAsFixed(0)}% \u00B7 '),
+              pw.TextSpan(text: 'On market: ${(weightOnMarket * 100).toStringAsFixed(0)}% \u00B7 '),
+              pw.TextSpan(text: 'Area benchmark: ${(weightArea * 100).toStringAsFixed(0)}%'),
+            ],
+          ),
+        ),
+      ),
+      pw.SizedBox(height: 6),
+      pw.Center(
+        child: pw.Text(
+          'Weighting reflects data availability and reliability in this area.',
+          textAlign: pw.TextAlign.center,
+          style: pw.TextStyle(font: font, fontSize: 10, color: PdfColors.grey600, fontStyle: pw.FontStyle.italic),
+        ),
+      ),
+    ],
+  );
 }
 
 PdfColor _getRiskColor(String risk) {
