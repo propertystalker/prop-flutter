@@ -103,14 +103,12 @@ class MockGdvController extends _i1.Mock implements _i2.GdvController {
 
   @override
   _i3.Future<void> calculateGdv({
-    required String? postcode,
     required int? habitableRooms,
     required double? totalFloorArea,
     required double? currentPrice,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#calculateGdv, [], {
-              #postcode: postcode,
               #habitableRooms: habitableRooms,
               #totalFloorArea: totalFloorArea,
               #currentPrice: currentPrice,

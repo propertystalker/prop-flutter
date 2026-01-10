@@ -36,7 +36,7 @@ void main() {
         ]
       };
 
-       final url = '$epcBaseUrl/search?postcode=AT1+2BC&size=100';
+       final url = '$epcBaseUrl/search?postcode=AT1+2BC&size=500';
     
       final credentials = base64Encode(utf8.encode('$epcEmail:$epcApiKey'));
 
@@ -49,7 +49,7 @@ void main() {
     });
 
     test('throws an exception if the http call completes with an error', () {
-      final url = '$epcBaseUrl/search?postcode=AT1+2BC&size=100';
+      final url = '$epcBaseUrl/search?postcode=AT1+2BC&size=500';
     
       final credentials = base64Encode(utf8.encode('$epcEmail:$epcApiKey'));
       
