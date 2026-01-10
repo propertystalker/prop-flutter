@@ -12,10 +12,11 @@ class EpcService {
   // The service only needs to fetch all data for a postcode.
   // The filtering will be handled by the UI (EpcScreen).
   Future<List<EpcModel>> getEpcData(String postcode) async {
-    final url = '$epcBaseUrl/search?postcode=${postcode.replaceAll(' ', '+')}&size=100';
-    
+    final url =
+        '$epcBaseUrl/search?postcode=${postcode.replaceAll(' ', '+')}&size=500';
+
     final credentials = base64Encode(utf8.encode('$epcEmail:$epcApiKey'));
-    
+
     // developer.log('Fetching EPC data from: $url');
 
     final response = await client.get(Uri.parse(url), headers: {
@@ -24,23 +25,13 @@ class EpcService {
     });
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      // developer.log('EPC API Response: ${response.body}');
-      
-      final List<dynamic> results = data['rows'];
-
-      final List<EpcModel> modelItems = [];
-      for (final item in results) {
-        try {
-          modelItems.add(EpcModel.fromJson(item));
-        } catch (e, s) {
-          developer.log('Failed to parse EPC item', error: e, stackTrace: s);
-        }
-      }
-      return modelItems;
+      final data = jsonDecode(response.body);
+      final List<dynamic> rows = data['rows'];
+      // developer.log('Fetched ${rows.length} EPC records.');
+      return rows.map((row) => EpcModel.fromJson(row)).toList();
     } else {
-      developer.log('EPC API Error: ${response.statusCode} ${response.body}');
-      throw Exception('Failed to load EPC data: ${response.statusCode} ${response.body}');
+      developer.log('Failed to load EPC data: ${response.statusCode}');
+      throw Exception('Failed to load EPC data');
     }
   }
 }
