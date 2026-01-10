@@ -43,6 +43,7 @@ void main() {
             totalCost,
             uplift,
             planningApplications,
+            [],
             scenarioUplifts,
             roi,
             areaGrowth,

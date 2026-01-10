@@ -21,7 +21,8 @@ class ReportPanel extends StatefulWidget {
   final double gdv;
   final double totalCost;
   final double uplift;
-  final List<PlanningApplication> planningApplications;
+  final List<PlanningApplication> propertyDataApplications;
+  final List<PlanningApplication> planitApplications;
 
   const ReportPanel({
     super.key,
@@ -33,7 +34,8 @@ class ReportPanel extends StatefulWidget {
     required this.gdv,
     required this.totalCost,
     required this.uplift,
-    required this.planningApplications,
+    required this.propertyDataApplications,
+    required this.planitApplications,
   });
 
   @override
@@ -67,7 +69,8 @@ class _ReportPanelState extends State<ReportPanel> {
         widget.gdv,
         widget.totalCost,
         widget.uplift,
-        widget.planningApplications,
+        widget.propertyDataApplications,
+        widget.planitApplications,
         gdvController.scenarioUplifts,
         financialController.roi,
         financialController.areaGrowth,

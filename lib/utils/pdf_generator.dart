@@ -17,7 +17,8 @@ class PdfGenerator {
     double gdv,
     double totalCost,
     double uplift,
-    List<PlanningApplication> planningApplications,
+    List<PlanningApplication> propertyDataApplications,
+    List<PlanningApplication> planitApplications,
     Map<String, UpliftData> scenarioUplifts,
     double roi,
     double areaGrowth,
@@ -89,6 +90,8 @@ class PdfGenerator {
           ),
         ],
       );
+
+      final planningApplications = propertyDataApplications.isNotEmpty ? propertyDataApplications : planitApplications;
 
       final widgets = <pw.Widget>[
         pw.UrlLink(

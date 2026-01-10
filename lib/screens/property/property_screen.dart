@@ -13,6 +13,7 @@ import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/models/epc_model.dart';
 import 'package:myapp/models/planning_application.dart';
 import 'package:myapp/services/planning_service.dart';
+import 'package:myapp/services/property_data_service.dart';
 import 'package:myapp/utils/constants.dart';
 import 'package:myapp/widgets/company_account.dart';
 import 'package:myapp/widgets/gdv_calculation_widget.dart';
@@ -58,6 +59,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
   String? _streetViewUrl;
   List<String> _selectedScenarioIds = [];
   List<PlanningApplication> _planningApplications = [];
+  List<PlanningApplication> _propertyDataPlanningApplications = [];
   bool _isLoadingPlanningApps = true;
 
   @override
@@ -77,6 +79,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchData();
       _fetchPlanningApplications();
+      _fetchPropertyDataPlanningApplications();
     });
   }
 
@@ -117,6 +120,19 @@ class _PropertyScreenState extends State<PropertyScreen> {
           _isLoadingPlanningApps = false;
         });
       }
+    }
+  }
+
+  Future<void> _fetchPropertyDataPlanningApplications() async {
+    try {
+      final apps = await PropertyDataService().getPlanningApplications(widget.epc.postcode);
+      if (mounted) {
+        setState(() {
+          _propertyDataPlanningApplications = apps;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching property data planning applications: $e");
     }
   }
 
@@ -413,7 +429,8 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                 gdv: financialController.gdv,
                                 totalCost: financialController.totalCost,
                                 uplift: financialController.uplift,
-                                planningApplications: _planningApplications,
+                                propertyDataApplications: _propertyDataPlanningApplications,
+                                planitApplications: _planningApplications,
                                 onSend: () {
                                   _toggleScenarioSelectionVisibility();
                                   final propertyId = "${widget.epc.address}, ${widget.epc.postcode}";

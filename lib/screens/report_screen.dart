@@ -57,6 +57,7 @@ class ReportScreen extends StatelessWidget {
                             gdv,
                             totalCost,
                             uplift,
+                            controller.propertyDataApplications,
                             controller.report!.planningApplications,
                             gdvController.scenarioUplifts,
                             financialController.roi,

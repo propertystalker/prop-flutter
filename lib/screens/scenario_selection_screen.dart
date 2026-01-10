@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/controllers/gdv_controller.dart';
+import 'package:myapp/models/planning_application.dart';
 import 'package:myapp/models/scenario_model.dart';
+import 'package:myapp/services/planning_service.dart';
+import 'package:myapp/services/property_data_service.dart';
 import 'package:myapp/widgets/report_panel.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +20,9 @@ class ScenarioSelectionScreen extends StatefulWidget {
 }
 
 class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
+  List<PlanningApplication> _planitApplications = [];
+  List<PlanningApplication> _propertyDataApplications = [];
+
   final List<Scenario> _scenarios = [
     Scenario(id: 'REFURB_FULL', name: 'Full refurbishment'),
     Scenario(id: 'FRONT_SINGLE', name: 'Full-width front single-storey'),
@@ -30,6 +36,28 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
     Scenario(id: 'LOFT_DORMER', name: 'Dormer loft conversion'),
     Scenario(id: 'LOFT_DORMER_ENSUITE', name: 'Dormer loft with ensuite'),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPlanningApplications();
+  }
+
+  Future<void> _fetchPlanningApplications() async {
+    try {
+      final postcode = widget.propertyId.split(', ').last;
+      final planitApps = await PlanningService().getPlanningApplications(postcode);
+      final propertyDataApps = await PropertyDataService().getPlanningApplications(postcode);
+      if (mounted) {
+        setState(() {
+          _planitApplications = planitApps;
+          _propertyDataApplications = propertyDataApps;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching planning applications: $e");
+    }
+  }
 
   void _generateReport(BuildContext context) {
     final selectedScenarioIds =
@@ -141,7 +169,8 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
                 gdv: gdvController.finalGdv,
                 totalCost: financialController.totalCost,
                 uplift: gdvController.finalGdv - financialController.totalCost,
-                planningApplications: const [],
+                planitApplications: _planitApplications,
+                propertyDataApplications: _propertyDataApplications,
               ),
             ],
           ),

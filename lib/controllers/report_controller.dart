@@ -1,12 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:myapp/models/report_model.dart';
 import 'package:myapp/services/planning_service.dart';
+import 'package:myapp/services/property_data_service.dart'; // Assuming this service exists
+import 'package:myapp/models/planning_application.dart';
 
 class ReportController with ChangeNotifier {
   PropertyReport? _report;
   final PlanningService _planningService = PlanningService();
+  final PropertyDataService _propertyDataService = PropertyDataService(); // Assuming this service exists
 
   PropertyReport? get report => _report;
+  List<PlanningApplication> _propertyDataApplications = [];
+  List<PlanningApplication> get propertyDataApplications => _propertyDataApplications;
 
   Future<void> generateReport(
     String propertyId, {
@@ -20,8 +25,8 @@ class ReportController with ChangeNotifier {
         (totalCost > 0) ? (uplift / totalCost) * 100 : 0.0;
 
     final postcode = propertyId.split(', ').last;
-    final planningApplications =
-        await _planningService.getPlanningApplications(postcode);
+    final planitApplications = await _planningService.getPlanningApplications(postcode);
+    _propertyDataApplications = await _propertyDataService.getPlanningApplications(postcode); // Assuming this method exists
 
     final investmentSignal = _calculateInvestmentSignal(returnOnInvestment);
     final gdvConfidence = _calculateGdvConfidence(gdv);
@@ -35,7 +40,7 @@ class ReportController with ChangeNotifier {
       gdvConfidence: gdvConfidence,
       selectedScenarios: scenarios,
       keyConstraints: ['Planning required for rear extension'],
-      planningApplications: planningApplications,
+      planningApplications: planitApplications,
     );
 
     notifyListeners();
