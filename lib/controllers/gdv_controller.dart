@@ -84,7 +84,6 @@ class GdvController with ChangeNotifier {
   }
 
   Future<void> calculateGdv({
-    required String postcode,
     required int habitableRooms,
     required double totalFloorArea,
     required double currentPrice,

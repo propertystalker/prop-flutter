@@ -15,29 +15,49 @@ class ReportController with ChangeNotifier {
     double totalCost = 0,
     double uplift = 0,
   }) async {
-    // In a real app, you'd fetch data from your services here
-    // and filter/calculate based on the selected scenarios.
-    // For now, we'll create some dummy data and pass the scenarios through.
-
     final estimatedProfit = gdv - totalCost;
-    final returnOnInvestment = (uplift / totalCost) * 100;
+    final double returnOnInvestment =
+        (totalCost > 0) ? (uplift / totalCost) * 100 : 0.0;
 
-    // Extract postcode from propertyId (assuming format "Address, Postcode")
     final postcode = propertyId.split(', ').last;
-    final planningApplications = await _planningService.getPlanningApplications(postcode);
+    final planningApplications =
+        await _planningService.getPlanningApplications(postcode);
+
+    final investmentSignal = _calculateInvestmentSignal(returnOnInvestment);
+    final gdvConfidence = _calculateGdvConfidence(gdv);
 
     _report = PropertyReport(
       propertyAddress: propertyId,
       dateGenerated: DateTime.now(),
-      investmentSignal: InvestmentSignal.green, // This would be calculated based on scenarios
+      investmentSignal: investmentSignal,
       estimatedProfit: estimatedProfit,
       returnOnInvestment: returnOnInvestment,
-      gdvConfidence: GdvConfidence.high,
-      selectedScenarios: scenarios, // Pass the selected scenarios to the report model
-      keyConstraints: ['Planning required for rear extension'], // This could also be scenario-dependent
+      gdvConfidence: gdvConfidence,
+      selectedScenarios: scenarios,
+      keyConstraints: ['Planning required for rear extension'],
       planningApplications: planningApplications,
     );
 
     notifyListeners();
+  }
+
+  InvestmentSignal _calculateInvestmentSignal(double returnOnInvestment) {
+    if (returnOnInvestment > 20) {
+      return InvestmentSignal.green;
+    } else if (returnOnInvestment >= 10) {
+      return InvestmentSignal.amber;
+    } else {
+      return InvestmentSignal.red;
+    }
+  }
+
+  GdvConfidence _calculateGdvConfidence(double gdv) {
+    if (gdv > 500000) {
+      return GdvConfidence.high;
+    } else if (gdv >= 200000) {
+      return GdvConfidence.medium;
+    } else {
+      return GdvConfidence.low;
+    }
   }
 }

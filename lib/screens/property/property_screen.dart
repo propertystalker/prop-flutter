@@ -95,7 +95,6 @@ class _PropertyScreenState extends State<PropertyScreen> {
     final currentPrice = _financialController.currentPrice ?? 0.0;
     
     await _gdvController.calculateGdv(
-      postcode: widget.epc.postcode,
       habitableRooms: int.tryParse(widget.epc.numberHabitableRooms) ?? 0,
       totalFloorArea: double.tryParse(widget.epc.totalFloorArea) ?? 0.0,
       currentPrice: currentPrice,
