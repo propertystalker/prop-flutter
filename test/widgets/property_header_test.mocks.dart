@@ -57,6 +57,11 @@ class MockFinancialController extends _i1.Mock
           as double);
 
   @override
+  double get marketGrowth =>
+      (super.noSuchMethod(Invocation.getter(#marketGrowth), returnValue: 0.0)
+          as double);
+
+  @override
   String get riskIndicator =>
       (super.noSuchMethod(
             Invocation.getter(#riskIndicator),
@@ -82,6 +87,12 @@ class MockFinancialController extends _i1.Mock
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
+
+  @override
+  void setMarketGrowth(String? growth) => super.noSuchMethod(
+    Invocation.method(#setMarketGrowth, [growth]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void calculateFinancials(

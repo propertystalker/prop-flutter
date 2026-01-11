@@ -2,16 +2,20 @@
 import 'dart:typed_data';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'dart:developer' as developer;
+import 'package:flutter/foundation.dart';
 
 class CloudinaryService {
   static const String _cloudName = 'dc5cnouvd';
   static const String _uploadPreset = 'reports';
 
-  static final CloudinaryPublic _cloudinary = CloudinaryPublic(
-    _cloudName,
-    _uploadPreset,
-    cache: false,
-  );
+  late final CloudinaryPublic _cloudinary;
+
+  CloudinaryService() {
+    _cloudinary = CloudinaryPublic(_cloudName, _uploadPreset, cache: false);
+  }
+
+  @visibleForTesting
+  CloudinaryService.withCloudinary(this._cloudinary);
 
   Future<String?> uploadPdf({
     required Uint8List pdfBytes,
