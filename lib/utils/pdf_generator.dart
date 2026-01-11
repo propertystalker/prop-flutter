@@ -37,6 +37,26 @@ class PdfGenerator {
       final font = pw.Font.ttf(fontData);
       final boldFont = pw.Font.ttf(boldFontData);
 
+      // Define the dark theme data
+      final darkTheme = pw.ThemeData.withFont(
+        base: font,
+        bold: boldFont,
+      ).copyWith(
+        defaultTextStyle: const pw.TextStyle(color: PdfColors.white, fontSize: 12),
+      );
+
+      // Define a single PageTheme for a dark background and white text
+      final pageTheme = pw.PageTheme(
+        pageFormat: PdfPageFormat.a4.landscape,
+        theme: darkTheme,
+        buildBackground: (pw.Context context) {
+          return pw.FullPage(
+            ignoreMargins: true,
+            child: pw.Container(color: PdfColors.black),
+          );
+        },
+      );
+
       final fallbackImageBytes = await rootBundle.load('assets/images/gemini.png');
       final fallbackImage = pw.MemoryImage(fallbackImageBytes.buffer.asUint8List());
 
@@ -47,10 +67,10 @@ class PdfGenerator {
         imageBytesList.add(await image.readAsBytes());
       }
 
-      // SECTION A
+      // Apply the dark theme to all pages
       pdf.addPage(
         pw.Page(
-          pageFormat: PdfPageFormat.a4.landscape,
+          pageTheme: pageTheme,
           build: (pw.Context context) => _buildSectionA(
             context,
             address,
@@ -61,10 +81,9 @@ class PdfGenerator {
         ),
       );
 
-      // SECTION B
       pdf.addPage(
         pw.Page(
-          pageFormat: PdfPageFormat.a4.landscape,
+          pageTheme: pageTheme,
           build: (pw.Context context) => _buildSectionB(
             context,
             gdv,
@@ -78,15 +97,10 @@ class PdfGenerator {
         ),
       );
 
-      // SECTION C
        pdf.addPage(
         pw.MultiPage(
-          pageFormat: PdfPageFormat.a4.landscape,
-          theme: pw.ThemeData.withFont(
-            base: font,
-            bold: boldFont,
-          ),
-          header: (context) => pw.Header(text: 'Section C: Planning Applications', level: 1),
+          pageTheme: pageTheme,
+          header: (context) => pw.Header(text: 'Section C: Planning Applications', level: 1, textStyle: pw.TextStyle(font: boldFont, fontSize: 20)),
           build: (context) => _buildSectionC(
             propertyDataApplications.isNotEmpty ? propertyDataApplications : planitApplications,
             boldFont,
@@ -94,10 +108,9 @@ class PdfGenerator {
         ),
       );
 
-      // SECTION D
       pdf.addPage(
         pw.Page(
-          pageFormat: PdfPageFormat.a4.landscape,
+          pageTheme: pageTheme,
           build: (pw.Context context) => _buildSectionD(
             context,
             scenarioUplifts,
@@ -107,10 +120,9 @@ class PdfGenerator {
         ),
       );
 
-      // SECTION E
       pdf.addPage(
         pw.Page(
-          pageFormat: PdfPageFormat.a4.landscape,
+          pageTheme: pageTheme,
           build: (pw.Context context) => _buildSectionE(
             context,
             selectedScenarios,
@@ -119,15 +131,10 @@ class PdfGenerator {
         ),
       );
 
-      // SECTION G
       pdf.addPage(
         pw.MultiPage(
-          pageFormat: PdfPageFormat.a4.landscape,
-          theme: pw.ThemeData.withFont(
-            base: font,
-            bold: boldFont,
-          ),
-          header: (context) => pw.Header(text: 'Section G: Property Gallery', level: 1),
+          pageTheme: pageTheme,
+          header: (context) => pw.Header(text: 'Section G: Property Gallery', level: 1, textStyle: pw.TextStyle(font: boldFont, fontSize: 20)),
           build: (context) => _buildSectionG(
             imageBytesList,
           ),
@@ -178,7 +185,7 @@ class PdfGenerator {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Header(text: 'Section A: Property Overview', level: 1),
+        pw.Header(text: 'Section A: Property Overview', level: 1, textStyle: pw.TextStyle(font: boldFont, fontSize: 20)),
         pw.Text(address, style: pw.TextStyle(font: boldFont, fontSize: 24)),
         pw.SizedBox(height: 20),
         pw.Image(streetViewImage, width: 400, height: 200, fit: pw.BoxFit.cover),
@@ -243,7 +250,7 @@ class PdfGenerator {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Header(text: 'Section B: GDV Information', level: 1),
+        pw.Header(text: 'Section B: GDV Information', level: 1, textStyle: pw.TextStyle(font: boldFont, fontSize: 20)),
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
           children: [
@@ -277,7 +284,7 @@ class PdfGenerator {
             margin: const pw.EdgeInsets.only(bottom: 10),
             padding: const pw.EdgeInsets.all(10),
             decoration: pw.BoxDecoration(
-              border: pw.Border.all(color: PdfColors.grey),
+              border: pw.Border.all(color: PdfColors.grey400),
               borderRadius: pw.BorderRadius.circular(5),
             ),
             child: pw.Column(
@@ -330,11 +337,11 @@ class PdfGenerator {
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.symmetric(vertical: 4.0),
-                  child: pw.Text(scenario.key, style: pw.TextStyle(fontSize: 12)),
+                  child: pw.Text(scenario.key),
                 ),
-                pw.Text(numberFormatter.format(scenario.value.area), style: pw.TextStyle(fontSize: 12), textAlign: pw.TextAlign.right),
-                pw.Text(currencyFormatter.format(scenario.value.rate), style: pw.TextStyle(fontSize: 12), textAlign: pw.TextAlign.right),
-                pw.Text(currencyFormatter.format(scenario.value.uplift), style: pw.TextStyle(fontSize: 12), textAlign: pw.TextAlign.right),
+                pw.Text(numberFormatter.format(scenario.value.area), textAlign: pw.TextAlign.right),
+                pw.Text(currencyFormatter.format(scenario.value.rate), textAlign: pw.TextAlign.right),
+                pw.Text(currencyFormatter.format(scenario.value.uplift), textAlign: pw.TextAlign.right),
               ],
             ),
           );
@@ -343,7 +350,7 @@ class PdfGenerator {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Header(text: 'Section D: Uplift Analysis by Scenario', level: 1),
+        pw.Header(text: 'Section D: Uplift Analysis by Scenario', level: 1, textStyle: pw.TextStyle(font: boldFont, fontSize: 20)),
          pw.Table(
           columnWidths: {
             0: const pw.FlexColumnWidth(3),
@@ -365,10 +372,9 @@ class PdfGenerator {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Header(text: 'Section E: Selected Scenarios', level: 1),
+        pw.Header(text: 'Section E: Selected Scenarios', level: 1, textStyle: pw.TextStyle(font: boldFont, fontSize: 20)),
         pw.Bullet(
           text: selectedScenarios.join('\n'),
-          style: pw.TextStyle(fontSize: 12),
           bulletShape: pw.BoxShape.circle,
           bulletSize: 5,
           bulletMargin: const pw.EdgeInsets.only(right: 5),
