@@ -78,10 +78,10 @@ class FinancialController with ChangeNotifier {
   FinancialController({required double existingInternalArea}) : _existingInternalArea = existingInternalArea;
 
   // --- Main Calculation Method ---
-  void calculateFinancials(String scenario, double gdv) {
+  void calculateFinancials(String scenario, double baseGdv, double scenarioUplift) {
     _selectedScenario = scenario;
     if (_currentPrice == null) return;
-    _gdv = gdv;
+    _gdv = baseGdv + scenarioUplift;
 
     // Standard financial calculations
     final costCategories = _scenarioCostMatrix[scenario] ?? [];
@@ -115,6 +115,6 @@ class FinancialController with ChangeNotifier {
   void setCurrentPrice(double price, double gdv) {
     _currentPrice = price;
     // Recalculate with the current scenario when price is set
-    calculateFinancials(_selectedScenario, gdv);
+    calculateFinancials(_selectedScenario, gdv, 0); // Assuming 0 uplift initially
   }
 }

@@ -150,9 +150,11 @@ class _PropertyScreenState extends State<PropertyScreen> {
   void _onGdvChanged() {
     if (mounted && _gdvController.finalGdv != _lastGdv) {
       _lastGdv = _gdvController.finalGdv;
+      final scenarioUplift = _gdvController.scenarioUplifts[_financialController.selectedScenario]?.uplift ?? 0.0;
       _financialController.calculateFinancials(
         _financialController.selectedScenario,
         _gdvController.finalGdv,
+        scenarioUplift,
       );
     }
   }
@@ -353,8 +355,9 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                 builder: (context, financialController, gdvController, child) {
                                   return DevelopmentScenarios(
                                     onScenarioChanged: (scenario) {
+                                      final scenarioUplift = gdvController.scenarioUplifts[scenario]?.uplift ?? 0.0;
                                       financialController.calculateFinancials(
-                                          scenario, gdvController.finalGdv);
+                                          scenario, gdvController.finalGdv, scenarioUplift);
                                     },
                                   );
                                 },
