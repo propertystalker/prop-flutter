@@ -55,6 +55,22 @@ class PdfGenerator {
             child: pw.Container(color: PdfColors.black),
           );
         },
+        buildForeground: (pw.Context context) {
+          return pw.Align(
+            alignment: pw.Alignment.bottomRight,
+            child: pw.Padding(
+              padding: const pw.EdgeInsets.only(right: 30, bottom: 20),
+              child: pw.Text(
+                'Page ${context.pageNumber} of ${context.pagesCount}',
+                style: pw.TextStyle(
+                  color: PdfColors.white,
+                  fontSize: 14,
+                  fontStyle: pw.FontStyle.italic,
+                ),
+              ),
+            ),
+          );
+        },
       );
 
       final fallbackImageBytes = await rootBundle.load('assets/images/gemini.png');
