@@ -63,6 +63,9 @@ class ReportScreen extends StatelessWidget {
                             financialController.roi,
                             financialController.areaGrowth,
                             financialController.riskIndicator,
+                            controller.report!.investmentSignal,
+                            controller.report!.gdvConfidence,
+                            selectedScenarios,
                           );
                         },
                 );

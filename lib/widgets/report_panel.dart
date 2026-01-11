@@ -11,6 +11,7 @@ import 'package:myapp/utils/pdf_generator.dart';
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import '../utils/constants.dart';
+import 'package:myapp/models/report_model.dart';
 
 class ReportPanel extends StatefulWidget {
   final VoidCallback onSend;
@@ -23,6 +24,7 @@ class ReportPanel extends StatefulWidget {
   final double uplift;
   final List<PlanningApplication> propertyDataApplications;
   final List<PlanningApplication> planitApplications;
+  final List<String> selectedScenarios;
 
   const ReportPanel({
     super.key,
@@ -36,6 +38,7 @@ class ReportPanel extends StatefulWidget {
     required this.uplift,
     required this.propertyDataApplications,
     required this.planitApplications,
+    required this.selectedScenarios,
   });
 
   @override
@@ -44,6 +47,26 @@ class ReportPanel extends StatefulWidget {
 
 class _ReportPanelState extends State<ReportPanel> {
   bool _isSending = false;
+
+  InvestmentSignal _calculateInvestmentSignal(double returnOnInvestment) {
+    if (returnOnInvestment > 20) {
+      return InvestmentSignal.green;
+    } else if (returnOnInvestment >= 10) {
+      return InvestmentSignal.amber;
+    } else {
+      return InvestmentSignal.red;
+    }
+  }
+
+  GdvConfidence _calculateGdvConfidence(double gdv) {
+    if (gdv > 500000) {
+      return GdvConfidence.high;
+    } else if (gdv >= 200000) {
+      return GdvConfidence.medium;
+    } else {
+      return GdvConfidence.low;
+    }
+  }
 
   Future<void> _generateAndUploadReport() async {
     if (_isSending) return;
@@ -61,6 +84,9 @@ class _ReportPanelState extends State<ReportPanel> {
     try {
       final gdvController = Provider.of<GdvController>(context, listen: false);
       final financialController = Provider.of<FinancialController>(context, listen: false);
+      final investmentSignal = _calculateInvestmentSignal(financialController.roi);
+      final gdvConfidence = _calculateGdvConfidence(widget.gdv);
+
       final pdfData = await PdfGenerator.generatePdf(
         widget.address,
         widget.price,
@@ -75,6 +101,9 @@ class _ReportPanelState extends State<ReportPanel> {
         financialController.roi,
         financialController.areaGrowth,
         financialController.riskIndicator,
+        investmentSignal,
+        gdvConfidence,
+        widget.selectedScenarios,
       );
 
       if (pdfData == null) {

@@ -84,6 +84,7 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
     // Access controllers to get live data
     final gdvController = Provider.of<GdvController>(context);
     final financialController = Provider.of<FinancialController>(context);
+    final selectedScenarioNames = _scenarios.where((s) => s.isSelected).map((s) => s.name).toList();
 
     return Scaffold(
       body: Stack(
@@ -171,6 +172,7 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
                 uplift: gdvController.finalGdv - financialController.totalCost,
                 planitApplications: _planitApplications,
                 propertyDataApplications: _propertyDataApplications,
+                selectedScenarios: selectedScenarioNames,
               ),
             ],
           ),

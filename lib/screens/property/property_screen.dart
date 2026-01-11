@@ -431,6 +431,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                 uplift: financialController.uplift,
                                 propertyDataApplications: _propertyDataPlanningApplications,
                                 planitApplications: _planningApplications,
+                                selectedScenarios: const [],
                                 onSend: () {
                                   _toggleScenarioSelectionVisibility();
                                   final propertyId = "${widget.epc.address}, ${widget.epc.postcode}";

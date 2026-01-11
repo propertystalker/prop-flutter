@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:myapp/controllers/gdv_controller.dart';
 import 'package:myapp/models/planning_application.dart';
 import 'package:myapp/utils/pdf_generator.dart';
+import 'package:myapp/models/report_model.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,9 @@ void main() {
       const roi = 25.0;
       const areaGrowth = 10.0;
       const riskIndicator = 'Low';
+      const investmentSignal = InvestmentSignal.green;
+      const gdvConfidence = GdvConfidence.high;
+      final selectedScenarios = <String>['Full refurbishment'];
 
       final List<PlanningApplication> planningApplications = [
         PlanningApplication(
@@ -48,6 +52,9 @@ void main() {
             roi,
             areaGrowth,
             riskIndicator,
+            investmentSignal,
+            gdvConfidence,
+            selectedScenarios,
           ));
 
       // 3. VERIFY: Check the output.
