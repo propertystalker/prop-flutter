@@ -45,6 +45,8 @@ class PdfGenerator {
         defaultTextStyle: const pw.TextStyle(color: PdfColors.white, fontSize: 12),
       );
 
+      final List<String> sections = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+
       // Define a single PageTheme for a dark background and white text
       final pageTheme = pw.PageTheme(
         pageFormat: PdfPageFormat.a4.landscape,
@@ -56,19 +58,65 @@ class PdfGenerator {
           );
         },
         buildForeground: (pw.Context context) {
+          final int currentPageIndex = context.pageNumber - 1;
           return pw.Align(
-            alignment: pw.Alignment.bottomRight,
-            child: pw.Padding(
-              padding: const pw.EdgeInsets.only(right: 30, bottom: 20),
-              child: pw.Text(
-                'Page ${context.pageNumber} of ${context.pagesCount}',
-                style: pw.TextStyle(
-                  color: PdfColors.white,
-                  fontSize: 14,
-                  fontStyle: pw.FontStyle.italic,
+            alignment: pw.Alignment.bottomCenter,
+            child: pw.Column(
+              mainAxisSize: pw.MainAxisSize.min,
+              children: [
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.center,
+                  children: List.generate(sections.length, (index) {
+                    final section = sections[index];
+                    final isSelected = currentPageIndex == index;
+                    return pw.Container(
+                      width: 40,
+                      height: 30,
+                      margin: pw.EdgeInsets.symmetric(horizontal: 2),
+                      decoration: pw.BoxDecoration(
+                        color: isSelected ? PdfColors.purple : PdfColors.black,
+                        borderRadius: pw.BorderRadius.only(
+                          topLeft: pw.Radius.circular(8),
+                          topRight: pw.Radius.circular(8),
+                        ),
+                        border: pw.Border.all(
+                          color: PdfColors.purple,
+                          width: 1,
+                        ),
+                      ),
+                      child: pw.Center(
+                        child: pw.Text(
+                          section,
+                          style: pw.TextStyle(
+                            color: isSelected ? PdfColors.white : PdfColors.grey,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
                 ),
-              ),
-            ),
+                pw.Container(
+                  height: 2,
+                  color: PdfColors.white,
+                ),
+                pw.SizedBox(height: 10),
+                 pw.Align(
+                  alignment: pw.Alignment.bottomRight,
+                  child: pw.Padding(
+                    padding: pw.EdgeInsets.only(right: 30),
+                    child: pw.Text(
+                      'Page ${context.pageNumber} of ${context.pagesCount}',
+                       style: pw.TextStyle(
+                        color: PdfColors.white,
+                        fontSize: 12,
+                        fontStyle: pw.FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ),
+              ]
+            )
           );
         },
       );
