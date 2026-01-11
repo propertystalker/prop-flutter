@@ -175,13 +175,11 @@ class PdfGenerator {
     InvestmentSignal investmentSignal,
     pw.Font boldFont,
   ) {
-    final town = address.split(', ').last;
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Header(text: 'Section A: Property Overview', level: 1),
         pw.Text(address, style: pw.TextStyle(font: boldFont, fontSize: 24)),
-        pw.Text(town, style: pw.TextStyle(fontSize: 18, color: PdfColors.grey700)),
         pw.SizedBox(height: 20),
         pw.Image(streetViewImage, width: 400, height: 200, fit: pw.BoxFit.cover),
         pw.SizedBox(height: 20),
