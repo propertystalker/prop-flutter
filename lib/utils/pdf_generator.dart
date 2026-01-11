@@ -42,6 +42,11 @@ class PdfGenerator {
 
       final streetViewImage = await _getStreetViewImage(streetViewUrl, fallbackImage);
 
+      final imageBytesList = <Uint8List>[];
+      for (var image in images) {
+        imageBytesList.add(await image.readAsBytes());
+      }
+
       // SECTION A
       pdf.addPage(
         pw.Page(
@@ -110,9 +115,24 @@ class PdfGenerator {
         ),
       );
 
+      // SECTION G
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          theme: pw.ThemeData.withFont(
+            base: font,
+            bold: boldFont,
+          ),
+          header: (context) => pw.Header(text: 'Section G: Property Gallery', level: 1),
+          build: (context) => _buildSectionG(
+            imageBytesList,
+          ),
+        ),
+      );
+
       final Uint8List pdfBytes = await pdf.save();
 
-      final sanitizedAddress = address.replaceAll(RegExp(r'[\/:*?"<>|]'), '_');
+      final sanitizedAddress = address.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
       final fileName = 'Property_Stalker_$sanitizedAddress.pdf';
 
       return {
@@ -353,6 +373,27 @@ class PdfGenerator {
         ),
       ],
     );
+  }
+
+  static List<pw.Widget> _buildSectionG(
+    List<Uint8List> imageBytesList,
+  ) {
+    return [
+      pw.Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: imageBytesList.map((bytes) {
+          return pw.Container(
+            width: 150,
+            height: 150,
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.grey, width: 1),
+            ),
+            child: pw.Image(pw.MemoryImage(bytes), fit: pw.BoxFit.cover),
+          );
+        }).toList(),
+      ),
+    ];
   }
 }
 
