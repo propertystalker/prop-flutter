@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +11,11 @@ import 'package:myapp/controllers/image_gallery_controller.dart';
 import 'package:myapp/controllers/price_paid_controller.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/models/epc_model.dart';
+import 'package:myapp/models/growth_per_square_foot.dart';
 import 'package:myapp/models/planning_application.dart';
+import 'package:myapp/screens/property/widgets/growth_per_square_foot_widget.dart';
+import 'package:myapp/screens/property/widgets/price_per_square_foot.dart';
+import 'package:myapp/services/api_service.dart';
 import 'package:myapp/services/planning_service.dart';
 import 'package:myapp/services/property_data_service.dart';
 import 'package:myapp/utils/constants.dart';
@@ -93,6 +98,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
 
   Future<void> _fetchData() async {
     await _fetchPriceHistory();
+    await _fetchGrowthPerSquareFoot();
 
     final currentPrice = _financialController.currentPrice ?? 0.0;
     
@@ -101,6 +107,21 @@ class _PropertyScreenState extends State<PropertyScreen> {
       totalFloorArea: double.tryParse(widget.epc.totalFloorArea) ?? 0.0,
       currentPrice: currentPrice,
     );
+  }
+
+  Future<void> _fetchGrowthPerSquareFoot() async {
+    try {
+      final growthData = await ApiService().getGrowthPerSquareFoot(
+        apiKey: apiKey,
+        postcode: widget.epc.postcode,
+      );
+      if (mounted && growthData.isNotEmpty) {
+        final latestGrowth = growthData.last.growth;
+        _financialController.setMarketGrowth(latestGrowth);
+      }
+    } catch (e) {
+      debugPrint("Error fetching growth per square foot data: $e");
+    }
   }
 
   Future<void> _fetchPlanningApplications() async {
@@ -387,6 +408,10 @@ class _PropertyScreenState extends State<PropertyScreen> {
                               ),
                               const Divider(height: 32),
                               const PriceHistory(),
+                              const Divider(height: 32),
+                              PricePerSquareFootWidget(postcode: widget.epc.postcode),
+                              const Divider(height: 32),
+                              GrowthPerSquareFootWidget(postcode: widget.epc.postcode),
                               const SizedBox(height: 16),
                               Center(
                                 child: ElevatedButton(

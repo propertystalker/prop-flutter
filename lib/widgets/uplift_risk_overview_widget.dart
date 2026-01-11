@@ -38,7 +38,7 @@ class UpliftRiskOverviewWidget extends StatelessWidget {
               _buildMetric(
                 context,
                 label: 'Area Growth',
-                value: '${numberFormatter.format(financialController.areaGrowth)}%',
+                value: '${numberFormatter.format(financialController.marketGrowth)}%',
                 caption: 'Increase in internal area',
               ),
               _buildRiskIndicator(context, financialController.riskIndicator),

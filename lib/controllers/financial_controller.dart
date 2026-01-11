@@ -10,6 +10,7 @@ class FinancialController with ChangeNotifier {
 
   // New Uplift & Risk Metrics
   double _areaGrowth = 0;
+  double _marketGrowth = 0.0;
   String _riskIndicator = 'Low';
   final double _existingInternalArea; // Passed in at initialization
 
@@ -71,11 +72,22 @@ class FinancialController with ChangeNotifier {
   double? get currentPrice => _currentPrice;
   double get gdv => _gdv;
   double get areaGrowth => _areaGrowth;
+  double get marketGrowth => _marketGrowth;
   String get riskIndicator => _riskIndicator;
   String get selectedScenario => _selectedScenario;
 
   // Constructor
   FinancialController({required double existingInternalArea}) : _existingInternalArea = existingInternalArea;
+
+  void setMarketGrowth(String? growth) {
+    if (growth != null) {
+      final growthValue = double.tryParse(growth.replaceAll('%', ''));
+      if (growthValue != null) {
+        _marketGrowth = growthValue;
+        notifyListeners();
+      }
+    }
+  }
 
   // --- Main Calculation Method ---
   void calculateFinancials(String scenario, double baseGdv, double scenarioUplift) {
