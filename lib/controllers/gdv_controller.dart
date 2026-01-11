@@ -90,12 +90,13 @@ class GdvController with ChangeNotifier {
   }) async {
     _currentTotalFloorArea = totalFloorArea;
 
-    // Use currentPrice as the core of the GDV estimation, removing randomness.
+    // Use currentPrice as the core of the GDV estimation.
     final baseGdv = currentPrice > 0 ? currentPrice : 80000 * habitableRooms.toDouble();
 
-    _gdvSold = baseGdv;
-    _gdvOnMarket = baseGdv;
-    _gdvArea = baseGdv;
+    // Apply some variation to simulate different data sources
+    _gdvSold = baseGdv; // Sold is often the most reliable benchmark
+    _gdvOnMarket = baseGdv * 1.05; // Live listings are often optimistically priced
+    _gdvArea = baseGdv * 0.98; // Area benchmark might be slightly different
 
     // Recalculate the blended GDV and bands
     calculateFinalGdv();

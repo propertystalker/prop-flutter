@@ -356,18 +356,6 @@ class PdfGenerator {
   }
 }
 
-PdfColor _getRiskColor(String risk) {
-  switch (risk) {
-    case 'Medium':
-      return PdfColors.orange;
-    case 'Higher':
-      return PdfColors.red;
-    case 'Low':
-    default:
-      return PdfColors.green;
-  }
-}
-
 PdfColor _getInvestmentSignalColor(InvestmentSignal signal) {
   switch (signal) {
     case InvestmentSignal.green:

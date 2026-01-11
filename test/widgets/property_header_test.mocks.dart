@@ -84,8 +84,16 @@ class MockFinancialController extends _i1.Mock
           as bool);
 
   @override
-  void calculateFinancials(String? scenario, double? gdv) => super.noSuchMethod(
-    Invocation.method(#calculateFinancials, [scenario, gdv]),
+  void calculateFinancials(
+    String? scenario,
+    double? baseGdv,
+    double? scenarioUplift,
+  ) => super.noSuchMethod(
+    Invocation.method(#calculateFinancials, [
+      scenario,
+      baseGdv,
+      scenarioUplift,
+    ]),
     returnValueForMissingStub: null,
   );
 
