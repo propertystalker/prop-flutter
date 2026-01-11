@@ -50,6 +50,7 @@ class PdfGenerator {
       // SECTION A
       pdf.addPage(
         pw.Page(
+          pageFormat: PdfPageFormat.a4.landscape,
           build: (pw.Context context) => _buildSectionA(
             context,
             address,
@@ -63,6 +64,7 @@ class PdfGenerator {
       // SECTION B
       pdf.addPage(
         pw.Page(
+          pageFormat: PdfPageFormat.a4.landscape,
           build: (pw.Context context) => _buildSectionB(
             context,
             gdv,
@@ -79,7 +81,7 @@ class PdfGenerator {
       // SECTION C
        pdf.addPage(
         pw.MultiPage(
-          pageFormat: PdfPageFormat.a4,
+          pageFormat: PdfPageFormat.a4.landscape,
           theme: pw.ThemeData.withFont(
             base: font,
             bold: boldFont,
@@ -95,6 +97,7 @@ class PdfGenerator {
       // SECTION D
       pdf.addPage(
         pw.Page(
+          pageFormat: PdfPageFormat.a4.landscape,
           build: (pw.Context context) => _buildSectionD(
             context,
             scenarioUplifts,
@@ -107,6 +110,7 @@ class PdfGenerator {
       // SECTION E
       pdf.addPage(
         pw.Page(
+          pageFormat: PdfPageFormat.a4.landscape,
           build: (pw.Context context) => _buildSectionE(
             context,
             selectedScenarios,
@@ -118,7 +122,7 @@ class PdfGenerator {
       // SECTION G
       pdf.addPage(
         pw.MultiPage(
-          pageFormat: PdfPageFormat.a4,
+          pageFormat: PdfPageFormat.a4.landscape,
           theme: pw.ThemeData.withFont(
             base: font,
             bold: boldFont,
