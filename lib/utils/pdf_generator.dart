@@ -92,10 +92,20 @@ class PdfGenerator {
         pw.Page(
           build: (pw.Context context) => _buildSectionD(
             context,
-            selectedScenarios,
             scenarioUplifts,
             boldFont,
             font,
+          ),
+        ),
+      );
+
+      // SECTION E
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) => _buildSectionE(
+            context,
+            selectedScenarios,
+            boldFont,
           ),
         ),
       );
@@ -273,7 +283,6 @@ class PdfGenerator {
 
   static pw.Widget _buildSectionD(
     pw.Context context,
-    List<String> selectedScenarios,
     Map<String, UpliftData> scenarioUplifts,
     pw.Font boldFont,
     pw.Font font,
@@ -294,7 +303,6 @@ class PdfGenerator {
       );
 
       for (var scenario in scenarioUplifts.entries) {
-        if(selectedScenarios.contains(scenario.key)){
           tableRows.add(
             pw.TableRow(
               children: [
@@ -308,13 +316,12 @@ class PdfGenerator {
               ],
             ),
           );
-        }
       }
 
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Header(text: 'Section D: Selected Scenarios', level: 1),
+        pw.Header(text: 'Section D: Uplift Analysis by Scenario', level: 1),
          pw.Table(
           columnWidths: {
             0: const pw.FlexColumnWidth(3),
@@ -323,6 +330,26 @@ class PdfGenerator {
             3: const pw.FlexColumnWidth(1.5),
           },
           children: tableRows,
+        ),
+      ],
+    );
+  }
+
+  static pw.Widget _buildSectionE(
+    pw.Context context,
+    List<String> selectedScenarios,
+    pw.Font boldFont,
+  ) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Header(text: 'Section E: Selected Scenarios', level: 1),
+        pw.Bullet(
+          text: selectedScenarios.join('\n'),
+          style: pw.TextStyle(fontSize: 12),
+          bulletShape: pw.BoxShape.circle,
+          bulletSize: 5,
+          bulletMargin: const pw.EdgeInsets.only(right: 5),
         ),
       ],
     );

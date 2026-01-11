@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -421,25 +420,35 @@ class _PropertyScreenState extends State<PropertyScreen> {
                               },
                             ),
                             Consumer2<FinancialController, ImageGalleryController>(
-                              builder: (context, financialController, imageGalleryController, child) => ReportPanel(
-                                address: widget.epc.address,
-                                price: NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(financialController.currentPrice ?? 0),
-                                images: imageGalleryController.images,
-                                streetViewUrl: _streetViewUrl,
-                                gdv: financialController.gdv,
-                                totalCost: financialController.totalCost,
-                                uplift: financialController.uplift,
-                                propertyDataApplications: _propertyDataPlanningApplications,
-                                planitApplications: _planningApplications,
-                                selectedScenarios: const [],
-                                onSend: () {
-                                  _toggleScenarioSelectionVisibility();
-                                  final propertyId = "${widget.epc.address}, ${widget.epc.postcode}";
-                                  context.go(
-                                    '/report/$propertyId?scenarios=${_selectedScenarioIds.join(',')}&gdv=${financialController.gdv}&totalCost=${financialController.totalCost}&uplift=${financialController.uplift}',
+                              builder: (context, financialController, imageGalleryController, child) {
+                                final gdvController = context.read<GdvController>();
+                                final selectedScenarioNames = _selectedScenarioIds.map((id) {
+                                  return gdvController.scenarioUplifts.keys.firstWhere(
+                                    (name) => name.toUpperCase().replaceAll(' ', '_') == id,
+                                    orElse: () => '',
                                   );
-                                },
-                              ),
+                                }).where((name) => name.isNotEmpty).toList();
+
+                                return ReportPanel(
+                                  address: widget.epc.address,
+                                  price: NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(financialController.currentPrice ?? 0),
+                                  images: imageGalleryController.images,
+                                  streetViewUrl: _streetViewUrl,
+                                  gdv: financialController.gdv,
+                                  totalCost: financialController.totalCost,
+                                  uplift: financialController.uplift,
+                                  propertyDataApplications: _propertyDataPlanningApplications,
+                                  planitApplications: _planningApplications,
+                                  selectedScenarios: selectedScenarioNames,
+                                  onSend: () {
+                                    _toggleScenarioSelectionVisibility();
+                                    final propertyId = "${widget.epc.address}, ${widget.epc.postcode}";
+                                    context.go(
+                                      '/report/$propertyId?scenarios=${selectedScenarioNames.join(',')}&gdv=${financialController.gdv}&totalCost=${financialController.totalCost}&uplift=${financialController.uplift}',
+                                    );
+                                  },
+                                );
+                              },
                             ),
                           ],
                         ),
