@@ -463,9 +463,6 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                   price: NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(financialController.currentPrice ?? 0),
                                   images: imageGalleryController.images,
                                   streetViewUrl: _streetViewUrl,
-                                  gdv: financialController.gdv,
-                                  totalCost: financialController.totalCost,
-                                  uplift: financialController.uplift,
                                   propertyDataApplications: _propertyDataPlanningApplications,
                                   planitApplications: _planningApplications,
                                   selectedScenarios: selectedScenarioNames,
@@ -473,7 +470,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                     _toggleScenarioSelectionVisibility();
                                     final propertyId = "${widget.epc.address}, ${widget.epc.postcode}";
                                     context.go(
-                                      '/report/$propertyId?scenarios=${selectedScenarioNames.join(',')}&gdv=${financialController.gdv}&totalCost=${financialController.totalCost}&uplift=${financialController.uplift}',
+                                      '/report/$propertyId?scenarios=${selectedScenarioNames.join(',')}',
                                     );
                                   },
                                 );

@@ -19,9 +19,6 @@ class ReportPanel extends StatefulWidget {
   final String price;
   final List<XFile> images;
   final String? streetViewUrl;
-  final double gdv;
-  final double totalCost;
-  final double uplift;
   final List<PlanningApplication> propertyDataApplications;
   final List<PlanningApplication> planitApplications;
   final List<String> selectedScenarios;
@@ -33,9 +30,6 @@ class ReportPanel extends StatefulWidget {
     required this.price,
     required this.images,
     this.streetViewUrl,
-    required this.gdv,
-    required this.totalCost,
-    required this.uplift,
     required this.propertyDataApplications,
     required this.planitApplications,
     required this.selectedScenarios,
@@ -85,19 +79,18 @@ class _ReportPanelState extends State<ReportPanel> {
       final gdvController = Provider.of<GdvController>(context, listen: false);
       final financialController = Provider.of<FinancialController>(context, listen: false);
       final investmentSignal = _calculateInvestmentSignal(financialController.roi);
-      final gdvConfidence = _calculateGdvConfidence(widget.gdv);
+      final gdvConfidence = _calculateGdvConfidence(gdvController.finalGdv);
 
       final pdfData = await PdfGenerator.generatePdf(
         widget.address,
         widget.price,
         widget.images,
         widget.streetViewUrl,
-        widget.gdv,
-        widget.totalCost,
-        widget.uplift,
+        gdvController, // Pass the controller
+        financialController.totalCost, // Get from controller
+        gdvController.finalGdv - financialController.totalCost, // Calculate uplift
         widget.propertyDataApplications,
         widget.planitApplications,
-        gdvController.scenarioUplifts,
         financialController.roi,
         financialController.areaGrowth,
         financialController.riskIndicator,

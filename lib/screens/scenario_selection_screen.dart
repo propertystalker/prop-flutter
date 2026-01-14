@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myapp/controllers/financial_controller.dart';
-import 'package:myapp/controllers/gdv_controller.dart';
 import 'package:myapp/models/planning_application.dart';
 import 'package:myapp/models/scenario_model.dart';
 import 'package:myapp/services/planning_service.dart';
 import 'package:myapp/services/property_data_service.dart';
 import 'package:myapp/widgets/report_panel.dart';
-import 'package:provider/provider.dart';
 
 class ScenarioSelectionScreen extends StatefulWidget {
   final String propertyId;
@@ -62,16 +59,9 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
   void _generateReport(BuildContext context) {
     final selectedScenarioIds =
         _scenarios.where((s) => s.isSelected).map((s) => s.id).toList();
-    
-    final gdvController = Provider.of<GdvController>(context, listen: false);
-    final financialController = Provider.of<FinancialController>(context, listen: false);
-
-    final gdv = gdvController.finalGdv;
-    final totalCost = financialController.totalCost;
-    final uplift = gdv - totalCost;
 
     context.go(
-      '/report/${widget.propertyId}?scenarios=${selectedScenarioIds.join(',')}&gdv=$gdv&totalCost=$totalCost&uplift=$uplift',
+      '/report/${widget.propertyId}?scenarios=${selectedScenarioIds.join(',')}',
     );
   }
 
@@ -81,9 +71,6 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
     final firstHalf = _scenarios.sublist(0, halfLength);
     final secondHalf = _scenarios.sublist(halfLength);
 
-    // Access controllers to get live data
-    final gdvController = Provider.of<GdvController>(context);
-    final financialController = Provider.of<FinancialController>(context);
     final selectedScenarioNames = _scenarios.where((s) => s.isSelected).map((s) => s.name).toList();
 
     return Scaffold(
@@ -167,9 +154,6 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
                 address: "31 BEECH ROAD, CAMBRIDGE, CB1 3AZ",
                 price: "£373k",
                 images: const [],
-                gdv: gdvController.finalGdv,
-                totalCost: financialController.totalCost,
-                uplift: gdvController.finalGdv - financialController.totalCost,
                 planitApplications: _planitApplications,
                 propertyDataApplications: _propertyDataApplications,
                 selectedScenarios: selectedScenarioNames,

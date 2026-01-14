@@ -12,29 +12,26 @@ import 'package:myapp/controllers/financial_controller.dart';
 class ReportScreen extends StatelessWidget {
   final String propertyId;
   final List<String> selectedScenarios;
-  final double gdv;
-  final double totalCost;
-  final double uplift;
 
   const ReportScreen({
     super.key,
     required this.propertyId,
     this.selectedScenarios = const [],
-    required this.gdv,
-    required this.totalCost,
-    required this.uplift,
   });
 
   @override
   Widget build(BuildContext context) {
+    final gdvController = Provider.of<GdvController>(context, listen: false);
+    final financialController = Provider.of<FinancialController>(context, listen: false);
+
     return ChangeNotifierProvider(
       create: (_) => ReportController()
         ..generateReport(
           propertyId,
           scenarios: selectedScenarios,
-          gdv: gdv,
-          totalCost: totalCost,
-          uplift: uplift,
+          gdv: gdvController.finalGdv,
+          totalCost: financialController.totalCost,
+          uplift: gdvController.finalGdv - financialController.totalCost,
         ),
       child: Scaffold(
         appBar: AppBar(
@@ -47,19 +44,16 @@ class ReportScreen extends StatelessWidget {
                   onPressed: controller.report == null
                       ? null
                       : () async {
-                          final gdvController = Provider.of<GdvController>(context, listen: false);
-                          final financialController = Provider.of<FinancialController>(context, listen: false);
                           await PdfGenerator.generatePdf(
                             controller.report!.propertyAddress,
                             '', // You might want to pass a price here
                             [], // You might want to pass images here
                             null, // You might want to pass a streetViewUrl here
-                            gdv,
-                            totalCost,
-                            uplift,
+                            gdvController,
+                            financialController.totalCost,
+                            gdvController.finalGdv - financialController.totalCost,
                             controller.propertyDataApplications,
                             controller.report!.planningApplications,
-                            gdvController.scenarioUplifts,
                             financialController.roi,
                             financialController.areaGrowth,
                             financialController.riskIndicator,

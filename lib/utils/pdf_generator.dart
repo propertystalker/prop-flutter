@@ -15,12 +15,11 @@ class PdfGenerator {
     String price,
     List<XFile> images,
     String? streetViewUrl,
-    double gdv,
+    GdvController gdvController, // Pass the controller
     double totalCost,
     double uplift,
     List<PlanningApplication> propertyDataApplications,
     List<PlanningApplication> planitApplications,
-    Map<String, UpliftData> scenarioUplifts,
     double roi,
     double areaGrowth,
     String riskIndicator,
@@ -150,7 +149,7 @@ class PdfGenerator {
           pageTheme: pageTheme,
           build: (pw.Context context) => _buildSectionB(
             context,
-            gdv,
+            gdvController.finalGdv,
             totalCost,
             uplift,
             gdvConfidence,
@@ -177,7 +176,7 @@ class PdfGenerator {
           pageTheme: pageTheme,
           build: (pw.Context context) => _buildSectionD(
             context,
-            scenarioUplifts,
+            gdvController.scenarioUplifts,
             boldFont,
             font,
           ),
