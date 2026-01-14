@@ -398,10 +398,6 @@ class _OpeningScreenState extends State<OpeningScreen> {
                   buildGreyedOutField('Tenure:'),
                   buildGreyedOutField('Parking Spaces:'),
                   const SizedBox(height: 16),
-                   ElevatedButton(
-                    onPressed: () => context.go('/debug'),
-                    child: const Text('Debug'),
-                  ),
                 ],
               ),
             ),

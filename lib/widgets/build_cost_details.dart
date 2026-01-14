@@ -33,7 +33,7 @@ class BuildCostDetails extends StatelessWidget {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }

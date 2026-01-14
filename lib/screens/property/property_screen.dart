@@ -11,7 +11,6 @@ import 'package:myapp/controllers/image_gallery_controller.dart';
 import 'package:myapp/controllers/price_paid_controller.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/models/epc_model.dart';
-import 'package:myapp/models/growth_per_square_foot.dart';
 import 'package:myapp/models/planning_application.dart';
 import 'package:myapp/screens/property/widgets/growth_per_square_foot_widget.dart';
 import 'package:myapp/screens/property/widgets/price_per_square_foot.dart';

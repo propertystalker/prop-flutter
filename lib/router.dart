@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/screens/admin_screen.dart';
-import 'package:myapp/screens/debug_screen.dart';
 import 'package:myapp/screens/epc_screen.dart';
 import 'package:myapp/screens/opening_screen.dart';
-import 'package:myapp/screens/price_paid_screen.dart';
 import 'package:myapp/screens/profile_screen.dart';
 import 'package:myapp/screens/report_screen.dart';
 import 'package:myapp/screens/scenario_selection_screen.dart';
@@ -22,12 +20,6 @@ final GoRouter router = GoRouter(
       },
       routes: <RouteBase>[
         GoRoute(
-          path: 'debug',
-          builder: (BuildContext context, GoRouterState state) {
-            return const DebugScreen();
-          },
-        ),
-        GoRoute(
           path: 'profile',
           builder: (BuildContext context, GoRouterState state) {
             return const ProfileScreen();
@@ -37,18 +29,6 @@ final GoRouter router = GoRouter(
           path: 'admin',
           builder: (BuildContext context, GoRouterState state) {
             return const AdminScreen();
-          },
-        ),
-        GoRoute(
-          path: 'price_paid',
-          builder: (BuildContext context, GoRouterState state) {
-            final String postcode = state.uri.queryParameters['postcode']!;
-            final String houseNumber =
-                state.uri.queryParameters['houseNumber'] ?? '';
-            return PricePaidScreen(
-              postcode: postcode,
-              houseNumber: houseNumber,
-            );
           },
         ),
         GoRoute(

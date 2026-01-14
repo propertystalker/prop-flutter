@@ -1,5 +1,4 @@
 
-import 'dart:typed_data';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';

@@ -7,10 +7,10 @@ import 'package:myapp/utils/constants.dart';
 class GrowthPerSquareFootWidget extends StatefulWidget {
   final String postcode;
 
-  const GrowthPerSquareFootWidget({Key? key, required this.postcode}) : super(key: key);
+  const GrowthPerSquareFootWidget({super.key, required this.postcode});
 
   @override
-  _GrowthPerSquareFootWidgetState createState() =>
+  State<GrowthPerSquareFootWidget> createState() =>
       _GrowthPerSquareFootWidgetState();
 }
 
@@ -32,11 +32,11 @@ class _GrowthPerSquareFootWidgetState extends State<GrowthPerSquareFootWidget> {
       future: _growthPerSquareFootFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('No data available.'));
+          return const Center(child: Text('No data available.'));
         } else {
           final growthData = snapshot.data!;
           return Card(
@@ -50,7 +50,7 @@ class _GrowthPerSquareFootWidgetState extends State<GrowthPerSquareFootWidget> {
                     'Growth Per Square Foot',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                   DataTable(
                     columns: const <DataColumn>[
                       DataColumn(label: Text('Date')),
