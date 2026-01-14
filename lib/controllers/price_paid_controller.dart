@@ -1,10 +1,14 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:myapp/models/price_paid_model.dart';
+import 'package:myapp/models/property.dart';
+import 'package:myapp/services/api_service.dart';
 import 'package:myapp/services/price_paid_service.dart';
+import 'package:myapp/utils/constants.dart';
 
 class PricePaidController with ChangeNotifier {
   final PricePaidService _pricePaidService = PricePaidService();
+  final ApiService _apiService = ApiService();
 
   List<PricePaidModel> _pricePaidData = [];
   List<PricePaidModel> get pricePaidData => _pricePaidData;
@@ -50,11 +54,10 @@ class PricePaidController with ChangeNotifier {
       // 1. Fetch all transactions for the postcode.
       final allTransactions = await _pricePaidService.getPricePaidData(postcode);
 
-      // 2. Filter the results in-memory using an exact match.
+      // 2. Filter for the specific property.
       if (houseNumber.isNotEmpty) {
         final searchNumber = houseNumber.toUpperCase().trim();
         _priceHistory = allTransactions.where((item) {
-          // Use an exact match on PAON (Primary Addressable Object Name)
           final paon = item.paon?.toUpperCase().trim() ?? '';
           return paon == searchNumber;
         }).toList();
@@ -62,10 +65,34 @@ class PricePaidController with ChangeNotifier {
         _priceHistory = allTransactions;
       }
       
-      // developer.log('Found ${_priceHistory.length} transactions for house $houseNumber at postcode $postcode.');
+      // 3. If no sales history is found, fall back to the estimation API.
+      if (_priceHistory.isEmpty && houseNumber.isNotEmpty) {
+        try {
+          // TODO: The bedroom count is hardcoded. This should be dynamic.
+          final List<Property> propertyData = await _apiService.getProperties(postcode: postcode, apiKey: apiKey, bedrooms: 3);
+
+          if (propertyData.isNotEmpty) {
+            // The PropertyData API doesn't return house numbers, so we take the first result.
+            final property = propertyData.first;
+            
+            _priceHistory = [
+              PricePaidModel(
+                transactionId: 'estimated_price',
+                amount: property.price,
+                transactionDate: DateTime.now(),
+                propertyType: property.type,
+                fullAddress: postcode, // Best guess
+                paon: houseNumber,      // Use the number we searched for
+              )
+            ];
+          }
+        } catch (e) {
+          developer.log('Failed to fetch from PropertyData API: $e');
+        }
+      }
 
       if (_priceHistory.isEmpty && houseNumber.isNotEmpty) {
-        _errorMessage = 'No sales history found for house number "$houseNumber" at this postcode. It may have a different official name (e.g., "The Barn") or no recent sales.';
+        _errorMessage = 'No sales history or price estimate found for house number "$houseNumber" at this postcode.';
       }
 
     } catch (e) {
