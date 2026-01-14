@@ -99,5 +99,17 @@ void main() {
       expect(gdvController.cautiousGdv, closeTo(expectedCautiousGdv, 0.01));
       expect(gdvController.optimisticGdv, closeTo(expectedOptimisticGdv, 0.01));
     });
+
+    test('recalculates uplift values correctly for side extension', () {
+      const price = 300000.0;
+      const totalFloorArea = 150.0;
+
+      gdvController.updateUpliftRates(currentPrice: price, totalFloorArea: totalFloorArea);
+
+      final pricePerSqm = price / totalFloorArea;
+      final sideExtensionUplift = pricePerSqm * 0.50;
+
+      expect(gdvController.scenarioUplifts['Side single-storey extension']!.rate, closeTo(sideExtensionUplift, 0.01));
+    });
   });
 }

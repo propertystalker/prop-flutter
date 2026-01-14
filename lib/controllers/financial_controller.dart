@@ -62,6 +62,7 @@ class FinancialController with ChangeNotifier {
     'Standard single garage conversion': ['Preliminaries', 'Demolition / Structure', 'Structure & Shell', 'Windows / Doors', 'Insulation + Plastering', 'Internal Finishes', 'Electrical', 'Plumbing / Heating', 'Waste / Skips', 'Statutory / Compliance', 'Professional Fees', 'Contingency'],
     'Basic loft conversion (Velux)': ['Preliminaries', 'Structural Steel', 'Roofing', 'Insulation + Plastering', 'Internal Finishes', 'Electrical', 'Waste / Skips', 'Statutory / Compliance', 'Professional Fees', 'Contingency'],
     'Dormer loft conversion': ['Preliminaries', 'Structure & Shell', 'Structural Steel', 'Roofing', 'Windows / Doors', 'Insulation + Plastering', 'Internal Finishes', 'Electrical', 'Plumbing / Heating', 'Waste / Skips', 'Statutory / Compliance', 'Professional Fees', 'Contingency'],
+    'Loft conversion with dormer': ['Preliminaries', 'Structure & Shell', 'Structural Steel', 'Roofing', 'Windows / Doors', 'Insulation + Plastering', 'Internal Finishes', 'Electrical', 'Plumbing / Heating', 'Waste / Skips', 'Statutory / Compliance', 'Professional Fees', 'Contingency'],
     'Dormer loft with ensuite': ['Preliminaries', 'Structure & Shell', 'Structural Steel', 'Roofing', 'Windows / Doors', 'Insulation + Plastering', 'Internal Finishes', 'Bathrooms', 'Electrical', 'Plumbing / Heating', 'Waste / Skips', 'Statutory / Compliance', 'Professional Fees', 'Contingency'],
   };
 
@@ -75,6 +76,10 @@ class FinancialController with ChangeNotifier {
   double get marketGrowth => _marketGrowth;
   String get riskIndicator => _riskIndicator;
   String get selectedScenario => _selectedScenario;
+
+  Map<String, List<String>> getScenarioCostMatrix() => _scenarioCostMatrix;
+  Map<String, double> getBaseCosts() => _baseCosts;
+
 
   // Constructor
   FinancialController({required double existingInternalArea}) : _existingInternalArea = existingInternalArea;

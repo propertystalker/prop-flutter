@@ -19,6 +19,7 @@ import 'package:myapp/services/api_service.dart';
 import 'package:myapp/services/planning_service.dart';
 import 'package:myapp/services/property_data_service.dart';
 import 'package:myapp/utils/constants.dart';
+import 'package:myapp/widgets/build_cost_details.dart';
 import 'package:myapp/widgets/company_account.dart';
 import 'package:myapp/widgets/gdv_calculation_widget.dart';
 import 'package:myapp/widgets/gdv_range_widget.dart';
@@ -368,7 +369,6 @@ class _PropertyScreenState extends State<PropertyScreen> {
                               const SizedBox(height: 16),
                               PropertyStats(
                                 squareMeters: (double.tryParse(widget.epc.totalFloorArea) ?? 0.0).round(),
-                                habitableRooms: int.tryParse(widget.epc.numberHabitableRooms) ?? 0,
                                 propertyType: widget.epc.propertyType,
                               ),
                               const Divider(height: 32),
@@ -397,6 +397,8 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                   roi: financialController.roi,
                                 ),
                               ),
+                              const Divider(height: 32),
+                              const BuildCostDetails(),
                               const Divider(height: 32),
                               const UpliftRiskOverviewWidget(),
                               const Divider(height: 32),
