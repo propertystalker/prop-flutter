@@ -8,6 +8,7 @@ import 'package:myapp/models/report_model.dart';
 import 'package:myapp/utils/pdf_generator.dart';
 import 'package:myapp/controllers/gdv_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
+import 'package:myapp/widgets/debug_widget.dart';
 
 class ReportScreen extends StatelessWidget {
   final String propertyId;
@@ -96,6 +97,8 @@ class ReportScreen extends StatelessWidget {
                   Text('Generated: ${DateFormat.yMMMMd().format(report.dateGenerated.toLocal())}'),
                   const SizedBox(height: 24),
                   _buildDealAtAGlance(context, report),
+                  const SizedBox(height: 24),
+                  const DebugWidget(),
                   const SizedBox(height: 24),
                   _buildSessionReports(context),
                 ],

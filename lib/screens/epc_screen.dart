@@ -60,6 +60,9 @@ class _EpcScreenState extends State<EpcScreen> {
   }
 
   void _navigateToDetails(BuildContext context, EpcModel epc) {
+    // Set the selected EPC in the controller
+    Provider.of<EpcController>(context, listen: false).setSelectedEpc(epc);
+
     Navigator.of(context).pop();
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -153,15 +156,15 @@ class _EpcScreenState extends State<EpcScreen> {
           if (controller.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (controller.error != null) {
-            return Center(child: Text('Error: ${controller.error}'));
+          if (controller.errorMessage != null) {
+            return Center(child: Text('Error: ${controller.errorMessage}'));
           }
-          if (controller.epcData.isEmpty) {
+          if (controller.epcs.isEmpty) {
             return const Center(
                 child: Text('No EPC data found for this postcode.'));
           }
 
-          final sortedData = List<EpcModel>.from(controller.epcData);
+          final sortedData = List<EpcModel>.from(controller.epcs);
           sortedData.sort((a, b) => _compareAddresses(a.address, b.address));
 
           // --- NEW AND CORRECTED FILTERING LOGIC ---
@@ -176,11 +179,11 @@ class _EpcScreenState extends State<EpcScreen> {
                   final addressLower = epc.address.toLowerCase();
                   
                   if (hasHouseQuery) {
-                      final houseRegex = RegExp(r'\b' + RegExp.escape(houseQuery) + r'\b');
+                      final houseRegex = RegExp(r'\b' + RegExp.escape(houseQuery!) + r'\b');
                       if (!houseRegex.hasMatch(addressLower)) return false;
                   }
                   if (hasFlatQuery) {
-                      final flatRegex = RegExp(r'\b' + RegExp.escape(flatQuery) + r'\b');
+                      final flatRegex = RegExp(r'\b' + RegExp.escape(flatQuery!) + r'\b');
                       if (!flatRegex.hasMatch(addressLower)) return false;
                   }
                   return true;

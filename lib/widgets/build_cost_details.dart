@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/controllers/financial_controller.dart';
@@ -10,30 +9,59 @@ class BuildCostDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final financialController = Provider.of<FinancialController>(context);
-    final currencyFormat = NumberFormat.compactSimpleCurrency(locale: 'en_GB');
+    final currencyFormat = NumberFormat.simpleCurrency(locale: 'en_GB', decimalDigits: 0);
+    final detailedCosts = financialController.detailedCosts;
 
-    // Access the private fields via a getter or a public method if they remain private
-    final costCategories = financialController.getScenarioCostMatrix()[financialController.selectedScenario] ?? [];
-    final baseCosts = financialController.getBaseCosts();
+    // Define the specific key for floor area
+    const String floorAreaKey = 'total floor area';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text('Build Cost Details', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 16),
-        ...costCategories.map((category) {
-          final cost = baseCosts[category] ?? 0;
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(category, style: Theme.of(context).textTheme.bodyMedium),
-                Text(currencyFormat.format(cost), style: Theme.of(context).textTheme.bodyMedium),
-              ],
-            ),
-          );
-        }),
+        if (detailedCosts.isEmpty)
+          const Center(child: Text('Select a scenario to see the cost breakdown.'))
+        else
+          ...detailedCosts.entries.map((entry) {
+            final isTotal = entry.key.toLowerCase().contains('total');
+            final isSubTotal = entry.key.toLowerCase().contains('sub-total');
+            final isFloorArea = entry.key.toLowerCase() == floorAreaKey;
+
+            String formattedValue;
+            if (isFloorArea) {
+              // Special formatting for floor area
+              formattedValue = '${entry.value.toStringAsFixed(0)} m²';
+            } else {
+              // Default currency formatting for all other costs
+              formattedValue = currencyFormat.format(entry.value);
+            }
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    entry.key.replaceAll('_', ' '), // Make keys more readable
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: isTotal || isSubTotal || isFloorArea
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                  ),
+                  Text(
+                    formattedValue,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: isTotal || isSubTotal || isFloorArea
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                  ),
+                ],
+              ),
+            );
+          }),
       ],
     );
   }

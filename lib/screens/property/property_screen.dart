@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +19,7 @@ import 'package:myapp/services/property_data_service.dart';
 import 'package:myapp/utils/constants.dart';
 import 'package:myapp/widgets/build_cost_details.dart';
 import 'package:myapp/widgets/company_account.dart';
+import 'package:myapp/widgets/debug_widget.dart';
 import 'package:myapp/widgets/gdv_calculation_widget.dart';
 import 'package:myapp/widgets/gdv_range_widget.dart';
 import 'package:myapp/widgets/person_account.dart';
@@ -73,6 +73,14 @@ class _PropertyScreenState extends State<PropertyScreen> {
     _financialController = Provider.of<FinancialController>(context, listen: false);
     _gdvController = Provider.of<GdvController>(context, listen: false);
     _imageGalleryController = ImageGalleryController();
+
+    // Immediately update the financial controller with the core property data.
+    // This was the root cause of the bug where 'total floor area' was 0.
+    _financialController.updatePropertyData(
+      totalFloorArea: double.tryParse(widget.epc.totalFloorArea) ?? 0.0,
+      propertyType: widget.epc.propertyType,
+      epcRating: widget.epc.currentEnergyRating,
+    );
 
     _lastGdv = _gdvController.finalGdv;
 
@@ -422,6 +430,8 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                   child: const Text('Home'),
                                 ),
                               ),
+                              const SizedBox(height: 100),
+                              const DebugWidget(),
                             ],
                           ),
                         ),

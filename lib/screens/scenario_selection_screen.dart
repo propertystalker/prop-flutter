@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:myapp/controllers/epc_controller.dart';
+import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/models/planning_application.dart';
 import 'package:myapp/models/scenario_model.dart';
 import 'package:myapp/services/planning_service.dart';
@@ -38,6 +41,7 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
   void initState() {
     super.initState();
     _fetchPlanningApplications();
+    _updateFinancialControllerWithPropertyData();
   }
 
   Future<void> _fetchPlanningApplications() async {
@@ -54,6 +58,24 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
     } catch (e) {
       debugPrint("Error fetching planning applications: $e");
     }
+  }
+
+  void _updateFinancialControllerWithPropertyData() {
+    // Use WidgetsBinding to ensure providers are available.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final epcController = Provider.of<EpcController>(context, listen: false);
+      final financialController = Provider.of<FinancialController>(context, listen: false);
+      final selectedEpc = epcController.selectedEpc;
+
+      if (selectedEpc != null) {
+        final floorArea = double.tryParse(selectedEpc.totalFloorArea) ?? 0.0;
+        financialController.updatePropertyData(
+          totalFloorArea: floorArea,
+          propertyType: selectedEpc.propertyType,
+          epcRating: selectedEpc.currentEnergyRating,
+        );
+      }
+    });
   }
 
   void _generateReport(BuildContext context) {

@@ -30,7 +30,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => SupabaseService()),
-        ChangeNotifierProvider(create: (context) => FinancialController(existingInternalArea: 0.0)),
+        ChangeNotifierProvider(create: (context) => FinancialController()),
         ChangeNotifierProvider(create: (context) => EpcController()),
         ChangeNotifierProvider(create: (context) => PricePaidController()),
         ChangeNotifierProvider(create: (context) => PersonController()),
