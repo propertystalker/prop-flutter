@@ -11,6 +11,7 @@ void main() {
         totalFloorArea: 100.0,
         epcRating: 'D', 
         propertyType: 'flat', 
+        builtForm: 'Unknown', // Added missing parameter
       );
     });
 

@@ -15,23 +15,16 @@ class FinancialController with ChangeNotifier {
   String _riskIndicator = 'Low';
 
   // Property & Scenario Data
-  double _existingInternalArea = 0.0; // Correctly initialize to 0.0
+  double _existingInternalArea = 0.0;
   String _selectedScenario = 'Full Refurbishment';
   String _propertyType = 'Terraced';
+  String _builtForm = 'Unknown'; // Added to store built form
   String _epcRating = 'D';
 
   // Detailed cost breakdown from the engine
   Map<String, double> _detailedCosts = {};
 
-  // --- Scenario Definitions (Not part of cost engine) ---
-  final Map<String, double> _scenarioAddedArea = {
-    'Full Refurbishment': 0, 'Rear single-storey extension': 48, 'Rear two-storey extension': 96,
-    'Side single-storey extension': 18, 'Side two-storey extension': 36, 'Porch / small front single-storey extension': 6,
-    'Full-width front single-storey extension': 15, 'Full-width front two-storey front extension': 30,
-    'Standard single garage conversion': 18, 'Basic loft conversion (Velux)': 25, 'Dormer loft conversion': 30,
-    'Dormer loft with ensuite': 30,
-  };
-
+  // Scenario planning requirements (should eventually move to a config)
   final Map<String, bool> _scenarioPlanningRequired = {
       'Full Refurbishment': false, 'Rear single-storey extension': false,
       'Rear two-storey extension': true, 'Side single-storey extension': false,
@@ -54,19 +47,19 @@ class FinancialController with ChangeNotifier {
   double get totalInternalArea => _existingInternalArea;
   Map<String, double> get detailedCosts => _detailedCosts;
 
-  // Constructor - No longer requires initial area
   FinancialController();
 
   // Method to update property details when a property is selected
   void updatePropertyData({
     required double totalFloorArea,
     required String propertyType,
+    required String builtForm,      // Added builtForm
     required String epcRating,
   }) {
-    _existingInternalArea = totalFloorArea > 0 ? totalFloorArea : 0.0; // Use 0.0 as the fallback
+    _existingInternalArea = totalFloorArea > 0 ? totalFloorArea : 0.0;
     _propertyType = propertyType;
+    _builtForm = builtForm;          // Store builtForm
     _epcRating = epcRating;
-    // We don't notify listeners here, as a calculation will follow immediately
   }
 
   void setMarketGrowth(String? growth) {
@@ -87,18 +80,21 @@ class FinancialController with ChangeNotifier {
       scenario: scenario,
       totalFloorArea: _existingInternalArea,
       propertyType: _propertyType,
+      builtForm: _builtForm, // Pass builtForm to the engine
       epcRating: _epcRating,
     );
 
     _detailedCosts = costEngine.calculateBuildCosts();
     final developmentCost = _detailedCosts['Total Development Cost'] ?? 0;
+    
+    // Use the dynamically calculated area from the new engine
+    final addedArea = (scenario == 'Full Refurbishment') ? 0 : _detailedCosts['calculatedAreaM2'] ?? 0;
 
     _gdv = baseGdv + scenarioUplift;
     _totalCost = (_currentPrice ?? 0) + developmentCost;
     _uplift = _gdv - _totalCost;
     _roi = (_totalCost > 0) ? (_uplift / _totalCost) * 100 : 0;
 
-    final addedArea = _scenarioAddedArea[scenario] ?? 0;
     _areaGrowth = (_existingInternalArea > 0) ? (addedArea / _existingInternalArea) * 100 : 0;
     final needsPlanning = _scenarioPlanningRequired[scenario] ?? false;
     _riskIndicator = _calculateRisk(needsPlanning, _areaGrowth);

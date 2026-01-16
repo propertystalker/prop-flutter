@@ -71,6 +71,7 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
         financialController.updatePropertyData(
           totalFloorArea: floorArea,
           propertyType: selectedEpc.propertyType,
+          builtForm: selectedEpc.builtForm,
           epcRating: selectedEpc.currentEnergyRating,
         );
       }

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:myapp/controllers/finance_proposal_request_controller.dart';
@@ -91,6 +90,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
     _financialController.updatePropertyData(
       totalFloorArea: double.tryParse(widget.epc.totalFloorArea) ?? 0.0,
       propertyType: widget.epc.propertyType,
+      builtForm: widget.epc.builtForm, // Correctly pass the builtForm
       epcRating: widget.epc.currentEnergyRating,
     );
 

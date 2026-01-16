@@ -1,20 +1,22 @@
+
+enum PropertyForm { terraced, semiDetached, detached, flat, unknown }
+
 class BuildCostEngine {
   final String scenario;
   final double totalFloorArea;
-  final String propertyType; // e.g., 'Detached', 'Semi-Detached', 'Terraced', 'Flat'
-  final String epcRating;    // e.g., 'A', 'B', 'C', 'D', 'E', 'F', 'G'
+  final String propertyType;
+  final String builtForm; 
+  final String epcRating;
 
   BuildCostEngine({
     required this.scenario,
     required this.totalFloorArea,
     required this.propertyType,
+    required this.builtForm,
     required this.epcRating,
   });
 
-  // --- Cost Data ---
-  // Using more granular data to allow for better scaling.
-
-  // 1. Costs per Square Meter (£/m²)
+  // --- Cost Data from the more detailed engine ---
   static const Map<String, double> _costsPerSqM = {
     'Foundations': 210,
     'Groundworks_Drainage': 110,
@@ -32,15 +34,13 @@ class BuildCostEngine {
     'Plumbing_Heating_SecondFix': 85,
   };
 
-  // 2. Fixed Project-Level Costs (£) - These are base values, some will be scaled.
   static const Map<String, double> _baseFixedCosts = {
-    'Preliminaries': 1500,     // Base for site setup
-    'Demolition_Structure': 2500, // Base for structural work
-    'Waste_Skips': 1000,       // Base for waste
-    'Statutory_Compliance': 1500, // Fixed cost
+    'Preliminaries': 1500,
+    'Demolition_Structure': 2500,
+    'Waste_Skips': 1000,
+    'Statutory_Compliance': 1500,
   };
 
-  // 3. Per-Item Costs (£)
   static const Map<String, double> _itemCosts = {
     'Kitchen_Basic': 5000,
     'Kitchen_Mid': 12000,
@@ -50,46 +50,77 @@ class BuildCostEngine {
     'Bathroom_High': 15000,
   };
 
-  // 4. Percentage-Based Costs (%)
   static const double _professionalFeesPercentage = 0.12;
   static const double _contingencyPercentage = 0.10;
   static const double _vatPercentage = 0.20;
-
-  // --- Scenario Definitions ---
-  static const Map<String, double> _scenarioAddedArea = {
-    'Full Refurbishment': 0, 'Rear single-storey extension': 48, 'Rear two-storey extension': 96,
-    'Side single-storey extension': 18, 'Side two-storey extension': 36, 'Porch / small front single-storey extension': 6,
-    'Full-width front single-storey extension': 15, 'Full-width front two-storey front extension': 30,
-    'Standard single garage conversion': 18, 'Basic loft conversion (Velux)': 25, 'Dormer loft conversion': 30,
-    'Dormer loft with ensuite': 30,
+  
+  // --- Area Calculation Config from the area-focused engine ---
+  static const Map<PropertyForm, double> _houseWidthByType = {
+    PropertyForm.terraced: 5.0,
+    PropertyForm.semiDetached: 7.0,
+    PropertyForm.detached: 9.0,
+    PropertyForm.flat: 6.0,
+    PropertyForm.unknown: 6.0,
   };
 
+  static const Map<PropertyForm, double> _assumedStoreysByType = {
+    PropertyForm.terraced: 2.0,
+    PropertyForm.semiDetached: 2.0,
+    PropertyForm.detached: 2.0,
+    PropertyForm.flat: 1.0,
+    PropertyForm.unknown: 2.0,
+  };
+
+  static const Map<PropertyForm, double> _rearDepthByType = {
+    PropertyForm.terraced: 6.0,
+    PropertyForm.semiDetached: 8.0,
+    PropertyForm.detached: 8.0,
+    PropertyForm.flat: 6.0,
+    PropertyForm.unknown: 6.0,
+  };
+
+  static const double _sideExtensionWidthRatio = 0.5;
+  
+  static const Map<PropertyForm, double> _loftVolumesByType = {
+    PropertyForm.terraced: 40.0,
+    PropertyForm.semiDetached: 50.0,
+    PropertyForm.detached: 50.0,
+    PropertyForm.flat: 40.0,
+    PropertyForm.unknown: 40.0,
+  };
+
+  static const double _loftAverageHeight = 2.4;
+  static const double _assumedGarageArea = 18.0;
+  static const double _frontExtensionDepth = 3.0;
+  static const double _defaultFootprintArea = 50.0;
+  
   static const Map<String, List<String>> _scenarioCostMatrix = {
       'Full Refurbishment': ['Preliminaries', 'Demolition_Structure', 'Insulation_Plastering', 'Internal_Finishes_Mid', 'Kitchen_Mid', 'Bathroom_Mid', 'Electrical_FirstFix', 'Electrical_SecondFix', 'Plumbing_Heating_FirstFix', 'Plumbing_Heating_SecondFix', 'Waste_Skips', 'Statutory_Compliance'],
       'Rear single-storey extension': ['Preliminaries', 'Demolition_Structure', 'Foundations', 'Groundworks_Drainage', 'Structure_Shell', 'Structural_Steel', 'Roofing', 'Windows_Doors', 'Insulation_Plastering', 'Internal_Finishes_Basic', 'Electrical_FirstFix', 'Electrical_SecondFix', 'Plumbing_Heating_FirstFix', 'Plumbing_Heating_SecondFix', 'Waste_Skips', 'Statutory_Compliance'],
       'Side single-storey extension': ['Preliminaries', 'Demolition_Structure', 'Foundations', 'Groundworks_Drainage', 'Structure_Shell', 'Structural_Steel', 'Roofing', 'Windows_Doors', 'Insulation_Plastering', 'Internal_Finishes_Basic', 'Electrical_FirstFix', 'Plumbing_Heating_FirstFix', 'Waste_Skips', 'Statutory_Compliance'],
       'Standard single garage conversion': ['Demolition_Structure', 'Structure_Shell', 'Windows_Doors', 'Insulation_Plastering', 'Internal_Finishes_Basic', 'Electrical_FirstFix', 'Electrical_SecondFix', 'Waste_Skips'],
       'Dormer loft with ensuite': ['Preliminaries', 'Structure_Shell', 'Structural_Steel', 'Roofing', 'Windows_Doors', 'Insulation_Plastering', 'Internal_Finishes_Basic', 'Bathroom_Mid', 'Electrical_FirstFix', 'Plumbing_Heating_FirstFix', 'Waste_Skips', 'Statutory_Compliance'],
+      // Add other scenarios as needed, mapping them to cost components
   };
 
+  // --- MAIN CALCULATION METHOD ---
   Map<String, double> calculateBuildCosts() {
     final costCategories = _scenarioCostMatrix[scenario] ?? [];
     final detailedCosts = <String, double>{};
 
-    final addedArea = _scenarioAddedArea[scenario] ?? 0;
+    final addedArea = _calculateScenarioArea();
     final areaForCalc = (scenario == 'Full Refurbishment') ? totalFloorArea : addedArea;
 
-    if (areaForCalc <= 0) return {};
+    if (areaForCalc <= 0) return {'Total Development Cost': 0};
 
-    // Include the floor area in the output for debugging and display
-    detailedCosts['total floor area'] = totalFloorArea;
+    detailedCosts['calculatedAreaM2'] = areaForCalc;
 
     double subTotal = 0;
 
     // Scaled Fixed Costs
-    final preliminaries = _baseFixedCosts['Preliminaries']! + (totalFloorArea * 15); // Scale with overall size
-    final demolition = _baseFixedCosts['Demolition_Structure']! + (addedArea * 20); // Scale with new area
-    final waste = _baseFixedCosts['Waste_Skips']! + (areaForCalc * 10); // Scale with work area
+    final preliminaries = _baseFixedCosts['Preliminaries']! + (totalFloorArea * 15);
+    final demolition = _baseFixedCosts['Demolition_Structure']! + (addedArea * 20);
+    final waste = _baseFixedCosts['Waste_Skips']! + (areaForCalc * 10);
 
     final scaledFixedCosts = {
       'Preliminaries': preliminaries,
@@ -131,5 +162,91 @@ class BuildCostEngine {
     detailedCosts['Total Development Cost'] = totalBuildCost + vat;
 
     return detailedCosts;
+  }
+
+  // --- DYNAMIC AREA CALCULATION LOGIC (from bulldog) ---
+  double _calculateScenarioArea() {
+    switch (scenario) {
+      case 'Full Refurbishment':
+        return totalFloorArea;
+      case 'Rear single-storey extension':
+        return _pdRearGroundFloorArea();
+      case 'Rear two-storey extension':
+        return _pdRearGroundFloorArea() * 2;
+      case 'Side single-storey extension':
+        return _pdSideGroundFloorArea();
+      case 'Side two-storey extension':
+        return _pdSideGroundFloorArea() * 2;
+      case 'Porch / small front single-storey extension':
+        return 6.0; // Standard small area
+      case 'Full-width front single-storey extension':
+        return _pdFullWidthFrontSingleStoreyArea();
+      case 'Full-width front two-storey front extension':
+        return _pdFullWidthFrontSingleStoreyArea() * 2;
+      case 'Standard single garage conversion':
+        return _assumedGarageArea;
+      case 'Basic loft conversion (Velux)':
+      case 'Dormer loft conversion':
+      case 'Loft conversion with dormer':
+      case 'Dormer loft with ensuite':
+        return _pdLoftArea();
+      default:
+        // Fallback for scenarios not yet in the detailed matrix
+        final Map<String, double> simpleAreaMap = {
+          'Rear single-storey extension': 48, 'Rear two-storey extension': 96,
+          'Side single-storey extension': 18, 'Side two-storey extension': 36,
+          'Porch / small front single-storey extension': 6,
+          'Full-width front single-storey extension': 15, 'Full-width front two-storey front extension': 30,
+          'Standard single garage conversion': 18, 'Basic loft conversion (Velux)': 25,
+          'Dormer loft conversion': 30, 'Dormer loft with ensuite': 30,
+        };
+        return simpleAreaMap[scenario] ?? 0;
+    }
+  }
+
+  PropertyForm _resolvePropertyForm() {
+    final combined = '$propertyType $builtForm'.toLowerCase();
+    if (combined.contains('terrace')) return PropertyForm.terraced;
+    if (combined.contains('semi')) return PropertyForm.semiDetached;
+    if (combined.contains('detached')) return PropertyForm.detached;
+    if (combined.contains('flat') || combined.contains('maisonette') || combined.contains('apartment')) return PropertyForm.flat;
+    return PropertyForm.unknown;
+  }
+
+  double _footprintArea(PropertyForm form) {
+    final storeys = _assumedStoreysByType[form] ?? 2.0;
+    if (storeys <= 0) return _defaultFootprintArea;
+    final footprint = totalFloorArea / storeys;
+    return (footprint > 0) ? footprint : _defaultFootprintArea;
+  }
+
+  double _pdRearGroundFloorArea() {
+    final form = _resolvePropertyForm();
+    final width = _houseWidthByType[form] ?? 0;
+    final depth = _rearDepthByType[form] ?? 0;
+    return (width * depth).clamp(0, double.infinity);
+  }
+
+  double _pdSideGroundFloorArea() {
+    final form = _resolvePropertyForm();
+    final footprintArea = _footprintArea(form);
+    final width = _houseWidthByType[form] ?? 0;
+    if (width <= 0) return 0;
+    final depth = footprintArea / width;
+    final extensionWidth = width * _sideExtensionWidthRatio;
+    return (extensionWidth * depth).clamp(0, double.infinity);
+  }
+
+  double _pdFullWidthFrontSingleStoreyArea() {
+    final form = _resolvePropertyForm();
+    final width = _houseWidthByType[form] ?? 0;
+    return (width * _frontExtensionDepth).clamp(0, double.infinity);
+  }
+
+  double _pdLoftArea() {
+    final form = _resolvePropertyForm();
+    final volume = _loftVolumesByType[form] ?? 0;
+    if (_loftAverageHeight <= 0) return 0;
+    return (volume / _loftAverageHeight).clamp(0, double.infinity);
   }
 }

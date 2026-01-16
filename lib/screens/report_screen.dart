@@ -51,6 +51,7 @@ class ReportScreen extends StatelessWidget {
                   onPressed: controller.report == null
                       ? null
                       : () async {
+                          if (!context.mounted) return; // Mounted check
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Generating PDF...')),
                           );
@@ -74,6 +75,7 @@ class ReportScreen extends StatelessWidget {
                             detailedCosts: controller.report!.detailedCosts,
                           );
 
+                          if (!context.mounted) return; // Mounted check
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
                           if (pdfData != null) {
@@ -81,6 +83,7 @@ class ReportScreen extends StatelessWidget {
                             final fileName = pdfData['filename'] as String;
                             await Printing.sharePdf(bytes: bytes, filename: fileName);
                           } else {
+                            if (!context.mounted) return; // Mounted check
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Failed to generate PDF. Please try again.')),
                             );
