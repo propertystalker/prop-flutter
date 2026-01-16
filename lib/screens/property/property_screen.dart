@@ -415,7 +415,7 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                 ),
                               ),
                               const Divider(height: 32),
-                              const BuildCostDetails(),
+                              BuildCostDetails(propertyType: widget.epc.propertyType),
                               const Divider(height: 32),
                               const UpliftRiskOverviewWidget(),
                               const Divider(height: 32),

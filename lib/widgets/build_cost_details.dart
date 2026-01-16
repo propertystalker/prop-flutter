@@ -4,7 +4,8 @@ import 'package:myapp/controllers/financial_controller.dart';
 import 'package:provider/provider.dart';
 
 class BuildCostDetails extends StatelessWidget {
-  const BuildCostDetails({super.key});
+  final String propertyType;
+  const BuildCostDetails({super.key, required this.propertyType});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,7 @@ class BuildCostDetails extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Build Cost Details', style: Theme.of(context).textTheme.titleLarge),
+        Text('Build Cost Details - $propertyType', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 16),
         if (detailedCosts.isEmpty)
           const Center(child: Text('Select a scenario to see the cost breakdown.'))
