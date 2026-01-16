@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/controllers/gdv_controller.dart';
@@ -8,13 +9,12 @@ import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/models/planning_application.dart';
 import 'package:myapp/services/cloudinary_service.dart';
 import 'package:myapp/utils/pdf_generator.dart';
-import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import '../utils/constants.dart';
 import 'package:myapp/models/report_model.dart';
 
 class ReportPanel extends StatefulWidget {
-  final VoidCallback onSend;
+  final String propertyId;
   final String address;
   final String price;
   final List<XFile> images;
@@ -25,7 +25,7 @@ class ReportPanel extends StatefulWidget {
 
   const ReportPanel({
     super.key,
-    required this.onSend,
+    required this.propertyId,
     required this.address,
     required this.price,
     required this.images,
@@ -62,7 +62,7 @@ class _ReportPanelState extends State<ReportPanel> {
     }
   }
 
-  Future<void> _generateAndUploadReport() async {
+  Future<void> _generateUploadAndNavigate() async {
     if (_isSending) return;
 
     setState(() {
@@ -80,9 +80,6 @@ class _ReportPanelState extends State<ReportPanel> {
       final financialController = Provider.of<FinancialController>(context, listen: false);
       final investmentSignal = _calculateInvestmentSignal(financialController.roi);
       final gdvConfidence = _calculateGdvConfidence(gdvController.finalGdv);
-
-      // *** DEBUG: Log the detailed costs before PDF generation ***
-      developer.log('Detailed Costs before PDF generation: ${financialController.detailedCosts}', name: 'ReportPanel');
 
       final pdfData = await PdfGenerator.generatePdf(
         widget.address,
@@ -117,8 +114,6 @@ class _ReportPanelState extends State<ReportPanel> {
       final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
       final fileName = '${originalFileName.split('.').first}_$timestamp.pdf';
 
-      await Printing.sharePdf(bytes: pdfBytes, filename: fileName);
-
       if(mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -139,9 +134,17 @@ class _ReportPanelState extends State<ReportPanel> {
         if(mounted){
           final reportSessionController = Provider.of<ReportSessionController>(context, listen: false);
           reportSessionController.addReport(fileName, reportUrl);
-        }
 
-        widget.onSend();
+          // Perform navigation directly from the panel
+          context.go(
+            '/report/${widget.propertyId}',
+            extra: {
+                'scenarios': widget.selectedScenarios,
+                'propertyDataApplications': widget.propertyDataApplications,
+                'planitApplications': widget.planitApplications,
+            }
+          );
+        }
       } else {
         throw Exception('Failed to upload report to Cloudinary.');
       }
@@ -225,7 +228,7 @@ class _ReportPanelState extends State<ReportPanel> {
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
               ),
-              onPressed: _isSending ? null : _generateAndUploadReport,
+              onPressed: _isSending ? null : _generateUploadAndNavigate,
               child: _isSending
                   ? const SizedBox(
                       height: 20,

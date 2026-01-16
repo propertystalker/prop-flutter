@@ -11,6 +11,7 @@ import 'package:myapp/controllers/price_paid_controller.dart';
 import 'package:myapp/controllers/send_report_request_controller.dart';
 import 'package:myapp/models/epc_model.dart';
 import 'package:myapp/models/planning_application.dart';
+import 'package:myapp/models/scenario_model.dart';
 import 'package:myapp/screens/property/widgets/growth_per_square_foot_widget.dart';
 import 'package:myapp/screens/property/widgets/price_per_square_foot.dart';
 import 'package:myapp/services/api_service.dart';
@@ -61,10 +62,23 @@ class _PropertyScreenState extends State<PropertyScreen> {
   bool _isGeneratingReport = false;
   double? _lastGdv;
   String? _streetViewUrl;
-  List<String> _selectedScenarioIds = [];
   List<PlanningApplication> _planningApplications = [];
   List<PlanningApplication> _propertyDataPlanningApplications = [];
   bool _isLoadingPlanningApps = true;
+
+  final List<Scenario> _scenarios = [
+    Scenario(id: 'REFURB_FULL', name: 'Full refurbishment'),
+    Scenario(id: 'FRONT_SINGLE', name: 'Full-width front single-storey'),
+    Scenario(id: 'REAR_SINGLE', name: 'Rear single-storey'),
+    Scenario(id: 'FRONT_DOUBLE', name: 'Full-width front two-storey'),
+    Scenario(id: 'REAR_DOUBLE', name: 'Rear two-storey'),
+    Scenario(id: 'GARAGE_SINGLE', name: 'Standard single garage'),
+    Scenario(id: 'SIDE_SINGLE', name: 'Side single-storey'),
+    Scenario(id: 'LOFT_BASIC', name: 'Basic loft conversion'),
+    Scenario(id: 'SIDE_DOUBLE', name: 'Side two-storey'),
+    Scenario(id: 'LOFT_DORMER', name: 'Dormer loft conversion'),
+    Scenario(id: 'LOFT_DORMER_ENSUITE', name: 'Dormer loft with ensuite'),
+  ];
 
   @override
   void initState() {
@@ -74,8 +88,6 @@ class _PropertyScreenState extends State<PropertyScreen> {
     _gdvController = Provider.of<GdvController>(context, listen: false);
     _imageGalleryController = ImageGalleryController();
 
-    // Immediately update the financial controller with the core property data.
-    // This was the root cause of the bug where 'total floor area' was 0.
     _financialController.updatePropertyData(
       totalFloorArea: double.tryParse(widget.epc.totalFloorArea) ?? 0.0,
       propertyType: widget.epc.propertyType,
@@ -252,7 +264,6 @@ class _PropertyScreenState extends State<PropertyScreen> {
       });
     } catch (e) {
       debugPrint("Error generating street view URL: $e");
-      // Optionally, show an error message to the user
     } finally {
       setState(() {
         _isGeneratingReport = false;
@@ -273,7 +284,6 @@ class _PropertyScreenState extends State<PropertyScreen> {
         final addressToGeocode = '$fullAddress, $postcode';
         return await _geocodeAddress(addressToGeocode);
       } catch (e) {
-        // Fallback to postcode if full address fails
         debugPrint('Failed to geocode full address, falling back to postcode: $e');
       }
     }
@@ -435,7 +445,6 @@ class _PropertyScreenState extends State<PropertyScreen> {
                             ],
                           ),
                         ),
-                        // Make sure there's enough space for the bottom panels
                         SizedBox(height: _isScenarioSelectionVisible ? 400 : 0),
                       ],
                     ),
@@ -452,23 +461,25 @@ class _PropertyScreenState extends State<PropertyScreen> {
                         child: Column(
                           children: [
                             ScenarioSelectionPanel(
-                              onSelectionChanged: (selectedIds) {
+                              scenarios: _scenarios,
+                              onScenarioSelected: (id, isSelected) {
                                 setState(() {
-                                  _selectedScenarioIds = selectedIds;
+                                  final scenario = _scenarios.firstWhere((s) => s.id == id);
+                                  scenario.isSelected = isSelected;
                                 });
                               },
                             ),
                             Consumer2<FinancialController, ImageGalleryController>(
                               builder: (context, financialController, imageGalleryController, child) {
-                                final gdvController = context.read<GdvController>();
-                                final selectedScenarioNames = _selectedScenarioIds.map((id) {
-                                  return gdvController.scenarioUplifts.keys.firstWhere(
-                                    (name) => name.toUpperCase().replaceAll(' ', '_') == id,
-                                    orElse: () => '',
-                                  );
-                                }).where((name) => name.isNotEmpty).toList();
+                                final selectedScenarioNames = _scenarios
+                                    .where((s) => s.isSelected)
+                                    .map((s) => s.name)
+                                    .toList();
+
+                                final propertyId = "${widget.epc.address}, ${widget.epc.postcode}";
 
                                 return ReportPanel(
+                                  propertyId: propertyId,
                                   address: widget.epc.address,
                                   price: NumberFormat.compactSimpleCurrency(locale: 'en_GB').format(financialController.currentPrice ?? 0),
                                   images: imageGalleryController.images,
@@ -476,13 +487,6 @@ class _PropertyScreenState extends State<PropertyScreen> {
                                   propertyDataApplications: _propertyDataPlanningApplications,
                                   planitApplications: _planningApplications,
                                   selectedScenarios: selectedScenarioNames,
-                                  onSend: () {
-                                    _toggleScenarioSelectionVisibility();
-                                    final propertyId = "${widget.epc.address}, ${widget.epc.postcode}";
-                                    context.go(
-                                      '/report/$propertyId?scenarios=${selectedScenarioNames.join(',')}',
-                                    );
-                                  },
                                 );
                               },
                             ),

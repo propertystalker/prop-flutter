@@ -1,51 +1,36 @@
-
 import 'package:flutter/material.dart';
 import 'package:myapp/models/scenario_model.dart';
 
-class ScenarioSelectionPanel extends StatefulWidget {
-  final Function(List<String> selectedScenarioIds) onSelectionChanged;
+class ScenarioSelectionPanel extends StatelessWidget {
+  final List<Scenario> scenarios;
+  final Function(String, bool) onScenarioSelected;
 
-  const ScenarioSelectionPanel({super.key, required this.onSelectionChanged});
-
-  @override
-  State<ScenarioSelectionPanel> createState() => _ScenarioSelectionPanelState();
-}
-
-class _ScenarioSelectionPanelState extends State<ScenarioSelectionPanel> {
-  final List<Scenario> _scenarios = [
-    Scenario(id: 'REFURB_FULL', name: 'Full refurbishment'),
-    Scenario(id: 'FRONT_SINGLE', name: 'Full-width front single-storey'),
-    Scenario(id: 'REAR_SINGLE', name: 'Rear single-storey'),
-    Scenario(id: 'FRONT_DOUBLE', name: 'Full-width front two-storey'),
-    Scenario(id: 'REAR_DOUBLE', name: 'Rear two-storey'),
-    Scenario(id: 'GARAGE_SINGLE', name: 'Standard single garage'),
-    Scenario(id: 'SIDE_SINGLE', name: 'Side single-storey'),
-    Scenario(id: 'LOFT_BASIC', name: 'Basic loft conversion'),
-    Scenario(id: 'SIDE_DOUBLE', name: 'Side two-storey'),
-    Scenario(id: 'LOFT_DORMER', name: 'Dormer loft conversion'),
-    Scenario(id: 'LOFT_DORMER_ENSUITE', name: 'Dormer loft with ensuite'),
-  ];
+  const ScenarioSelectionPanel({
+    super.key,
+    required this.scenarios,
+    required this.onScenarioSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final halfLength = (_scenarios.length / 2).ceil();
-    final firstHalf = _scenarios.sublist(0, halfLength);
-    final secondHalf = _scenarios.sublist(halfLength);
+    final halfLength = (scenarios.length / 2).ceil();
+    final firstHalf = scenarios.sublist(0, halfLength);
+    final secondHalf = scenarios.sublist(halfLength);
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: _buildScenarioColumn(firstHalf)),
+          Expanded(child: _buildScenarioColumn(context, firstHalf)),
           const SizedBox(width: 16),
-          Expanded(child: _buildScenarioColumn(secondHalf)),
+          Expanded(child: _buildScenarioColumn(context, secondHalf)),
         ],
       ),
     );
   }
 
-  Widget _buildScenarioColumn(List<Scenario> scenarios) {
+  Widget _buildScenarioColumn(BuildContext context, List<Scenario> scenarios) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,14 +41,7 @@ class _ScenarioSelectionPanelState extends State<ScenarioSelectionPanel> {
                   title: Text(scenario.name, style: const TextStyle(color: Colors.white)),
                   value: scenario.isSelected,
                   onChanged: (bool? value) {
-                    setState(() {
-                      scenario.isSelected = value ?? false;
-                    });
-                    final selectedIds = _scenarios
-                        .where((s) => s.isSelected)
-                        .map((s) => s.id)
-                        .toList();
-                    widget.onSelectionChanged(selectedIds);
+                    onScenarioSelected(scenario.id, value ?? false);
                   },
                   controlAffinity: ListTileControlAffinity.leading,
                   activeColor: Colors.white,

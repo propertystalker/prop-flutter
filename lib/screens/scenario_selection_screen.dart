@@ -1,5 +1,5 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/controllers/epc_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
@@ -61,7 +61,6 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
   }
 
   void _updateFinancialControllerWithPropertyData() {
-    // Use WidgetsBinding to ensure providers are available.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final epcController = Provider.of<EpcController>(context, listen: false);
       final financialController = Provider.of<FinancialController>(context, listen: false);
@@ -78,15 +77,6 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
     });
   }
 
-  void _generateReport(BuildContext context) {
-    final selectedScenarioIds =
-        _scenarios.where((s) => s.isSelected).map((s) => s.id).toList();
-
-    context.go(
-      '/report/${widget.propertyId}?scenarios=${selectedScenarioIds.join(',')}',
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final halfLength = (_scenarios.length / 2).ceil();
@@ -94,6 +84,7 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
     final secondHalf = _scenarios.sublist(halfLength);
 
     final selectedScenarioNames = _scenarios.where((s) => s.isSelected).map((s) => s.name).toList();
+    developer.log('Building ScenarioSelectionScreen. Selected Scenarios: $selectedScenarioNames', name: 'ScenarioSelectionScreen');
 
     return Scaffold(
       body: Stack(
@@ -172,7 +163,7 @@ class _ScenarioSelectionScreenState extends State<ScenarioSelectionScreen> {
                 ),
               ),
               ReportPanel(
-                onSend: () => _generateReport(context),
+                propertyId: widget.propertyId,
                 address: "31 BEECH ROAD, CAMBRIDGE, CB1 3AZ",
                 price: "£373k",
                 images: const [],
