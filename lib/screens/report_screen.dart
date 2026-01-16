@@ -1,5 +1,7 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:printing/printing.dart';
 import 'package:myapp/controllers/gdv_controller.dart';
 import 'package:myapp/controllers/financial_controller.dart';
 import 'package:myapp/controllers/report_controller.dart';
@@ -49,7 +51,11 @@ class ReportScreen extends StatelessWidget {
                   onPressed: controller.report == null
                       ? null
                       : () async {
-                          await PdfGenerator.generatePdf(
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Generating PDF...')),
+                          );
+
+                          final pdfData = await PdfGenerator.generatePdf(
                             controller.report!.propertyAddress,
                             '', // Price - handle this properly
                             [], // Images - handle this properly
@@ -67,6 +73,18 @@ class ReportScreen extends StatelessWidget {
                             controller.report!.selectedScenarios,
                             detailedCosts: controller.report!.detailedCosts,
                           );
+
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                          if (pdfData != null) {
+                            final bytes = pdfData['bytes'] as Uint8List;
+                            final fileName = pdfData['filename'] as String;
+                            await Printing.sharePdf(bytes: bytes, filename: fileName);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Failed to generate PDF. Please try again.')),
+                            );
+                          }
                         },
                 );
               },
@@ -126,10 +144,8 @@ class ReportScreen extends StatelessWidget {
 
                   // --- Key Constraints ---
                   Text('Key Constraints', style: Theme.of(context).textTheme.titleLarge),
-                  ...report.keyConstraints.map((constraint) => ListTile(
-                        leading: const Icon(Icons.warning_amber_rounded),
-                        title: Text(constraint),
-                      )),
+                  const SizedBox(height: 8),
+                  Text('Coming Soon', style: Theme.of(context).textTheme.bodyMedium),
 
                 ],
               ),

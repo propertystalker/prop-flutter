@@ -36,7 +36,7 @@ class ReportController with ChangeNotifier {
       investmentSignal: InvestmentSignal.amber, // Placeholder
       estimatedProfit: uplift,
       returnOnInvestment: (totalCost > 0) ? (uplift / totalCost) * 100 : 0, // Avoid division by zero
-      keyConstraints: ['Constraint 1', 'Constraint 2'], // Placeholder
+      keyConstraints: [], // No constraints for now
       detailedCosts: detailedCosts, 
     );
     notifyListeners();
