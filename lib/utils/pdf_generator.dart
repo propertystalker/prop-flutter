@@ -459,7 +459,7 @@ class PdfGenerator {
     );
   }
 
-  // DIAGNOSTIC VERSION OF _buildSectionF
+  // FINAL, PRODUCTION-READY VERSION of _buildSectionF
   static pw.Widget _buildSectionF(
     pw.Context context,
     Map<String, double> detailedCosts,
@@ -467,52 +467,72 @@ class PdfGenerator {
     pw.Font font,
   ) {
     final currencyFormatter = NumberFormat.simpleCurrency(locale: 'en_GB', decimalDigits: 0);
-    final List<pw.Widget> costWidgets = [];
-
-    // Header
-    costWidgets.add(
-      pw.Header(
-        level: 1,
-        text: 'Section F: Build Cost Details',
-        textStyle: pw.TextStyle(font: boldFont, fontSize: 20, color: PdfColors.white),
-      )
-    );
-    costWidgets.add(pw.SizedBox(height: 10));
-
-    // Diagnostic entry to test rendering
-    costWidgets.add(
-      pw.Text(
-        '--- DIAGNOSTIC ENTRY ---',
-        style: pw.TextStyle(font: font, color: PdfColors.yellow, fontSize: 14),
-      )
-    );
-    costWidgets.add(pw.SizedBox(height: 5));
-
-
-    // Iterate over the costs and create simple Text widgets
-    for (var entry in detailedCosts.entries) {
-      costWidgets.add(
-        pw.Text(
-          '${entry.key}: ${currencyFormatter.format(entry.value)}',
-          style: pw.TextStyle(font: font, color: PdfColors.white, fontSize: 10),
-        ),
-      );
-    }
     
-    if (detailedCosts.isEmpty) {
-        costWidgets.add(
-            pw.Text(
-                'No detailed costs were provided for the report.',
-                style: pw.TextStyle(font: font, color: PdfColors.grey, fontSize: 12),
-            )
-        );
+    final List<pw.Widget> costRows = [];
+
+    // Header Row
+    costRows.add(
+      pw.Container(
+        decoration: const pw.BoxDecoration(
+          border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey600, width: 1.5)),
+        ),
+        padding: const pw.EdgeInsets.only(bottom: 4),
+        child: pw.Row(
+          children: [
+            pw.Expanded(
+              flex: 3,
+              child: pw.Text('Cost Item', style: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 14)),
+            ),
+            pw.Expanded(
+              flex: 2,
+              child: pw.Text('Amount', style: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 14), textAlign: pw.TextAlign.right),
+            ),
+          ],
+        ),
+      )
+    );
+
+    costRows.add(pw.SizedBox(height: 5));
+
+    // Data Rows
+    for (var entry in detailedCosts.entries) {
+      costRows.add(
+        pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(vertical: 3.0),
+          child: pw.Row(
+            children: [
+              pw.Expanded(
+                flex: 3,
+                child: pw.Text(entry.key, style: pw.TextStyle(font: font, color: PdfColors.white, fontSize: 11)),
+              ),
+              pw.Expanded(
+                flex: 2,
+                child: pw.Text(
+                  currencyFormatter.format(entry.value),
+                  textAlign: pw.TextAlign.right,
+                  style: pw.TextStyle(font: font, color: PdfColors.white, fontSize: 11),
+                ),
+              ),
+            ],
+          ),
+        )
+      );
     }
 
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: costWidgets,
+      children: [
+        pw.Header(
+          level: 1,
+          text: 'Section F: Build Cost Details',
+          textStyle: pw.TextStyle(font: boldFont, fontSize: 20, color: PdfColors.white),
+        ),
+        pw.SizedBox(height: 10),
+        ...costRows,
+      ],
     );
   }
+
 
   static List<pw.Widget> _buildSectionG(
     List<Uint8List> imageBytesList,
