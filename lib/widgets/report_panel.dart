@@ -81,14 +81,17 @@ class _ReportPanelState extends State<ReportPanel> {
       final investmentSignal = _calculateInvestmentSignal(financialController.roi);
       final gdvConfidence = _calculateGdvConfidence(gdvController.finalGdv);
 
+      // *** DEBUG: Log the detailed costs before PDF generation ***
+      developer.log('Detailed Costs before PDF generation: ${financialController.detailedCosts}', name: 'ReportPanel');
+
       final pdfData = await PdfGenerator.generatePdf(
         widget.address,
         widget.price,
         widget.images,
         widget.streetViewUrl,
-        gdvController, // Pass the controller
-        financialController.totalCost, // Get from controller
-        gdvController.finalGdv - financialController.totalCost, // Calculate uplift
+        gdvController,
+        financialController.totalCost,
+        gdvController.finalGdv - financialController.totalCost,
         widget.propertyDataApplications,
         widget.planitApplications,
         financialController.roi,
@@ -97,6 +100,7 @@ class _ReportPanelState extends State<ReportPanel> {
         investmentSignal,
         gdvConfidence,
         widget.selectedScenarios,
+        detailedCosts: financialController.detailedCosts, 
       );
 
       if (pdfData == null) {

@@ -7,7 +7,12 @@ void main() {
     late FinancialController financialController;
 
     setUp(() {
-      financialController = FinancialController(existingInternalArea: 100.0);
+      financialController = FinancialController();
+      financialController.updatePropertyData(
+        totalFloorArea: 100.0,
+        epcRating: 'D', 
+        propertyType: 'flat', 
+      );
     });
 
     test('Initial values are correct', () {

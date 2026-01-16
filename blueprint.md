@@ -28,6 +28,7 @@ The `PdfGenerator` class is responsible for creating PDF reports. The reports in
 
 - A summary of the deal, including a pie chart visualizing the GDV, uplift, and total cost.
 - A dedicated page for planning applications, listing all relevant applications for the property's postcode.
+- A new "Section F: Build Cost Details" that displays a table of the detailed cost breakdown.
 
 ## Error Handling and Logging
 
@@ -53,3 +54,7 @@ The application uses the `dart:developer` library for structured logging, allowi
 - **Corrected "total floor area" Formatting:** Fixed a bug in the `BuildCostDetails` widget where the "total floor area" was being incorrectly formatted as a currency. It is now displayed as a numerical area with "m²".
 - **Fixed Root Cause of Incorrect Floor Area:** Identified and fixed a critical data bug in the `FinancialController`. The `_existingInternalArea` was incorrectly initialized to `1.0`, causing the `BuildCostEngine` to calculate costs based on this placeholder. The value is now correctly initialized to `0.0`, ensuring that cost calculations are only performed when a valid property with a real floor area is selected.
 - **Established Correct Data Flow:** Fixed the fundamental data flow issue where the `FinancialController` was not being updated with the property's floor area. The `PropertyScreen` now calls `financialController.updatePropertyData()` in `initState`, ensuring the `BuildCostEngine` has the correct data from the moment the screen loads. This resolves the persistent "total floor area 0" bug.
+- **Added Build Cost Details to PDF Report:** Implemented the user's request to add the detailed build cost breakdown to the PDF report. This involved:
+    - Adding a `detailedCosts` map to the `PropertyReport` model.
+    - Updating the `ReportController` to populate this map from the `FinancialController`.
+    - Creating a new `_buildSectionF` method in the `PdfGenerator` to render the costs as a table in a new "Section F: Build Cost Details" page of the PDF.

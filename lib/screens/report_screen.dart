@@ -33,6 +33,7 @@ class ReportScreen extends StatelessWidget {
           gdv: gdvController.finalGdv,
           totalCost: financialController.totalCost,
           uplift: gdvController.finalGdv - financialController.totalCost,
+          detailedCosts: financialController.detailedCosts,
         ),
       child: Scaffold(
         appBar: AppBar(
@@ -61,6 +62,7 @@ class ReportScreen extends StatelessWidget {
                             controller.report!.investmentSignal,
                             controller.report!.gdvConfidence,
                             selectedScenarios,
+                            detailedCosts: financialController.detailedCosts,
                           );
                         },
                 );

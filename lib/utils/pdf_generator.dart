@@ -25,8 +25,9 @@ class PdfGenerator {
     String riskIndicator,
     InvestmentSignal investmentSignal,
     GdvConfidence gdvConfidence,
-    List<String> selectedScenarios,
-  ) async {
+    List<String> selectedScenarios, {
+    Map<String, double> detailedCosts = const {},
+  }) async {
     try {
       final pdf = pw.Document();
 
@@ -190,6 +191,18 @@ class PdfGenerator {
             context,
             selectedScenarios,
             boldFont,
+          ),
+        ),
+      );
+
+      pdf.addPage(
+        pw.Page(
+          pageTheme: pageTheme,
+          build: (pw.Context context) => _buildSectionF(
+            context,
+            detailedCosts,
+            boldFont,
+            font,
           ),
         ),
       );
@@ -443,6 +456,61 @@ class PdfGenerator {
           bulletMargin: const pw.EdgeInsets.only(right: 5),
         ),
       ],
+    );
+  }
+
+  // DIAGNOSTIC VERSION OF _buildSectionF
+  static pw.Widget _buildSectionF(
+    pw.Context context,
+    Map<String, double> detailedCosts,
+    pw.Font boldFont,
+    pw.Font font,
+  ) {
+    final currencyFormatter = NumberFormat.simpleCurrency(locale: 'en_GB', decimalDigits: 0);
+    final List<pw.Widget> costWidgets = [];
+
+    // Header
+    costWidgets.add(
+      pw.Header(
+        level: 1,
+        text: 'Section F: Build Cost Details',
+        textStyle: pw.TextStyle(font: boldFont, fontSize: 20, color: PdfColors.white),
+      )
+    );
+    costWidgets.add(pw.SizedBox(height: 10));
+
+    // Diagnostic entry to test rendering
+    costWidgets.add(
+      pw.Text(
+        '--- DIAGNOSTIC ENTRY ---',
+        style: pw.TextStyle(font: font, color: PdfColors.yellow, fontSize: 14),
+      )
+    );
+    costWidgets.add(pw.SizedBox(height: 5));
+
+
+    // Iterate over the costs and create simple Text widgets
+    for (var entry in detailedCosts.entries) {
+      costWidgets.add(
+        pw.Text(
+          '${entry.key}: ${currencyFormatter.format(entry.value)}',
+          style: pw.TextStyle(font: font, color: PdfColors.white, fontSize: 10),
+        ),
+      );
+    }
+    
+    if (detailedCosts.isEmpty) {
+        costWidgets.add(
+            pw.Text(
+                'No detailed costs were provided for the report.',
+                style: pw.TextStyle(font: font, color: PdfColors.grey, fontSize: 12),
+            )
+        );
+    }
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: costWidgets,
     );
   }
 

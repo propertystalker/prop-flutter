@@ -5,12 +5,13 @@ void main() {
   group('FinancialController', () {
     late FinancialController controller;
 
-    FinancialController createController({double area = 100.0}) {
-      return FinancialController(existingInternalArea: area);
-    }
-
     setUp(() {
-      controller = createController();
+      controller = FinancialController();
+      controller.updatePropertyData(
+        totalFloorArea: 100.0,
+        epcRating: 'D', 
+        propertyType: 'flat', 
+      );
     });
 
     test('Initial values are set correctly', () {

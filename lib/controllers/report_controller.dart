@@ -19,6 +19,7 @@ class ReportController with ChangeNotifier {
     double gdv = 0,
     double totalCost = 0,
     double uplift = 0,
+    Map<String, double> detailedCosts = const {},
   }) async {
     final estimatedProfit = gdv - totalCost;
     final double returnOnInvestment =
@@ -41,6 +42,7 @@ class ReportController with ChangeNotifier {
       selectedScenarios: scenarios,
       keyConstraints: ['Planning required for rear extension'],
       planningApplications: planitApplications,
+      detailedCosts: detailedCosts,
     );
 
     notifyListeners();

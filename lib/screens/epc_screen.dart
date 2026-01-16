@@ -179,11 +179,11 @@ class _EpcScreenState extends State<EpcScreen> {
                   final addressLower = epc.address.toLowerCase();
                   
                   if (hasHouseQuery) {
-                      final houseRegex = RegExp(r'\b' + RegExp.escape(houseQuery!) + r'\b');
+                      final houseRegex = RegExp(r'\b' + RegExp.escape(houseQuery) + r'\b');
                       if (!houseRegex.hasMatch(addressLower)) return false;
                   }
                   if (hasFlatQuery) {
-                      final flatRegex = RegExp(r'\b' + RegExp.escape(flatQuery!) + r'\b');
+                      final flatRegex = RegExp(r'\b' + RegExp.escape(flatQuery) + r'\b');
                       if (!flatRegex.hasMatch(addressLower)) return false;
                   }
                   return true;

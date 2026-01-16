@@ -17,6 +17,7 @@ class PropertyReport {
   final List<String> selectedScenarios;
   final List<String> keyConstraints;
   final List<PlanningApplication> planningApplications;
+  final Map<String, double> detailedCosts;
 
   PropertyReport({
     required this.propertyAddress,
@@ -31,5 +32,6 @@ class PropertyReport {
     this.selectedScenarios = const [],
     this.keyConstraints = const [],
     this.planningApplications = const [],
+    this.detailedCosts = const {},
   });
 }
