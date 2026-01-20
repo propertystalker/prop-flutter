@@ -1,6 +1,7 @@
 
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:printing/printing.dart';
 import 'package:myapp/controllers/gdv_controller.dart';
@@ -80,21 +81,26 @@ class _ReportScreenState extends State<ReportScreen> {
             throw Exception('Could not launch payment URL');
         }
         await launchUrl(Uri.parse(paymentUrl), mode: LaunchMode.externalApplication);
-        // A real app would use deep linking to confirm payment automatically.
-        // For this example, we'll assume success when the user returns.
+        
+        // Set state to enable download if user navigates back
         setState(() {
           _isPaymentSuccessful = true;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment successful! You can now download the report.')),
-        );
+
+        // Navigate to success screen
+        if (mounted) {
+          context.go('/payment-success');
+        }
+
       } else {
         throw Exception('Payment URL not received from GoCardless response.');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Payment failed: ${e.toString()}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment failed: ${e.toString()}')),
+        );
+      }
     } finally {
       setState(() {
         _isProcessingPayment = false;
