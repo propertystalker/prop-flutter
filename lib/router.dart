@@ -4,7 +4,8 @@ import 'package:myapp/models/planning_application.dart';
 import 'package:myapp/screens/admin_screen.dart';
 import 'package:myapp/screens/epc_screen.dart';
 import 'package:myapp/screens/opening_screen.dart';
-import 'package:myapp/screens/payment_success_screen.dart'; // Import the new screen
+import 'package:myapp/screens/home/home_screen.dart'; // Import the new home screen
+import 'package:myapp/screens/payment_success_screen.dart';
 import 'package:myapp/screens/profile_screen.dart';
 import 'package:myapp/screens/report_screen.dart';
 import 'package:myapp/screens/scenario_selection_screen.dart';
@@ -19,7 +20,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/',
       builder: (BuildContext context, GoRouterState state) {
-        return const OpeningScreen();
+        return const HomeScreen(); // Set HomeScreen as the initial route
       },
       routes: <RouteBase>[
         GoRoute(
@@ -35,7 +36,7 @@ final GoRouter router = GoRouter(
           },
         ),
          GoRoute(
-          path: 'payment-success', // Add the new route
+          path: 'payment-success', 
           builder: (BuildContext context, GoRouterState state) {
             return const PaymentSuccessScreen();
           },
@@ -53,6 +54,12 @@ final GoRouter router = GoRouter(
             );
           },
         ),
+         GoRoute(
+          path: 'opening', // Keep opening screen accessible if needed
+          builder: (BuildContext context, GoRouterState state) {
+            return const OpeningScreen();
+          },
+        ),
         GoRoute(
           path: 'select-scenarios/:propertyId',
           builder: (BuildContext context, GoRouterState state) {
@@ -65,7 +72,6 @@ final GoRouter router = GoRouter(
           builder: (BuildContext context, GoRouterState state) {
             final String propertyId = state.pathParameters['propertyId']!;
 
-            // Log the received extra data for debugging
             developer.log('Navigating to ReportScreen. Received extra: ${state.extra}', name: 'router.report');
 
             final extraData = state.extra as Map<String, dynamic>? ?? {};
